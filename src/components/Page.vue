@@ -10,6 +10,7 @@ import SubscriptionTab from "./tabs/SubscriptionTab.vue";
 import RuleProvidersTab from "./tabs/RuleProvidersTab.vue";
 import HostsTab from "./tabs/HostsTab.vue";
 import StatisticsPanel from "./StatisticsPanel.vue";
+import MetaLogo from "@/assets/Meta.png";
 import "@/styles/common.css";
 import {
   RuleData,
@@ -342,7 +343,7 @@ onMounted(() => {
         <v-card-title>
           <v-icon class="mr-2" size="24">
             <img
-                :src="`/api/v1/system/img/1?cache=1&imgurl=${encodeURIComponent('https://raw.githubusercontent.com/MetaCubeX/mihomo/Meta/Meta.png')}`"
+                :src="`/api/v1/plugin/file/clashruleprovider/dist${MetaLogo}`"
                 alt="icon"
                 style="width: 100%; height: 100%;">
           </v-icon>
