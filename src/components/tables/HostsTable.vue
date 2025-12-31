@@ -47,55 +47,58 @@ const headersHosts = ref([
       fixed-header
       item-key="domain"
   >
-    <template v-slot:item="{ item }">
-      <tr>
-        <td>{{ item.domain }}</td>
-        <td>
-          <v-chip
-              v-for="ip in item.value"
-              :key="ip"
-              size="small"
-              class="ma-1"
+    <template #item.domain="{ item }">
+      <v-chip size="small" pill color="secondary">{{ item.domain }}</v-chip>
+    </template>
+
+    <template #item.value="{ item }">
+      <v-chip
+          v-for="ip in item.value"
+          :key="ip"
+          size="small"
+          class="ma-1"
+          variant="tonal"
+      >
+        {{ ip }}
+      </v-chip>
+    </template>
+
+    <template #item.using_cloudflare="{ item }">
+      <v-chip
+          :color="getBoolColor(item.using_cloudflare)"
+          size="small"
+          variant="tonal"
+      >
+        {{ item.using_cloudflare ? '是' : '否' }}
+      </v-chip>
+    </template>
+
+    <template #item.actions="{ item }">
+      <v-menu min-width="120">
+        <template v-slot:activator="{ props }">
+          <v-btn color="secondary" icon size="small" variant="text" v-bind="props">
+            <v-icon>mdi-dots-vertical</v-icon>
+          </v-btn>
+        </template>
+        <v-list density="compact">
+          <v-list-item
+              @click="$emit('edit', item.domain)"
           >
-            {{ ip }}
-          </v-chip>
-        </td>
-        <td>
-          <v-chip
-              :color="getBoolColor(item.using_cloudflare)"
-              size="small"
-          >
-            {{ item.using_cloudflare ? '是' : '否' }}
-          </v-chip>
-        </td>
-        <td>
-          <v-menu min-width="120">
-            <template v-slot:activator="{ props }">
-              <v-btn color="secondary" icon size="small" variant="text" v-bind="props">
-                <v-icon>mdi-dots-vertical</v-icon>
-              </v-btn>
+            <template v-slot:prepend>
+              <v-icon size="small" color="primary">mdi-file-edit-outline</v-icon>
             </template>
-            <v-list density="compact">
-              <v-list-item
-                  @click="$emit('edit', item.domain)"
-              >
-                <template v-slot:prepend>
-                  <v-icon size="small" color="primary">mdi-file-edit-outline</v-icon>
-                </template>
-                <v-list-item-title>编辑</v-list-item-title>
-              </v-list-item>
-              <v-list-item
-                  @click="$emit('delete', item.domain)"
-              >
-                <template v-slot:prepend>
-                  <v-icon size="small" color="error">mdi-trash-can-outline</v-icon>
-                </template>
-                <v-list-item-title>删除</v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-        </td>
-      </tr>
+            <v-list-item-title>编辑</v-list-item-title>
+          </v-list-item>
+          <v-list-item
+              @click="$emit('delete', item.domain)"
+          >
+            <template v-slot:prepend>
+              <v-icon size="small" color="error">mdi-trash-can-outline</v-icon>
+            </template>
+            <v-list-item-title>删除</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
     </template>
   </v-data-table>
 </template>

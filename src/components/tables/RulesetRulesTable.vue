@@ -36,7 +36,7 @@ const emit = defineEmits<{
 
 const headersRuleset = [
   {title: '', key: 'handler', sortable: false, width: '1rem'},
-  {title: '优先级', key: 'priority', sortable: true},
+  {title: '优先级', key: 'priority', sortable: true, width: '3.5rem'},
   {title: '类型', key: 'type', sortable: true},
   {title: '内容', key: 'payload', sortable: true},
   {title: '出站', key: 'action', sortable: true},
@@ -46,7 +46,7 @@ const headersRuleset = [
 ];
 
 const groupHeaders = [
-  {title: '优先级', key: 'priority', sortable: true},
+  {title: '优先级', key: 'priority', sortable: true, width: '3.5rem'},
   {title: '类型', key: 'type', sortable: true},
   {title: '内容', key: 'payload', sortable: true},
   {title: '日期', key: 'time_modified', sortable: true},
@@ -156,17 +156,27 @@ const rowProps = (data: any) => {
     </template>
 
     <template #item.priority="{ item }">
-      {{ item.priority }}
-    </template>
-
-    <template #item.type="{ item }">
-      <v-chip :color="getRuleTypeColor(item.type)" size="small" label>
-        {{ item.type }}
+      <v-chip
+          size="x-small"
+          label
+          variant="tonal"
+          color="secondary"
+          class="font-weight-bold"
+      >
+        {{ item.priority }}
       </v-chip>
     </template>
 
+    <template #item.type="{ item }">
+      <v-chip :color="getRuleTypeColor(item.type)" size="small" label variant="tonal">
+        {{ item.type }}
+      </v-chip>
+    </template>
+    <template #item.payload="{ value }">
+      <small>{{ value }}</small>
+    </template>
     <template #item.time_modified="{ item }">
-      {{ item?.time_modified ? timestampToDate(item.time_modified) : '' }}
+      <small>{{ item?.time_modified ? timestampToDate(item.time_modified) : '' }}</small>
     </template>
 
     <template #item.actions="{ item }">
@@ -217,27 +227,36 @@ const rowProps = (data: any) => {
       </v-icon>
     </template>
     <template #item.priority="{ item }">
-      {{ item.priority }}
-    </template>
-
-    <template #item.type="{ item }">
-      <v-chip :color="getRuleTypeColor(item.type)" size="small" label>
-        {{ item.type }}
+      <v-chip
+          size="x-small"
+          variant="tonal"
+          color="secondary"
+          class="font-weight-bold"
+      >
+        {{ item.priority }}
       </v-chip>
     </template>
 
+    <template #item.type="{ item }">
+      <v-chip :color="getRuleTypeColor(item.type)" size="small" label variant="tonal">
+        {{ item.type }}
+      </v-chip>
+    </template>
+    <template #item.payload="{ value }">
+      <small>{{ value }}</small>
+    </template>
     <template #item.action="{ item }">
-      <v-chip :color="getActionColor(item.action)" size="small" label>
+      <v-chip :color="getActionColor(item.action)" size="small" variant="outlined" pill>
         {{ item.action }}
       </v-chip>
     </template>
 
     <template #item.name="{ item }">
-      {{ rulesetPrefix }}{{ item.action }}
+      <small>{{ rulesetPrefix }}{{ item.action }}</small>
     </template>
 
     <template #item.time_modified="{ item }">
-      {{ item?.time_modified ? timestampToDate(item.time_modified) : '' }}
+      <small>{{ item?.time_modified ? timestampToDate(item.time_modified) : '' }}</small>
     </template>
 
     <template #item.actions="{ item }">

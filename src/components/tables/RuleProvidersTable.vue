@@ -2,7 +2,14 @@
 import {PropType, ref} from "vue";
 import {RuleProviderData} from "@/components/types";
 import {itemsPerPageOptions} from "@/components/constants";
-import {isManual, getBehaviorColor, isTemplate} from "@/components/utils";
+import {
+  isManual,
+  getBehaviorColor,
+  isTemplate,
+  getSourceColor,
+  getRuleTypeColor,
+  getFormatColor
+} from "@/components/utils";
 
 const headersRuleProviders = ref([
   {title: '名称', key: 'name', sortable: true},
@@ -48,24 +55,35 @@ const emit = defineEmits<{
       hide-default-footer
       fixed-header
   >
+    <template #item.name="{ item }">
+      <v-chip size="small" pill color="secondary">{{ item.name }}</v-chip>
+    </template>
     <template #item.type="{ item }">
-      {{ item.rule_provider.type }}
+      <v-chip size="small" label variant="tonal" color="primary">
+        {{ item.rule_provider.type }}
+      </v-chip>
     </template>
 
     <template #item.behavior="{ item }">
-      <v-chip v-if="item.rule_provider?.behavior" :color="getBehaviorColor(item.rule_provider.behavior)" size="small" label>
+      <v-chip v-if="item.rule_provider?.behavior" :color="getBehaviorColor(item.rule_provider.behavior)" size="small" label variant="tonal">
         {{ item.rule_provider.behavior }}
       </v-chip>
     </template>
 
     <template #item.format="{ item }">
-      {{ item.rule_provider.format }}
+      <v-chip :color="getFormatColor(item.rule_provider.format)" size="small" label variant="tonal">
+        {{ item.rule_provider.format }}
+      </v-chip>
     </template>
 
     <template #item.source="{ item }">
-      <v-icon v-if="isManual(item.source)" color="primary">mdi-feather</v-icon>
-      <v-icon v-else-if="isTemplate(item.source)" color="success">mdi-file-code-outline</v-icon>
-      <v-icon v-else color="info">mdi-file-download-outline</v-icon>
+      <v-chip
+          :color="getSourceColor(item.source)"
+          size="small"
+          variant="outlined"
+      >
+        {{ item.source }}
+      </v-chip>
     </template>
 
     <template #item.actions="{ item }">

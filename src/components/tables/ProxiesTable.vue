@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import {getProxyColor, isInvalid, isManual, isTemplate} from "@/components/utils";
+import {getProxyColor, isInvalid, isManual, isTemplate, getSourceColor, getRuleTypeColor} from "@/components/utils";
 import {PropType, ref} from "vue";
 import {ProxyData} from "@/components/types";
 import {itemsPerPageOptions} from "@/components/constants";
@@ -53,7 +53,7 @@ const headers = ref([
       fixed-header
   >
     <template #item.name="{ item }">
-      {{ item.proxy.name }}
+      <v-chip size="small" pill color="secondary">{{ item.proxy.name }}</v-chip>
       <v-btn v-if="item.v2ray_link" icon size="small" color="secondary" variant="text"
              @click="emit('copyToClipboard', item.v2ray_link)">
         <v-icon>mdi-link</v-icon>
@@ -61,23 +61,34 @@ const headers = ref([
     </template>
 
     <template #item.type="{ item }">
-      <v-chip :color="getProxyColor(item.proxy.type)" size="small" label>
+      <v-chip :color="getProxyColor(item.proxy.type)" size="small" label variant="tonal">
         {{ item.proxy.type }}
       </v-chip>
     </template>
 
     <template #item.server="{ item }">
-      {{ item.proxy.server }}
+      <small>{{ item.proxy.server }}</small>
     </template>
 
     <template #item.port="{ item }">
-      {{ item.proxy.port }}
+      <v-chip
+          size="x-small"
+          label
+          variant="tonal"
+          color="primary"
+      >
+        {{ item.proxy.port }}
+      </v-chip>
     </template>
 
     <template #item.source="{ item }">
-      <v-icon v-if="isManual(item.source)" color="primary">mdi-feather</v-icon>
-      <v-icon v-else-if="isTemplate(item.source)" color="success">mdi-file-code-outline</v-icon>
-      <v-icon v-else color="info">mdi-file-download-outline</v-icon>
+      <v-chip
+          :color="getSourceColor(item.source)"
+          size="small"
+          variant="outlined"
+      >
+        {{ item.source }}
+      </v-chip>
     </template>
 
     <template #item.actions="{ item }">

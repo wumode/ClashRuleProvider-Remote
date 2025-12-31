@@ -42,6 +42,15 @@ export function getBehaviorColor(action: string) {
     return colors[action] || 'primary'
 }
 
+export function getFormatColor(action: string) {
+    const colors:Record<string, string> = {
+        'yaml': 'success',
+        'text': 'warning',
+        'mrs': 'info',
+    }
+    return colors[action] || 'secondary'
+}
+
 export function getRuleTypeColor(type: string) {
     const colors: Record<string, string> = {
         'DOMAIN': 'primary',
@@ -86,8 +95,6 @@ export function getSourceColor(source: string) {
     const colors:Record<string, string> = {
         'Auto': 'success',
         'Manual': 'info',
-        'Subscription': 'error',
-        'Template': 'warning',
     }
     return colors[source] || 'primary'
 }

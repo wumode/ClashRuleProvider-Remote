@@ -50,17 +50,17 @@ const proxyGroupHeaders = ref([
       item-key="name"
   >
     <template #item.name="{ item }">
-      {{ item.proxy_group.name }}
+      <v-chip size="small" pill color="secondary">{{ item.proxy_group.name }}</v-chip>
     </template>
 
     <template #item.type="{ item }">
-      <v-chip :color="getProxyGroupTypeColor(item.proxy_group.type)" size="small" label>
+      <v-chip :color="getProxyGroupTypeColor(item.proxy_group.type)" size="small" label variant="tonal">
         {{ item.proxy_group.type }}
       </v-chip>
     </template>
 
     <template #item.source="{ item }">
-      <v-chip size="small" label :color="getSourceColor(item.source)">{{ item.source }}</v-chip>
+      <v-chip size="small" :color="getSourceColor(item.source)" variant="outlined">{{ item.source }}</v-chip>
     </template>
 
     <template #item.actions="{ item }">
