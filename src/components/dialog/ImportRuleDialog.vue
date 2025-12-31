@@ -45,7 +45,7 @@ async function importRule() {
   try {
     importRuleLoading.value = true;
     const requestData = {
-      type: importRules.value.type,
+      vehicle: importRules.value.type,
       payload: importRules.value.payload
     };
     const result = await props.api.post('/plugin/ClashRuleProvider/import', requestData);

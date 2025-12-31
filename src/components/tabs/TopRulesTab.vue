@@ -233,6 +233,7 @@ async function handleReorderRule(targetPriority: number, movedPriority: number) 
     ></RuleDialog>
     <ImportRuleDialog
         v-model="importRuleDialog"
+        v-if="importRuleDialog"
         :api="api"
         @refresh="emit('refresh', ['top'])"
         @show-snackbar="(val) => emit('show-snackbar', val)"
