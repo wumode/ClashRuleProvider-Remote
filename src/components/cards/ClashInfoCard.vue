@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {reactive, onMounted, onUnmounted, ref} from 'vue'
+import MetaLogo from "@/assets/Meta.png";
 
 const props = defineProps({
   config: {
@@ -97,7 +98,7 @@ onUnmounted(() => {
           <div class="d-flex align-center text-center">
             <v-img
                 v-if="clashInfo.version.meta"
-                src="/api/v1/system/img/1?cache=1&imgurl=https://raw.githubusercontent.com/MetaCubeX/mihomo/refs/heads/Meta/Meta.png"
+                :src="`/api/v1/plugin/file/clashruleprovider/dist${MetaLogo}`"
                 alt="Logo"
                 max-height="48"
                 contain

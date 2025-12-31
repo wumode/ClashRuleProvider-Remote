@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import {getProxyColor, isInvalid, isManual, isTemplate, getSourceColor, getRuleTypeColor} from "@/components/utils";
+import {getProxyColor, isInvalid, isManual, getSourceColor} from "@/components/utils";
 import {PropType, ref} from "vue";
 import {ProxyData} from "@/components/types";
 import {itemsPerPageOptions} from "@/components/constants";
@@ -83,11 +83,11 @@ const headers = ref([
 
     <template #item.source="{ item }">
       <v-chip
-          :color="getSourceColor(item.source)"
+          :color="getSourceColor(item.meta.source)"
           size="small"
           variant="outlined"
       >
-        {{ item.source }}
+        {{ item.meta.source }}
       </v-chip>
     </template>
 
@@ -113,7 +113,7 @@ const headers = ref([
           </v-list-item>
           <v-list-item
               @click="emit('deleteProxy', item.proxy.name)"
-              :disabled="!(isManual(item.source)||isInvalid(item.source))"
+              :disabled="!(isManual(item.meta.source)||isInvalid(item.meta.source))"
           >
             <template v-slot:prepend>
               <v-icon size="small" color="error">mdi-trash-can-outline</v-icon>

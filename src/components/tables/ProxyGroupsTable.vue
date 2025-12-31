@@ -2,7 +2,7 @@
 import {PropType, ref} from "vue";
 import {ProxyGroupData} from "@/components/types";
 import {itemsPerPageOptions} from "@/components/constants";
-import {isManual, isRegion, getProxyGroupTypeColor, isTemplate, getSourceColor} from "@/components/utils";
+import {isManual, isRegion, getProxyGroupTypeColor, getSourceColor} from "@/components/utils";
 
 const props = defineProps({
   proxyGroups: {
@@ -60,7 +60,7 @@ const proxyGroupHeaders = ref([
     </template>
 
     <template #item.source="{ item }">
-      <v-chip size="small" :color="getSourceColor(item.source)" variant="outlined">{{ item.source }}</v-chip>
+      <v-chip size="small" :color="getSourceColor(item.meta.source)" variant="outlined">{{ item.meta.source }}</v-chip>
     </template>
 
     <template #item.actions="{ item }">
@@ -79,7 +79,7 @@ const proxyGroupHeaders = ref([
           </v-list-item>
           <v-list-item
               @click="emit('editProxyGroup', item.proxy_group.name)"
-              :disabled="!(isManual(item.source)||isRegion(item.source))"
+              :disabled="!(isManual(item.meta.source)||isRegion(item.meta.source))"
           >
             <template v-slot:prepend>
               <v-icon size="small" color="primary">mdi-file-edit-outline</v-icon>
@@ -88,7 +88,7 @@ const proxyGroupHeaders = ref([
           </v-list-item>
           <v-list-item
               @click="emit('deleteProxyGroup', item.proxy_group.name)"
-              :disabled="!isManual(item.source)"
+              :disabled="!isManual(item.meta.source)"
           >
             <template v-slot:prepend>
               <v-icon size="small" color="error">mdi-trash-can-outline</v-icon>

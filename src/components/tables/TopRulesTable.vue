@@ -26,6 +26,8 @@ const emit = defineEmits<{
   (e: 'delete', priority: number, type: RuleSetType): void
   (e: 'delete-batch', priorities: number[], type: RuleSetType): void
   (e: 'reorder', targetPriority: number, movedPriority: number, type: RuleSetType): void
+  (e: 'change-status', priority: number, disabled: boolean, type: RuleSetType): void
+  (e: 'change-status-batch', priorities: number[], disabled: boolean, type: RuleSetType): void
 }>()
 
 const headers = ref([
@@ -89,13 +91,25 @@ function deleteSelected() {
   }
 }
 
+function updateStatus(item: RuleData, disabled: boolean) {
+  emit('change-status', item.priority, disabled, ruleset);
+}
+
+function changeBatchStatus(disabled: boolean) {
+  if (selected.value.length > 0) {
+    emit('change-status-batch', selected.value, disabled, ruleset);
+    selected.value = [];
+  }
+}
+
 const rowProps = (data: any) => {
   const item = data.item as RuleData;
   return {
     class: {
       'drop-over': item.priority === hoveredPriority.value,
       'dragging-item': dragItem.value?.priority === item.priority,
-      'list-row': true
+      'list-row': true,
+      'text-grey': item.meta?.disabled
     },
     draggable: dragEnabled.value,
     onDragstart: (e: DragEvent) => dragStart(e, item.priority),
@@ -126,14 +140,29 @@ const rowProps = (data: any) => {
   >
     <template #top>
       <teleport to="#top-rules-table-batch-actions" v-if="selected.length > 0">
-        <v-btn
-            color="error"
-            variant="tonal"
-            prepend-icon="mdi-trash-can-outline"
-            @click="deleteSelected"
-        >
-          删除({{ selected.length }})
-        </v-btn>
+        <v-btn-group rounded variant="tonal">
+          <v-btn
+              color="success"
+              prepend-icon="mdi-check"
+              @click="changeBatchStatus(false)"
+              size="small"
+          >
+          </v-btn>
+          <v-btn
+              color="warning"
+              prepend-icon="mdi-close"
+              @click="changeBatchStatus(true)"
+              size="small"
+          >
+          </v-btn>
+          <v-btn
+              color="error"
+              prepend-icon="mdi-trash-can-outline"
+              @click="deleteSelected"
+              size="small"
+          >
+          </v-btn>
+        </v-btn-group>
       </teleport>
     </template>
     <template #item.handler="{ }">
@@ -170,7 +199,7 @@ const rowProps = (data: any) => {
     </template>
 
     <template #item.time_modified="{ item }">
-      <small>{{ item?.time_modified ? timestampToDate(item.time_modified) : '' }}</small>
+      <small>{{ item.meta?.time_modified ? timestampToDate(item.meta.time_modified) : '' }}</small>
     </template>
 
     <template #item.actions="{ item }">
@@ -184,6 +213,14 @@ const rowProps = (data: any) => {
           </v-tooltip>
         </template>
         <v-list density="compact">
+          <v-list-item @click="updateStatus(item, !item.meta?.disabled)">
+            <template v-slot:prepend>
+              <v-icon size="small" :color="item.meta?.disabled ? 'success' : 'warning'">
+                {{ item.meta?.disabled ? 'mdi-check' : 'mdi-close' }}
+              </v-icon>
+            </template>
+            <v-list-item-title>{{ item.meta?.disabled ? '启用' : '禁用' }}</v-list-item-title>
+          </v-list-item>
           <v-list-item
               @click="editRule(item.priority)"
               :disabled="isSystemRule(item)"

@@ -21,11 +21,11 @@ const emit = defineEmits<{
   <v-card rounded="lg" elevation="1">
     <v-card-title class="d-flex justify-space-between align-center">
       <v-row align="center">
-        <v-icon start v-if="isManual(proxyGroupData.source)" size="x-small" color="primary">mdi-feather
+        <v-icon start v-if="isManual(proxyGroupData.meta.source)" size="x-small" color="primary">mdi-feather
         </v-icon>
-        <v-icon start v-else-if="isRegion(proxyGroupData.source)" size="x-small" color="info">mdi-earth
+        <v-icon start v-else-if="isRegion(proxyGroupData.meta.source)" size="x-small" color="info">mdi-earth
         </v-icon>
-        <v-icon start v-else-if="isTemplate(proxyGroupData.source)" size="x-small" color="success">
+        <v-icon start v-else-if="isTemplate(proxyGroupData.meta.source)" size="x-small" color="success">
           mdi-file-code-outline
         </v-icon>
         <v-chip v-else size="small" label>item.source</v-chip>
@@ -44,7 +44,7 @@ const emit = defineEmits<{
 
       <v-btn icon size="small" color="primary" variant="text"
              @click="emit('editProxyGroup', proxyGroupData.proxy_group.name)"
-             :disabled="!(isManual(proxyGroupData.source)||isRegion(proxyGroupData.source))"
+             :disabled="!(isManual(proxyGroupData.meta.source)||isRegion(proxyGroupData.meta.source))"
       >
         <v-icon>mdi-pencil</v-icon>
       </v-btn>
@@ -56,7 +56,7 @@ const emit = defineEmits<{
       <v-spacer></v-spacer>
       <v-btn icon size="small" color="error" variant="text"
              @click="emit('deleteProxyGroup', proxyGroupData.proxy_group.name)"
-             :disabled="!isManual(proxyGroupData.source)">
+             :disabled="!isManual(proxyGroupData.meta.source)">
         <v-icon>mdi-delete</v-icon>
       </v-btn>
     </v-card-actions>

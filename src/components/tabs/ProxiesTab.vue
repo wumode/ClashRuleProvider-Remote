@@ -130,7 +130,7 @@ async function importExtraProxiesFun() {
 // Edit Dialog State
 const proxiesDialogVisible = ref(false)
 const editingProxy = ref<ProxyData>({
-  ...defaultMetadata,
+  meta:{...defaultMetadata},
   proxy: {...defaultProxy}
 })
 

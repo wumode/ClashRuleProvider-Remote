@@ -103,6 +103,31 @@ async function handleReorderRule(targetPriority: number, movedPriority: number) 
   emit('refresh', ["top", "ruleset"]);
 }
 
+async function handleStatusChange(priority: number, disabled: boolean) {
+  try {
+    await props.api.post(`/plugin/ClashRuleProvider/rules/ruleset/metadata/disabled`, {
+        [priority]: disabled
+    });
+    emit('refresh', ["top", "ruleset"]);
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      emit('show-error', err.message || '更新规则状态失败');
+    }
+  }
+}
+
+async function handleBatchStatusChange(priorities: number[], disabled: boolean) {
+  try {
+    const payload = priorities.reduce((acc, p) => ({ ...acc, [p]: disabled }), {});
+    await props.api.post(`/plugin/ClashRuleProvider/rules/ruleset/metadata/disabled`, payload);
+    emit('refresh', ["top", "ruleset"]);
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      emit('show-error', err.message || '批量更新规则状态失败');
+    }
+  }
+}
+
 function closeRuleDialog() {
   ruleDialogVisible.value = false;
 }
@@ -129,7 +154,7 @@ function closeRuleDialog() {
           />
         </v-col>
         <v-col cols="2" sm="6" class="d-flex justify-end">
-          <v-btn-group variant="outlined" rounded>
+          <v-btn-group variant="outlined" rounded divided>
             <v-btn
                 class="d-none d-sm-flex"
                 :icon="group ? 'mdi-format-list-bulleted' : 'mdi-format-list-group'"
@@ -153,6 +178,8 @@ function closeRuleDialog() {
           @delete="deleteRule"
           @delete-batch="deleteRules"
           @reorder="handleReorderRule"
+          @change-status="handleStatusChange"
+          @change-status-batch="handleBatchStatusChange"
       ></RulesetRulesTable>
     </div>
     <!-- 移动端卡片 -->
@@ -174,10 +201,10 @@ function closeRuleDialog() {
     </div>
     <div class="pa-4" style="min-height: 4rem;">
       <v-row align="center" no-gutters>
-        <v-col cols="2" md="1">
+        <v-col cols="2" md="2">
           <div id="ruleset-rules-table-batch-actions"></div>
         </v-col>
-        <v-col cols="8" md="10" class="d-flex justify-center">
+        <v-col cols="8" md="8" class="d-flex justify-center">
           <v-pagination
               v-model="pageRuleset"
               :length="pageCountRuleset"
@@ -194,7 +221,7 @@ function closeRuleDialog() {
               class="d-sm-none my-0"
           />
         </v-col>
-        <v-col cols="2" md="1" class="d-flex justify-end">
+        <v-col cols="2" md="2" class="d-flex justify-end">
           <v-menu>
             <template v-slot:activator="{ props }">
               <v-btn v-bind="props" icon rounded="circle" variant="tonal">

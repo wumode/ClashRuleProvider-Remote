@@ -19,9 +19,9 @@ const emit = defineEmits<{
   <v-card rounded="lg" elevation="1">
     <v-card-title class="d-flex justify-space-between align-center">
       <v-row align="center">
-        <v-icon start v-if="isManual(ruleProviderData.source)" size="x-small" color="primary">mdi-feather
+        <v-icon start v-if="isManual(ruleProviderData.meta.source)" size="x-small" color="primary">mdi-feather
         </v-icon>
-        <v-icon start v-else-if="isTemplate(ruleProviderData.source)" size="x-small" color="success">
+        <v-icon start v-else-if="isTemplate(ruleProviderData.meta.source)" size="x-small" color="success">
           mdi-file-code-outline
         </v-icon>
         <v-icon start v-else size="x-small" color="info">mdi-file-download-outline</v-icon>
@@ -39,13 +39,13 @@ const emit = defineEmits<{
     <v-card-actions class="d-flex justify-center">
       <v-btn icon size="small" color="primary" variant="text"
              @click="emit('editRuleProvider', ruleProviderData.name)"
-             :disabled="!isManual(ruleProviderData.source)">
+             :disabled="!isManual(ruleProviderData.meta.source)">
         <v-icon>mdi-pencil</v-icon>
       </v-btn>
       <v-spacer></v-spacer>
       <v-btn icon size="small" color="error" variant="text"
              @click="emit('deleteRuleProvider', ruleProviderData.name)"
-             :disabled="!isManual(ruleProviderData.source)">
+             :disabled="!isManual(ruleProviderData.meta.source)">
         <v-icon>mdi-delete</v-icon>
       </v-btn>
     </v-card-actions>

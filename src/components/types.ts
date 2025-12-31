@@ -144,9 +144,10 @@ export interface RuleProvider {
     payload?: string[];
 }
 
-export interface RuleProviderData extends Metadata {
+export interface RuleProviderData {
     name: string;
     rule_provider: RuleProvider;
+    meta: Metadata;
 }
 
 export interface HealthCheck {
@@ -196,9 +197,10 @@ export interface ProxyProvider {
     header?: Record<string, string[]>;
 }
 
-export interface ProxyProviderData extends Metadata {
+export interface ProxyProviderData {
     name: string;
     proxy_provider: ProxyProvider;
+    meta: Metadata;
 }
 
 export interface RuleData {
@@ -209,8 +211,7 @@ export interface RuleData {
     additional_params?: 'no-resolve' | 'src';
     conditions?: string[];
     condition?: string;
-    source?: string;
-    time_modified?: number;
+    meta: Metadata;
 }
 
 export interface Smux {
@@ -286,14 +287,16 @@ export interface Proxy {
     [key: string]: any; // To support other proxy-specific fields without defining each one
 }
 
-export interface ProxyData extends Metadata {
+export interface ProxyData {
     proxy: Proxy;
     raw?: string | Record<string, any> | null;
     v2ray_link?: string | null;
+    meta: Metadata;
 }
 
-export interface ProxyGroupData extends Metadata {
+export interface ProxyGroupData {
     proxy_group: ProxyGroup
+    meta: Metadata;
 }
 
 interface DataUsage {
@@ -309,10 +312,11 @@ export interface SubscriptionInfo extends DataUsage {
     enabled: boolean;
 }
 
-export interface HostData extends Metadata {
+export interface HostData {
     domain: string
     value: string[]
     using_cloudflare: boolean
+    meta: Metadata;
 }
 
 export interface GeoRules {

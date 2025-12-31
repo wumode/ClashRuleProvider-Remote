@@ -5,9 +5,7 @@ import {itemsPerPageOptions} from "@/components/constants";
 import {
   isManual,
   getBehaviorColor,
-  isTemplate,
   getSourceColor,
-  getRuleTypeColor,
   getFormatColor
 } from "@/components/utils";
 
@@ -78,11 +76,11 @@ const emit = defineEmits<{
 
     <template #item.source="{ item }">
       <v-chip
-          :color="getSourceColor(item.source)"
+          :color="getSourceColor(item.meta.source)"
           size="small"
           variant="outlined"
       >
-        {{ item.source }}
+        {{ item.meta.source }}
       </v-chip>
     </template>
 
@@ -92,14 +90,14 @@ const emit = defineEmits<{
           <v-btn color="secondary" icon size="small" variant="text" v-bind="props">
             <v-icon>mdi-dots-vertical</v-icon>
           </v-btn>
-          <v-tooltip activator="parent" location="top" v-if="!isManual(item.source)">
+          <v-tooltip activator="parent" location="top" v-if="!isManual(item.meta.source)">
             非手动添加
           </v-tooltip>
         </template>
         <v-list density="compact">
           <v-list-item
               @click="emit('editRuleProvider', item.name)"
-              :disabled="!isManual(item.source)"
+              :disabled="!isManual(item.meta.source)"
           >
             <template v-slot:prepend>
               <v-icon size="small" color="primary">mdi-file-edit-outline</v-icon>
@@ -108,7 +106,7 @@ const emit = defineEmits<{
           </v-list-item>
           <v-list-item
               @click="emit('deleteRuleProvider', item.name)"
-              :disabled="!isManual(item.source)"
+              :disabled="!isManual(item.meta.source)"
           >
             <template v-slot:prepend>
               <v-icon size="small" color="error">mdi-trash-can-outline</v-icon>

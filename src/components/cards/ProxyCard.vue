@@ -23,9 +23,9 @@ const emit = defineEmits<{
   <v-card rounded="lg" elevation="1">
     <v-card-title class="d-flex justify-space-between align-center">
       <v-row align="center">
-        <v-icon start v-if="isManual(proxyData.source)" size="x-small" color="primary">mdi-feather
+        <v-icon start v-if="isManual(proxyData.meta.source)" size="x-small" color="primary">mdi-feather
         </v-icon>
-        <v-icon start v-else-if="isTemplate(proxyData.source)" size="x-small" color="success">
+        <v-icon start v-else-if="isTemplate(proxyData.meta.source)" size="x-small" color="success">
           mdi-file-code-outline
         </v-icon>
         <v-icon start v-else size="x-small" color="info">mdi-file-download-outline</v-icon>
@@ -48,7 +48,7 @@ const emit = defineEmits<{
       <v-btn icon size="small" color="primary" variant="text"
              @click="emit('editProxy', proxyData)"
       >
-        <v-icon v-if="proxyData.patched">mdi-wrench-check</v-icon>
+        <v-icon v-if="proxyData.meta.patched">mdi-wrench-check</v-icon>
         <v-icon v-else>mdi-cog</v-icon>
       </v-btn>
       <v-spacer></v-spacer>
@@ -60,7 +60,7 @@ const emit = defineEmits<{
       <v-spacer></v-spacer>
       <v-btn icon size="small" color="error" variant="text"
              @click="emit('deleteProxy', proxyData.proxy.name)"
-             :disabled="!isManual(proxyData.source)">
+             :disabled="!isManual(proxyData.meta.source)">
         <v-icon>mdi-delete</v-icon>
       </v-btn>
     </v-card-actions>
