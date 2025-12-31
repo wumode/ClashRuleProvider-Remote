@@ -66,7 +66,7 @@ yarn build
 ## 📂 项目结构
 
 ```
-plugin-component/
+component/
 ├── src/
 │   ├── assets/        # 静态资源
 │   ├── components/    # 组件源码
