@@ -87,6 +87,17 @@ async function deleteRule(priority: number) {
   }
 }
 
+async function deleteRules(priorities: number[]) {
+  try {
+    await props.api.delete('/plugin/ClashRuleProvider/rules/ruleset', { data: { rules_priority: priorities } });
+    emit('refresh', ["top", "ruleset"]);
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      emit('show-error', err.message || '批量删除规则失败');
+    }
+  }
+}
+
 async function handleReorderRule(targetPriority: number, movedPriority: number) {
   await props.api.put(`/plugin/ClashRuleProvider/reorder-rules/ruleset/${targetPriority}`, {"moved_priority": movedPriority});
   emit('refresh', ["top", "ruleset"]);
@@ -119,6 +130,11 @@ function closeRuleDialog() {
         </v-col>
         <v-col cols="2" sm="6" class="d-flex justify-end">
           <v-btn-group variant="outlined" rounded>
+            <v-btn
+                class="d-none d-sm-flex"
+                :icon="group ? 'mdi-format-list-bulleted' : 'mdi-format-list-group'"
+                @click="group = !group"
+            />
             <v-btn @click="openAddRuleDialog" icon="mdi-plus"></v-btn>
           </v-btn-group>
         </v-col>
@@ -135,6 +151,7 @@ function closeRuleDialog() {
           :search-rule="searchRulesetRule"
           @edit="editRule"
           @delete="deleteRule"
+          @delete-batch="deleteRules"
           @reorder="handleReorderRule"
       ></RulesetRulesTable>
     </div>
@@ -158,12 +175,7 @@ function closeRuleDialog() {
     <div class="pa-4" style="min-height: 4rem;">
       <v-row align="center" no-gutters>
         <v-col cols="2" md="1">
-          <v-btn
-              class="d-none d-sm-flex"
-              variant="tonal"
-              :icon="group ? 'mdi-format-list-bulleted' : 'mdi-format-list-group'"
-              @click="group = !group"
-          />
+          <div id="ruleset-rules-table-batch-actions"></div>
         </v-col>
         <v-col cols="8" md="10" class="d-flex justify-center">
           <v-pagination

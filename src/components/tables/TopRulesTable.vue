@@ -24,6 +24,7 @@ const props = defineProps({
 const emit = defineEmits<{
   (e: 'edit', priority: number, type: RuleSetType): void
   (e: 'delete', priority: number, type: RuleSetType): void
+  (e: 'delete-batch', priorities: number[], type: RuleSetType): void
   (e: 'reorder', targetPriority: number, movedPriority: number, type: RuleSetType): void
 }>()
 
@@ -41,6 +42,7 @@ const dragEnabled = ref(false);
 const hoveredPriority = ref<number>(-1);
 const ruleset = "top"
 const dragItem = ref<RuleData | null>(null);
+const selected = ref<number[]>([]);
 
 function dragStart(event: DragEvent, priority: number) {
   const item = props.sortedRules.find(r => r.priority === priority);
@@ -80,6 +82,13 @@ function deleteRule(priority: number) {
   emit('delete', priority, ruleset);
 }
 
+function deleteSelected() {
+  if (selected.value.length > 0) {
+    emit('delete-batch', selected.value, ruleset);
+    selected.value = [];
+  }
+}
+
 const rowProps = (data: any) => {
   const item = data.item as RuleData;
   return {
@@ -107,11 +116,26 @@ const rowProps = (data: any) => {
       :items-per-page="itemsPerPage"
       :items-per-page-options="itemsPerPageOptions"
       item-key="priority"
+      item-value="priority"
+      v-model="selected"
+      show-select
       density="compact"
       hide-default-footer
       fixed-header
       :row-props="rowProps"
   >
+    <template #top>
+      <teleport to="#top-rules-table-batch-actions" v-if="selected.length > 0">
+        <v-btn
+            color="error"
+            variant="tonal"
+            prepend-icon="mdi-trash-can-outline"
+            @click="deleteSelected"
+        >
+          删除({{ selected.length }})
+        </v-btn>
+      </teleport>
+    </template>
     <template #item.handler="{ }">
       <v-icon
           class="drag-handle"
@@ -123,7 +147,6 @@ const rowProps = (data: any) => {
     <template #item.priority="{ item }">
       <v-chip
           size="x-small"
-          label
           variant="tonal"
           color="secondary"
           class="font-weight-bold"

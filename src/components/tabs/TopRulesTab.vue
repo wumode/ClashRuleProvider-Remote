@@ -95,6 +95,17 @@ async function deleteRule(priority: number) {
   }
 }
 
+async function deleteRules(priorities: number[]) {
+  try {
+    await props.api.delete('/plugin/ClashRuleProvider/rules/top', { data: { rules_priority: priorities } });
+    emit('refresh', ["top", "ruleset"]);
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      emit('show-error', err.message || '批量删除规则失败');
+    }
+  }
+}
+
 async function handleReorderRule(targetPriority: number, movedPriority: number) {
   await props.api.put(`/plugin/ClashRuleProvider/reorder-rules/top/${targetPriority}`, {"moved_priority": movedPriority});
   emit('refresh', ["top", "ruleset"]);
@@ -145,6 +156,7 @@ async function handleReorderRule(targetPriority: number, movedPriority: number) 
         :search-rule="searchTopRule"
         @edit="editRule"
         @delete="deleteRule"
+        @delete-batch="deleteRules"
         @reorder="handleReorderRule"
       ></TopRulesTable>
     </div>
@@ -169,6 +181,7 @@ async function handleReorderRule(targetPriority: number, movedPriority: number) 
     <div class="pa-4" style="min-height: 4rem;">
       <v-row align="center" no-gutters>
         <v-col cols="2" md="1">
+          <div id="top-rules-table-batch-actions"></div>
         </v-col>
         <v-col cols="8" md="10" class="d-flex justify-center">
           <v-pagination

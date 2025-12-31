@@ -31,6 +31,7 @@ const props = defineProps({
 const emit = defineEmits<{
   (e: 'edit', priority: number, type: RuleSetType): void
   (e: 'delete', priority: number, type: RuleSetType): void
+  (e: 'delete-batch', priorities: number[], type: RuleSetType): void
   (e: 'reorder', targetPriority: number, movedPriority: number, type: RuleSetType): void
 }>()
 
@@ -64,6 +65,7 @@ const dragEnabled = ref(false);
 const dragItem = ref<RuleData | null>(null);
 const hoveredPriority = ref<number>(-1);
 const ruleset = "ruleset"
+const selected = ref<number[]>([]);
 
 function dragStart(event: DragEvent, priority: number) {
   const item = props.sortedRules.find(r => r.priority === priority);
@@ -106,6 +108,13 @@ function deleteRule(priority: number) {
   emit('delete', priority, ruleset);
 }
 
+function deleteSelected() {
+  if (selected.value.length > 0) {
+    emit('delete-batch', selected.value, ruleset);
+    selected.value = [];
+  }
+}
+
 const rowProps = (data: any) => {
   const item = data.item as RuleData;
   return {
@@ -124,6 +133,17 @@ const rowProps = (data: any) => {
 </script>
 
 <template>
+  <teleport to="#ruleset-rules-table-batch-actions" v-if="selected.length > 0">
+    <v-btn
+        color="error"
+        variant="tonal"
+        prepend-icon="mdi-trash-can-outline"
+        @click="deleteSelected"
+    >
+      删除({{ selected.length }})
+    </v-btn>
+  </teleport>
+
   <v-data-table
       v-if="group"
       fixed-header
@@ -136,6 +156,9 @@ const rowProps = (data: any) => {
       :items-per-page="itemsPerPage"
       :items-per-page-options="itemsPerPageOptions"
       item-key="priority"
+      item-value="priority"
+      show-select
+      v-model="selected"
       density="compact"
       hide-default-footer
   >
@@ -158,7 +181,6 @@ const rowProps = (data: any) => {
     <template #item.priority="{ item }">
       <v-chip
           size="x-small"
-          label
           variant="tonal"
           color="secondary"
           class="font-weight-bold"
@@ -214,6 +236,9 @@ const rowProps = (data: any) => {
       :items-per-page="itemsPerPage"
       :items-per-page-options="itemsPerPageOptions"
       item-key="priority"
+      item-value="priority"
+      show-select
+      v-model="selected"
       density="compact"
       hide-default-footer
       :row-props="rowProps"
