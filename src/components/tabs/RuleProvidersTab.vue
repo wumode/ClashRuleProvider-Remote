@@ -26,6 +26,7 @@ const itemsPerPageRuleProviders = ref(10)
 const ruleProviderDialogVisible = ref(false)
 const editingRuleProvider = ref<RuleProviderData | null>(null)
 const editingRuleProviderName = ref<string | null>(null)
+const loading = ref(false)
 
 const filteredExtraRuleProviders = computed(() => {
   if (!searchRuleProviders.value) return props.ruleProviders;
@@ -67,6 +68,7 @@ function editRuleProvider(name: string) {
 }
 
 async function deleteRuleProvider(name: string) {
+  loading.value = true;
   try {
     const n = encodeURIComponent(name)
     await props.api.delete(`/plugin/ClashRuleProvider/rule-providers/${n}`);
@@ -74,6 +76,8 @@ async function deleteRuleProvider(name: string) {
   } catch (err: unknown) {
     if (err instanceof Error)
       emit('show-error', err.message || '删除规则集合失败');
+  } finally {
+    loading.value = false;
   }
 }
 
@@ -85,7 +89,10 @@ function closeRuleProviderDialog() {
 </script>
 
 <template>
-  <div class="mb-2">
+  <div class="mb-2 position-relative">
+    <v-overlay v-model="loading" contained class="align-center justify-center">
+      <v-progress-circular indeterminate color="primary"></v-progress-circular>
+    </v-overlay>
     <div class="pa-4">
       <v-row align="center" no-gutters>
         <v-col cols="10" sm="6" class="d-flex justify-start">
@@ -101,6 +108,7 @@ function closeRuleProviderDialog() {
               flat
               rounded="pill"
               single-line
+              :disabled="loading"
           ></v-text-field>
         </v-col>
         <v-col cols="2" sm="6" class="d-flex justify-end">
@@ -108,6 +116,7 @@ function closeRuleProviderDialog() {
             <v-btn
                 @click="openAddRuleProviderDialog"
                 icon="mdi-plus"
+                :disabled="loading"
             >
             </v-btn>
           </v-btn-group>
@@ -153,6 +162,7 @@ function closeRuleProviderDialog() {
               total-visible="5"
               rounded="circle"
               class="d-none d-sm-flex my-0"
+              :disabled="loading"
           />
           <!-- 移动端分页器：只在 sm 以下显示 -->
           <v-pagination
@@ -161,12 +171,13 @@ function closeRuleProviderDialog() {
               total-visible="0"
               rounded="circle"
               class="d-sm-none my-0"
+              :disabled="loading"
           />
         </v-col>
         <v-col cols="2" md="1" class="d-flex justify-end">
           <v-menu>
             <template v-slot:activator="{ props }">
-              <v-btn v-bind="props" icon rounded="circle" variant="tonal">
+              <v-btn v-bind="props" icon rounded="circle" variant="tonal" :disabled="loading">
                 {{ pageTitle(itemsPerPageRuleProviders) }}
               </v-btn>
             </template>

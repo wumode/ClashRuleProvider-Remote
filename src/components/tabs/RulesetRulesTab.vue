@@ -25,6 +25,7 @@ const emit = defineEmits<{
 const searchRulesetRule = ref('');
 const pageRuleset = ref(1);
 const itemsPerPageRuleset = ref(10);
+const loading = ref(false);
 // 是否要分组
 const group = ref(false)
 // Dialog State
@@ -77,6 +78,7 @@ function editRule(priority: number) {
 }
 
 async function deleteRule(priority: number) {
+  loading.value = true;
   try {
     await props.api.delete(`/plugin/ClashRuleProvider/rules/ruleset/${priority}`);
     emit('refresh', ["top", "ruleset"]);
@@ -84,10 +86,13 @@ async function deleteRule(priority: number) {
     if (err instanceof Error) {
       emit('show-error', err.message || '删除规则失败');
     }
+  } finally {
+    loading.value = false;
   }
 }
 
 async function deleteRules(priorities: number[]) {
+  loading.value = true;
   try {
     await props.api.delete('/plugin/ClashRuleProvider/rules/ruleset', { data: { rules_priority: priorities } });
     emit('refresh', ["top", "ruleset"]);
@@ -95,15 +100,27 @@ async function deleteRules(priorities: number[]) {
     if (err instanceof Error) {
       emit('show-error', err.message || '批量删除规则失败');
     }
+  } finally {
+    loading.value = false;
   }
 }
 
 async function handleReorderRule(targetPriority: number, movedPriority: number) {
-  await props.api.put(`/plugin/ClashRuleProvider/reorder-rules/ruleset/${targetPriority}`, {"moved_priority": movedPriority});
-  emit('refresh', ["top", "ruleset"]);
+  loading.value = true;
+  try {
+    await props.api.put(`/plugin/ClashRuleProvider/reorder-rules/ruleset/${targetPriority}`, {"moved_priority": movedPriority});
+    emit('refresh', ["top", "ruleset"]);
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      emit('show-error', err.message || '重排序失败');
+    }
+  } finally {
+    loading.value = false;
+  }
 }
 
 async function handleStatusChange(priority: number, disabled: boolean) {
+  loading.value = true;
   try {
     await props.api.post(`/plugin/ClashRuleProvider/rules/ruleset/metadata/disabled`, {
         [priority]: disabled
@@ -113,10 +130,13 @@ async function handleStatusChange(priority: number, disabled: boolean) {
     if (err instanceof Error) {
       emit('show-error', err.message || '更新规则状态失败');
     }
+  } finally {
+    loading.value = false;
   }
 }
 
 async function handleBatchStatusChange(priorities: number[], disabled: boolean) {
+  loading.value = true;
   try {
     const payload = priorities.reduce((acc, p) => ({ ...acc, [p]: disabled }), {});
     await props.api.post(`/plugin/ClashRuleProvider/rules/ruleset/metadata/disabled`, payload);
@@ -125,6 +145,8 @@ async function handleBatchStatusChange(priorities: number[], disabled: boolean) 
     if (err instanceof Error) {
       emit('show-error', err.message || '批量更新规则状态失败');
     }
+  } finally {
+    loading.value = false;
   }
 }
 
@@ -134,7 +156,11 @@ function closeRuleDialog() {
 </script>
 
 <template>
-  <div class="mb-2">
+  <div class="mb-2 position-relative">
+    <v-overlay v-model="loading" contained class="align-center justify-center">
+      <v-progress-circular indeterminate color="primary"></v-progress-circular>
+    </v-overlay>
+
     <!-- 顶部工具栏 -->
     <div class="pa-4">
       <v-row align="center" no-gutters>
@@ -151,6 +177,7 @@ function closeRuleDialog() {
               flat
               rounded="pill"
               single-line
+              :disabled="loading"
           />
         </v-col>
         <v-col cols="2" sm="6" class="d-flex justify-end">
@@ -159,8 +186,9 @@ function closeRuleDialog() {
                 class="d-none d-sm-flex"
                 :icon="group ? 'mdi-format-list-bulleted' : 'mdi-format-list-group'"
                 @click="group = !group"
+                :disabled="loading"
             />
-            <v-btn @click="openAddRuleDialog" icon="mdi-plus"></v-btn>
+            <v-btn @click="openAddRuleDialog" icon="mdi-plus" :disabled="loading"></v-btn>
           </v-btn-group>
         </v-col>
       </v-row>
@@ -211,6 +239,7 @@ function closeRuleDialog() {
               total-visible="5"
               rounded="circle"
               class="d-none d-sm-flex my-0"
+              :disabled="loading"
           />
           <!-- 移动端分页器：只在 sm 以下显示 -->
           <v-pagination
@@ -219,12 +248,13 @@ function closeRuleDialog() {
               total-visible="0"
               rounded="circle"
               class="d-sm-none my-0"
+              :disabled="loading"
           />
         </v-col>
         <v-col cols="2" md="2" class="d-flex justify-end">
           <v-menu>
             <template v-slot:activator="{ props }">
-              <v-btn v-bind="props" icon rounded="circle" variant="tonal">
+              <v-btn v-bind="props" icon rounded="circle" variant="tonal" :disabled="loading">
                 {{ pageTitle(itemsPerPageRuleset) }}
               </v-btn>
             </template>

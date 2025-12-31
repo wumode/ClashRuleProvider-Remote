@@ -22,6 +22,7 @@ const itemsPerPageHosts = ref(10)
 const hostDialog = ref(false)
 const currentHost = ref<HostData>({...defaultHost})
 const isAdding = ref(true)
+const loading = ref(false)
 
 // Computed
 const filteredHosts = computed(() => {
@@ -65,6 +66,7 @@ function editHost(domain: string) {
 }
 
 async function deleteHost(name: string) {
+  loading.value = true;
   try {
     await props.api.delete('/plugin/ClashRuleProvider/hosts', {
       domain: name
@@ -72,11 +74,16 @@ async function deleteHost(name: string) {
     emit('refresh');
   } catch (err: any) {
     emit('show-error', err.message || '删除 host 失败');
+  } finally {
+    loading.value = false;
   }
 }
 </script>
 <template>
-  <div class="mb-2">
+  <div class="mb-2 position-relative">
+    <v-overlay v-model="loading" contained class="align-center justify-center">
+      <v-progress-circular indeterminate color="primary"></v-progress-circular>
+    </v-overlay>
     <div class="pa-4">
       <v-row align="center" no-gutters>
         <v-col cols="10" sm="6" class="d-flex justify-start">
@@ -92,11 +99,12 @@ async function deleteHost(name: string) {
               flat
               rounded="pill"
               single-line
+              :disabled="loading"
           ></v-text-field>
         </v-col>
         <v-col cols="2" sm="6" class="d-flex justify-end">
           <v-btn-group variant="outlined" rounded>
-            <v-btn @click="openAddHostDialog" icon="mdi-plus"></v-btn>
+            <v-btn @click="openAddHostDialog" icon="mdi-plus" :disabled="loading"></v-btn>
           </v-btn-group>
         </v-col>
       </v-row>
@@ -146,12 +154,14 @@ async function deleteHost(name: string) {
             <v-card-actions class="d-flex justify-center">
               <v-btn icon size="small" color="primary" variant="text"
                      @click="editHost(item.domain)"
+                     :disabled="loading"
               >
                 <v-icon>mdi-file-edit-outline</v-icon>
               </v-btn>
               <v-spacer></v-spacer>
               <v-btn icon size="small" color="error" variant="text"
                      @click="deleteHost(item.domain)"
+                     :disabled="loading"
               >
                 <v-icon>mdi-trash-can-outline</v-icon>
               </v-btn>
@@ -172,6 +182,7 @@ async function deleteHost(name: string) {
               total-visible="5"
               rounded="circle"
               class="d-none d-sm-flex my-0"
+              :disabled="loading"
           />
           <!-- 移动端分页器：只在 sm 以下显示 -->
           <v-pagination
@@ -180,13 +191,14 @@ async function deleteHost(name: string) {
               total-visible="0"
               rounded="circle"
               class="d-sm-none my-0"
+              :disabled="loading"
           />
 
         </v-col>
         <v-col cols="2" md="1" class="d-flex justify-end">
           <v-menu>
             <template v-slot:activator="{ props }">
-              <v-btn v-bind="props" icon rounded="circle" variant="tonal">
+              <v-btn v-bind="props" icon rounded="circle" variant="tonal" :disabled="loading">
                 {{ pageTitle(itemsPerPageHosts) }}
               </v-btn>
             </template>

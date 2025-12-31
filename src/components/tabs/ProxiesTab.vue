@@ -43,6 +43,7 @@ const importProxiesTypes = ['YAML', 'LINK']
 const searchProxies = ref('')
 const pageProxies = ref(1);
 const itemsPerPageProxies = ref(10);
+const loading = ref(false);
 
 const filteredExtraProxies = computed(() => {
   if (!searchProxies.value) return props.proxies;
@@ -144,6 +145,7 @@ function closeProxyDialog() {
 }
 
 async function deleteProxy(name: string) {
+  loading.value = true;
   try {
     await props.api.delete(`/plugin/ClashRuleProvider/proxies/${name}`);
     emit('refresh', ["proxies", "clash-outbounds"]);
@@ -151,13 +153,17 @@ async function deleteProxy(name: string) {
     if (err instanceof Error) {
       emit('show-error', err.message || '删除规则失败');
     }
+  } finally {
+    loading.value = false;
   }
 }
-
 </script>
 
 <template>
-  <div class="mb-2">
+  <div class="mb-2 position-relative">
+    <v-overlay v-model="loading" contained class="align-center justify-center">
+      <v-progress-circular indeterminate color="primary"></v-progress-circular>
+    </v-overlay>
     <div class="pa-4">
       <v-row align="center" no-gutters>
         <v-col cols="10" sm="6" class="d-flex justify-start">
@@ -173,6 +179,7 @@ async function deleteProxy(name: string) {
               flat
               rounded="pill"
               single-line
+              :disabled="loading"
           ></v-text-field>
         </v-col>
         <v-col cols="2" sm="6" class="d-flex justify-end">
@@ -180,13 +187,16 @@ async function deleteProxy(name: string) {
             <v-btn
                 @click="openImportProxiesDialog"
                 icon="mdi-import"
+                :disabled="loading"
             >
             </v-btn>
           </v-btn-group>
         </v-col>
       </v-row>
     </div>
+
     <!-- 桌面端表格 -->
+
     <div class="d-none d-sm-flex clash-data-table">
       <ProxiesTable
           :items-per-page="itemsPerPageProxies"
@@ -199,6 +209,7 @@ async function deleteProxy(name: string) {
       >
       </ProxiesTable>
     </div>
+
     <!-- 移动端卡片 -->
     <div class="d-sm-none">
       <v-row>
@@ -217,6 +228,7 @@ async function deleteProxy(name: string) {
         </v-col>
       </v-row>
     </div>
+
     <div class="pa-4" style="min-height: 4rem;">
       <v-row align="center" no-gutters>
         <v-col cols="2" md="1">
@@ -229,6 +241,7 @@ async function deleteProxy(name: string) {
               total-visible="5"
               class="d-none d-sm-flex my-0"
               rounded="circle"
+              :disabled="loading"
           />
           <!-- 移动端分页器：只在 sm 以下显示 -->
           <v-pagination
@@ -237,13 +250,13 @@ async function deleteProxy(name: string) {
               total-visible="0"
               class="d-sm-none my-0"
               rounded="circle"
+              :disabled="loading"
           />
-
         </v-col>
         <v-col cols="2" md="1" class="d-flex justify-end">
           <v-menu>
             <template v-slot:activator="{ props }">
-              <v-btn v-bind="props" icon rounded="circle" variant="tonal">
+              <v-btn v-bind="props" icon rounded="circle" variant="tonal" :disabled="loading">
                 {{ pageTitle(itemsPerPageProxies) }}
               </v-btn>
             </template>

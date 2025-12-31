@@ -20,7 +20,9 @@ const emit = defineEmits<{
   (e: 'show-error', msg: string): void
   (e: 'show-snackbar', value: any): void;
   (e: 'refresh', regions: string[]): void;
-  (e: 'copy-to-clipboard', url: string): void
+  (e: 'copy-to-clipboard', url: string): void;
+  (e: 'start-loading'): void;
+  (e: 'end-loading'): void;
 }>()
 
 const loading = ref<boolean>(false)
@@ -28,6 +30,7 @@ const loading = ref<boolean>(false)
 // 更新订阅
 async function updateSubscription() {
   loading.value = true
+  emit('start-loading')
   try {
     await props.api.put('plugin/ClashRuleProvider/refresh', {
       url: props.url
@@ -44,10 +47,12 @@ async function updateSubscription() {
       emit('show-error', '订阅更新失败: ' + (err.message || '未知错误'));
   } finally {
     loading.value = false
+    emit('end-loading')
   }
 }
 
 async function toggleSubscription() {
+  emit('start-loading')
   try {
     await props.api.post('plugin/ClashRuleProvider/subscription-info', {
       url: props.url,
@@ -64,6 +69,8 @@ async function toggleSubscription() {
     if (err instanceof Error)
       emit('show-error', '设置自动更新失败: ' + (err.message || '未知错误'));
     emit('refresh', ["status"]);
+  } finally {
+    emit('end-loading')
   }
 }
 </script>

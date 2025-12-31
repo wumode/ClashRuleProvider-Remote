@@ -25,6 +25,7 @@ const emit = defineEmits<{
 const searchTopRule = ref('');
 const page = ref(1);
 const itemsPerPage = ref(10);
+const loading = ref(false);
 
 // Dialog State
 const ruleDialogVisible = ref(false)
@@ -85,6 +86,7 @@ function editRule(priority: number) {
 }
 
 async function deleteRule(priority: number) {
+  loading.value = true;
   try {
     await props.api.delete(`/plugin/ClashRuleProvider/rules/top/${priority}`);
     emit('refresh', ["top", "ruleset"]);
@@ -92,10 +94,13 @@ async function deleteRule(priority: number) {
     if (err instanceof Error) {
       emit('show-error', err.message || '删除规则失败');
     }
+  } finally {
+    loading.value = false;
   }
 }
 
 async function deleteRules(priorities: number[]) {
+  loading.value = true;
   try {
     await props.api.delete('/plugin/ClashRuleProvider/rules/top', { data: { rules_priority: priorities } });
     emit('refresh', ["top", "ruleset"]);
@@ -103,15 +108,27 @@ async function deleteRules(priorities: number[]) {
     if (err instanceof Error) {
       emit('show-error', err.message || '批量删除规则失败');
     }
+  } finally {
+    loading.value = false;
   }
 }
 
 async function handleReorderRule(targetPriority: number, movedPriority: number) {
-  await props.api.put(`/plugin/ClashRuleProvider/reorder-rules/top/${targetPriority}`, {"moved_priority": movedPriority});
-  emit('refresh', ["top", "ruleset"]);
+  loading.value = true;
+  try {
+    await props.api.put(`/plugin/ClashRuleProvider/reorder-rules/top/${targetPriority}`, {"moved_priority": movedPriority});
+    emit('refresh', ["top", "ruleset"]);
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      emit('show-error', err.message || '重排序失败');
+    }
+  } finally {
+    loading.value = false;
+  }
 }
 
 async function handleStatusChange(priority: number, disabled: boolean) {
+  loading.value = true;
   try {
     await props.api.post(`/plugin/ClashRuleProvider/rules/top/metadata/disabled`, {
         [priority]: disabled
@@ -121,10 +138,13 @@ async function handleStatusChange(priority: number, disabled: boolean) {
     if (err instanceof Error) {
       emit('show-error', err.message || '更新规则状态失败');
     }
+  } finally {
+    loading.value = false;
   }
 }
 
 async function handleBatchStatusChange(priorities: number[], disabled: boolean) {
+  loading.value = true;
   try {
     const payload = priorities.reduce((acc, p) => ({ ...acc, [p]: disabled }), {});
     await props.api.post(`/plugin/ClashRuleProvider/rules/top/metadata/disabled`, payload);
@@ -133,13 +153,19 @@ async function handleBatchStatusChange(priorities: number[], disabled: boolean) 
     if (err instanceof Error) {
       emit('show-error', err.message || '批量更新规则状态失败');
     }
+  } finally {
+    loading.value = false;
   }
 }
 
 </script>
 
 <template>
-  <div class="mb-2">
+  <div class="mb-2 position-relative">
+    <v-overlay v-model="loading" contained class="align-center justify-center">
+      <v-progress-circular indeterminate color="primary"></v-progress-circular>
+    </v-overlay>
+
     <div class="pa-4">
       <v-row align="center" no-gutters>
         <v-col cols="8" sm="6" class="d-flex justify-start">
@@ -156,6 +182,7 @@ async function handleBatchStatusChange(priorities: number[], disabled: boolean) 
             flat
             rounded="pill"
             single-line
+            :disabled="loading"
           ></v-text-field>
         </v-col>
         <v-col cols="4" sm="6" class="d-flex justify-end">
@@ -163,10 +190,12 @@ async function handleBatchStatusChange(priorities: number[], disabled: boolean) 
             <v-btn
                 @click="openImportRuleDialog"
                 icon="mdi-import"
+                :disabled="loading"
             ></v-btn>
             <v-btn
                 @click="openAddRuleDialog"
                 icon="mdi-plus"
+                :disabled="loading"
             ></v-btn>
           </v-btn-group>
 
@@ -217,6 +246,7 @@ async function handleBatchStatusChange(priorities: number[], disabled: boolean) 
             total-visible="5"
             rounded="circle"
             class="d-none d-sm-flex my-0"
+            :disabled="loading"
           />
           <v-pagination
             v-model="page"
@@ -224,12 +254,13 @@ async function handleBatchStatusChange(priorities: number[], disabled: boolean) 
             total-visible="0"
             rounded="circle"
             class="d-sm-none my-0"
+            :disabled="loading"
           />
         </v-col>
         <v-col cols="2" md="2" class="d-flex justify-end">
           <v-menu>
             <template v-slot:activator="{ props }">
-              <v-btn v-bind="props" icon rounded="circle" variant="tonal">
+              <v-btn v-bind="props" icon rounded="circle" variant="tonal" :disabled="loading">
                 {{ pageTitle(itemsPerPage) }}
               </v-btn>
             </template>

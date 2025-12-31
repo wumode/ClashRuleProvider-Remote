@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { SubscriptionInfo } from "@/components/types";
 import SubscriptionCard from "@/components/cards/SubscriptionCard.vue";
+import {ref} from "vue";
 
 defineProps<{
   subscriptionsInfo: Record<string, SubscriptionInfo>;
@@ -14,10 +15,16 @@ const emit = defineEmits<{
   (e: 'copy-to-clipboard', text: string): void;
   (e: 'switch'): void;
 }>();
+
+const loading = ref(false);
 </script>
 
 <template>
-  <div class="mb-2">
+  <div class="mb-2 position-relative">
+    <v-overlay v-model="loading" contained class="align-center justify-center">
+      <v-progress-circular indeterminate color="primary"></v-progress-circular>
+    </v-overlay>
+
     <v-row v-if="Object.keys(subscriptionsInfo).length === 0" class="pa-6 justify-center">
       <v-card
           class="mx-auto text-center py-8 px-4"
@@ -63,6 +70,8 @@ const emit = defineEmits<{
             @show-snackbar="(val) => emit('show-snackbar', val)"
             @show-error="(msg) => emit('show-error', msg)"
             @copy-to-clipboard="(t) => emit('copy-to-clipboard', t)"
+            @start-loading="loading = true"
+            @end-loading="loading = false"
         />
       </v-col>
     </v-row>
