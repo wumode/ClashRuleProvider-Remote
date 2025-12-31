@@ -46,28 +46,6 @@ async function saveHost() {
       value: newHost.value
     };
     
-    // If editing and domain changed, we might need to handle it differently depending on API.
-    // In HostsTab.vue logic: 
-    // const requestData = {
-    //   domain: editingHostDomainName.value === null ? newHost.value.domain : editingHostDomainName.value,
-    //   value: newHost.value
-    // };
-    // Here props.initialHost.domain acts as the original domain name if we are editing.
-    // If isAdding is true, initialHost.domain might be empty or default.
-    // Actually, let's double check how HostsTab logic worked.
-    // It used `editingHostDomainName` which was null when adding.
-    // If editing, `editingHostDomainName` held the original domain.
-    // So if isAdding is false, we use props.initialHost.domain as the key to update (or the original domain).
-    // Wait, the API seems to take `domain` as the key to identify which host to update (if it's a replace/update) OR the new domain name?
-    // Let's look at HostsTab.vue again.
-    // requestData.domain is used. 
-    // If editingHostDomainName is not null (editing), it uses that.
-    // If null (adding), it uses newHost.value.domain.
-    // So effectively, it uses the *original* domain name when editing to identify the record? 
-    // Or is it creating a new one?
-    // The API is `POST /plugin/ClashRuleProvider/hosts`. 
-    // Usually POST implies create or update-by-id.
-    
     const targetDomain = props.isAdding ? newHost.value.domain : props.initialHost.domain;
 
     const result = await props.api.post('/plugin/ClashRuleProvider/hosts', {

@@ -69,7 +69,6 @@ const geoRules = ref<GeoRules>({
   geosite: [],
 })
 const lastUpdated = ref('')
-const refreshingSubscription = ref<Record<string, boolean>>({})
 const showYamlDialog = ref(false)
 const displayedYaml = ref('')
 
@@ -116,55 +115,6 @@ function showError(Msg: string) {
   errorMsg.value = Msg;
 }
 
-// 更新订阅
-async function updateSubscription(url: string) {
-  if (!url) {
-    showError('请先输入订阅URL')
-    return
-  }
-
-  refreshingSubscription.value[url] = true
-  try {
-    await props.api.put('plugin/ClashRuleProvider/refresh', {
-      url: url
-    })
-    // 显示成功提示
-    snackbar.value = {
-      show: true,
-      message: '订阅更新成功',
-      color: 'success'
-    }
-    await refreshAllRegions(["status", "clash-outbounds", "rule-providers", "proxy-groups", "proxies", "proxy-providers"])
-  } catch (err: unknown) {
-    if (err instanceof Error)
-      showError(err.message)
-  } finally {
-    refreshingSubscription.value[url] = false
-  }
-}
-
-async function toggleSubscription(url: string, enabled: boolean) {
-  try {
-    await props.api.post('plugin/ClashRuleProvider/subscription-info', {
-      url: url,
-      value: enabled,
-      field: 'enabled'
-    })
-    // 显示成功提示
-    snackbar.value = {
-      show: true,
-      message: '设置成功',
-      color: 'success'
-    }
-    await refreshAllRegions(["status"])
-  } catch (err: unknown) {
-    if (err instanceof Error)
-      showError(err.message);
-  } finally {
-    refreshingSubscription.value[url] = false
-  }
-}
-
 async function refreshStatus() {
   const state = await props.api.get('/plugin/ClashRuleProvider/status')
   // 处理状态请求的响应
@@ -173,7 +123,6 @@ async function refreshStatus() {
 
   if (state?.data?.subscription_info) {
     subscriptionsInfo.value = state.data.subscription_info
-    refreshingSubscription.value = {}
   }
   bestCloudflareIPs.value = state?.data?.best_cf_ip || []
   rulesetPrefix.value = state?.data?.ruleset_prefix || '📂<=';
@@ -294,10 +243,9 @@ async function refreshData() {
 
     if (state?.data?.subscription_info) {
       subscriptionsInfo.value = state.data.subscription_info
-      refreshingSubscription.value = {}
     }
     bestCloudflareIPs.value = state?.data?.best_cf_ip || []
-    rulesetPrefix.value = state?.data?.ruleset_prefix || '';
+    rulesetPrefix.value = state?.data?.ruleset_prefix || '📂<=';
     geoRules.value = state?.data?.geoRules ?? geoRules.value;
     rules.value = response?.data || [];
     rulesetRules.value = response_ruleset?.data || [];
@@ -306,7 +254,7 @@ async function refreshData() {
     proxyGroups.value = proxyGroupsResponse?.data || [];
     proxies.value = extraProxiesResponse?.data || [];
     hosts.value = hostsResponse?.data || [];
-    proxyProviders.value = proxyProvidersResponse?.data || {};
+    proxyProviders.value = proxyProvidersResponse?.data || [];
     lastUpdated.value = new Date().toLocaleString();
   } catch (err: unknown) {
     console.error('获取数据失败:', err);
@@ -473,9 +421,10 @@ onMounted(() => {
             <v-window-item>
               <SubscriptionTab
                   :subscriptions-info="subscriptionsInfo"
-                  :refreshing-subscription="refreshingSubscription"
-                  @update-subscription="updateSubscription"
-                  @toggle-subscription="toggleSubscription"
+                  :api="api"
+                  @refresh="refreshAllRegions"
+                  @show-snackbar="val => snackbar = val"
+                  @show-error="showError"
                   @copy-to-clipboard="copyToClipboard"
                   @switch="notifySwitch"
               />

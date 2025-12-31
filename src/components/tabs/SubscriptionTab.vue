@@ -4,12 +4,13 @@ import SubscriptionCard from "@/components/cards/SubscriptionCard.vue";
 
 defineProps<{
   subscriptionsInfo: Record<string, SubscriptionInfo>;
-  refreshingSubscription: Record<string, boolean>;
+  api: any;
 }>();
 
 const emit = defineEmits<{
-  (e: 'update-subscription', url: string): void;
-  (e: 'toggle-subscription', url: string, enabled: boolean): void;
+  (e: 'show-error', msg: string): void
+  (e: 'show-snackbar', value: any): void;
+  (e: 'refresh', regions: string[]): void;
   (e: 'copy-to-clipboard', text: string): void;
   (e: 'switch'): void;
 }>();
@@ -57,9 +58,10 @@ const emit = defineEmits<{
         <SubscriptionCard
             :info="info"
             :url="String(url)"
-            :refreshing="refreshingSubscription[url]"
-            @update-subscription="(u) => emit('update-subscription', u)"
-            @toggle-subscription="(u, e) => emit('toggle-subscription', u, e)"
+            :api="api"
+            @refresh="(r) => emit('refresh', r)"
+            @show-snackbar="(val) => emit('show-snackbar', val)"
+            @show-error="(msg) => emit('show-error', msg)"
             @copy-to-clipboard="(t) => emit('copy-to-clipboard', t)"
         />
       </v-col>
