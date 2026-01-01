@@ -29,15 +29,15 @@ const emit = defineEmits<{
       <v-row no-gutters class="mb-2 align-center">
         <v-col cols="3" class="text-caption text-medium-emphasis">类型</v-col>
         <v-col cols="9">
-          <span class="text-body-2 font-weight-medium">{{ ruleProviderData.rule_provider.type }}</span>
+          <span class="text-body-2 font-weight-medium">{{ ruleProviderData.data.type }}</span>
         </v-col>
       </v-row>
 
       <v-row no-gutters class="mb-2 align-center">
         <v-col cols="3" class="text-caption text-medium-emphasis">行为</v-col>
         <v-col cols="9">
-           <v-chip v-if="ruleProviderData.rule_provider?.behavior" :color="getBehaviorColor(ruleProviderData.rule_provider.behavior)" size="x-small" label variant="tonal" class="font-weight-medium">
-            {{ ruleProviderData.rule_provider.behavior }}
+           <v-chip v-if="ruleProviderData.data?.behavior" :color="getBehaviorColor(ruleProviderData.data.behavior)" size="x-small" label variant="tonal" class="font-weight-medium">
+            {{ ruleProviderData.data.behavior }}
           </v-chip>
         </v-col>
       </v-row>
@@ -45,7 +45,7 @@ const emit = defineEmits<{
        <v-row no-gutters class="align-center">
         <v-col cols="3" class="text-caption text-medium-emphasis">内容</v-col>
         <v-col cols="9" class="text-body-2 text-truncate font-weight-medium">
-          <span :title="ruleProviderData.rule_provider.format">{{ ruleProviderData.rule_provider.format }}</span>
+          <span :title="ruleProviderData.data.format">{{ ruleProviderData.data.format }}</span>
         </v-col>
       </v-row>
     </v-card-text>
@@ -80,7 +80,7 @@ const emit = defineEmits<{
             <v-list-item-title>编辑</v-list-item-title>
           </v-list-item>
 
-          <v-list-item @click="emit('showYaml', ruleProviderData.rule_provider)">
+          <v-list-item @click="emit('showYaml', ruleProviderData.data)">
             <template v-slot:prepend>
               <v-icon size="small" color="info">mdi-code-json</v-icon>
             </template>

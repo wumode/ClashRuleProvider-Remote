@@ -63,10 +63,10 @@ function openAddProxyGroupDialog() {
 }
 
 function editProxyGroup(name: string) {
-  const proxyGroupData = props.proxyGroups.find(p => p.proxy_group.name === name);
+  const proxyGroupData = props.proxyGroups.find(p => p.data.name === name);
   if (proxyGroupData) {
     editingProxyGroupName.value = name;
-    currentProxyGroup.value = {...proxyGroupData}
+    currentProxyGroup.value = {...proxyGroupData};
     proxyGroupDialogVisible.value = true;
   }
 }
@@ -89,8 +89,11 @@ async function deleteProxyGroup(name: string) {
 async function handleStatusChange(name: string, disabled: boolean) {
   loading.value = true;
   try {
-    const group = props.proxyGroups.find(g => g.proxy_group.name === name);
-    if (!group) throw new Error("Proxy group not found");
+    const group = props.proxyGroups.find(g => g.data.name === name);
+    if (!group) {
+      emit('show-error', "Proxy group not found");
+      return
+    }
     const n = encodeURIComponent(name);
     // Send full metadata with updated disabled status
     const newMeta = { ...group.meta, disabled: disabled };
@@ -104,8 +107,6 @@ async function handleStatusChange(name: string, disabled: boolean) {
     loading.value = false;
   }
 }
-
-
 
 function closeProxyGroupsDialog() {
   currentProxyGroup.value = null;
@@ -169,7 +170,7 @@ function closeProxyGroupsDialog() {
       <v-row>
         <v-col
             v-for="item in paginatedProxyGroups"
-            :key="item.proxy_group.name"
+            :key="item.data.name"
             cols="12"
         >
           <ProxyGroupCard

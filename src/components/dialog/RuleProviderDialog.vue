@@ -30,8 +30,8 @@ const newRuleProvider = ref<RuleProviderData>(
     props.initialValue
         ? structuredClone(toRaw(props.initialValue))
         : {
-          ...defaultMetadata,
-          rule_provider: {...defaultRuleProvider},
+          meta: {...defaultMetadata},
+          data: {...defaultRuleProvider},
           name: ''
         }
 )
@@ -93,7 +93,7 @@ async function saveRuleProvider() {
               class="mb-4"
           ></v-text-field>
           <v-select
-              v-model="newRuleProvider.rule_provider.type"
+              v-model="newRuleProvider.data.type"
               :items="ruleProviderTypes"
               label="type"
               required
@@ -101,8 +101,8 @@ async function saveRuleProvider() {
               class="mb-4"
           ></v-select>
           <v-text-field
-              v-if="newRuleProvider.rule_provider.type === 'http'"
-              v-model="newRuleProvider.rule_provider.url"
+              v-if="newRuleProvider.data.type === 'http'"
+              v-model="newRuleProvider.data.url"
               label="url"
               required
               :rules="[(v) => !!v || 'URL 不能为空', (v) => isValidUrl(v) || '请输入有效的 URL',]"
@@ -110,8 +110,8 @@ async function saveRuleProvider() {
               hint="当类型为 http 时必须配置"
           ></v-text-field>
           <v-text-field
-              v-if="newRuleProvider.rule_provider.type === 'file'"
-              v-model="newRuleProvider.rule_provider.path"
+              v-if="newRuleProvider.data.type === 'file'"
+              v-model="newRuleProvider.data.path"
               label="path"
               required
               :rules="[v => !!v || '当类型为文件时，路径不能为空']"
@@ -119,7 +119,7 @@ async function saveRuleProvider() {
               hint="文件路径，不填写时会使用 url 的 MD5 作为文件名"
           ></v-text-field>
           <v-text-field
-              v-model.number="newRuleProvider.rule_provider.interval"
+              v-model.number="newRuleProvider.data.interval"
               label="interval"
               class="mb-4"
               type="number"
@@ -130,21 +130,21 @@ async function saveRuleProvider() {
               :rules="[v => (v === null || v === undefined || v >= 0) || '更新间隔不能为负数']"
           ></v-text-field>
           <v-select
-              v-model="newRuleProvider.rule_provider.behavior"
+              v-model="newRuleProvider.data.behavior"
               :items="ruleProviderBehaviorTypes"
               label="behavior"
               class="mb-4"
               hint="对应不同格式的 rule-provider 文件"
           ></v-select>
           <v-select
-              v-model="newRuleProvider.rule_provider.format"
+              v-model="newRuleProvider.data.format"
               :items="ruleProviderFormatTypes"
               label="format"
               class="mb-4"
               hint="mrs目前 behavior 仅支持 domain/ipcidr"
           ></v-select>
           <v-text-field
-              v-model.number="newRuleProvider.rule_provider['size-limit']"
+              v-model.number="newRuleProvider.data['size-limit']"
               label="size-limit"
               class="mb-4"
               type="number"
@@ -154,8 +154,8 @@ async function saveRuleProvider() {
               :rules="[v => (v === null || v === undefined || v >= 0) || '大小限制不能为负数']"
           ></v-text-field>
           <v-combobox
-              v-if="newRuleProvider.rule_provider.type === 'inline'"
-              v-model="newRuleProvider.rule_provider.payload"
+              v-if="newRuleProvider.data.type === 'inline'"
+              v-model="newRuleProvider.data.payload"
               multiple
               chips
               closable-chips

@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import {ref, PropType, toRaw, watch} from 'vue'
+import {ref, PropType, toRaw} from 'vue'
 import {validateIPs} from '@/components/utils'
 import type {HostData} from "@/components/types"
 import {defaultHost} from "@/components/constants";
 
 const props = defineProps({
-  initialHost: {
+  initialValue: {
     type: Object as PropType<HostData>,
     default: () => ({...defaultHost})
   },
@@ -28,24 +28,18 @@ const emit = defineEmits(['close', 'refresh', 'show-snackbar', 'show-error'])
 // State
 const hostForm = ref<any>(null)
 const saveHostLoading = ref(false)
-const newHost = ref<HostData>({...defaultHost})
-
-// Watch for initialHost changes to update local state
-watch(() => props.initialHost, (val) => {
-  newHost.value = structuredClone(toRaw(val));
-}, { immediate: true, deep: true });
-
+const newHost = ref<HostData>(props.isAdding ? {...defaultHost} : structuredClone(toRaw(props.initialValue)))
 async function saveHost() {
   const {valid} = await hostForm.value.validate();
   if (!valid) return;
   try {
     saveHostLoading.value = true
     newHost.value.domain = newHost.value.domain.trim();
-    const targetDomain = props.isAdding ? newHost.value.domain : props.initialHost.domain;
+    const targetDomain = props.isAdding ? newHost.value.domain : props.initialValue.domain;
 
     const result = await props.api.post('/plugin/ClashRuleProvider/hosts', {
-      domain: targetDomain, 
-      value: newHost.value
+      domain: targetDomain,
+      host: newHost.value
     });
     
     if (!result.success) {

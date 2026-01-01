@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import {PropType} from "vue";
 import {ProxyData} from "@/components/types";
-import {isManual, getProxyColor, getSourceColor} from '@/components/utils'
+import {getProxyColor, getSourceColor} from '@/components/utils'
+import ProxyActionMenu from "@/components/menu/ProxyActionMenu.vue";
 
 defineProps({
   proxyData: {
@@ -23,7 +24,7 @@ const emit = defineEmits<{
 <template>
   <v-card rounded="lg" elevation="2" class="proxy-card h-100 transition-swing">
     <div class="d-flex justify-space-between align-center px-4 pt-3">
-      <span class="font-weight-bold text-truncate" :title="proxyData.proxy.name">{{ proxyData.proxy.name }}</span>
+      <span class="font-weight-bold text-truncate" :title="proxyData.data.name">{{ proxyData.data.name }}</span>
       <v-chip size="small" :color="getSourceColor(proxyData.meta.source)" variant="outlined">
         {{ proxyData.meta.source }}
       </v-chip>
@@ -33,8 +34,8 @@ const emit = defineEmits<{
       <v-row no-gutters class="mb-2 align-center">
         <v-col cols="3" class="text-caption text-medium-emphasis">类型</v-col>
         <v-col cols="9">
-          <v-chip :color="getProxyColor(proxyData.proxy.type)" size="x-small" label variant="tonal" class="font-weight-medium">
-            {{ proxyData.proxy.type }}
+          <v-chip :color="getProxyColor(proxyData.data.type)" size="x-small" label variant="tonal" class="font-weight-medium">
+            {{ proxyData.data.type }}
           </v-chip>
         </v-col>
       </v-row>
@@ -42,7 +43,7 @@ const emit = defineEmits<{
       <v-row no-gutters class="align-center">
         <v-col cols="3" class="text-caption text-medium-emphasis">服务器</v-col>
         <v-col cols="9" class="text-body-2 text-truncate font-weight-medium">
-          <span :title="proxyData.proxy.server">{{ proxyData.proxy.server }}</span>
+          <span :title="proxyData.data.server">{{ proxyData.data.server }}</span>
         </v-col>
       </v-row>
     </v-card-text>
@@ -54,66 +55,14 @@ const emit = defineEmits<{
         {{ proxyData.meta.disabled ? 'mdi-close-circle-outline' : 'mdi-check-circle-outline' }}
       </v-icon>
       <v-spacer></v-spacer>
-      <v-menu min-width="140">
-        <template v-slot:activator="{ props }">
-          <v-btn
-              color="secondary"
-              icon
-              size="small"
-              variant="text"
-              v-bind="props"
-          >
-            <v-icon>mdi-dots-vertical</v-icon>
-          </v-btn>
-        </template>
-        <v-list density="compact">
-          <v-list-item @click="emit('changeStatus', proxyData.proxy.name, !proxyData.meta.disabled)">
-            <template v-slot:prepend>
-              <v-icon size="small" :color="proxyData.meta.disabled ? 'success' : 'warning'">
-                {{ proxyData.meta.disabled ? 'mdi-check' : 'mdi-close' }}
-              </v-icon>
-            </template>
-            <v-list-item-title>{{ proxyData.meta.disabled ? '启用' : '禁用' }}</v-list-item-title>
-          </v-list-item>
-          <v-list-item
-              @click="emit('editProxy', proxyData)"
-              :disabled="!isManual(proxyData.meta.source)"
-          >
-            <template v-slot:prepend>
-              <v-icon size="small" color="primary" v-if="proxyData.meta.patched">mdi-wrench-check</v-icon>
-              <v-icon size="small" color="primary" v-else>mdi-pencil</v-icon>
-            </template>
-            <v-list-item-title>编辑</v-list-item-title>
-          </v-list-item>
-
-          <v-list-item @click="emit('showYaml', proxyData.proxy)">
-            <template v-slot:prepend>
-              <v-icon size="small" color="info">mdi-code-json</v-icon>
-            </template>
-            <v-list-item-title>查看YAML</v-list-item-title>
-          </v-list-item>
-
-          <v-list-item
-              v-if="proxyData.v2ray_link"
-              @click="emit('copyToClipboard', proxyData.v2ray_link)"
-          >
-            <template v-slot:prepend>
-              <v-icon size="small" color="secondary">mdi-link</v-icon>
-            </template>
-            <v-list-item-title>复制链接</v-list-item-title>
-          </v-list-item>
-
-          <v-list-item
-              @click="emit('deleteProxy', proxyData.proxy.name)"
-              :disabled="!isManual(proxyData.meta.source)"
-          >
-            <template v-slot:prepend>
-              <v-icon size="small" color="error">mdi-trash-can-outline</v-icon>
-            </template>
-            <v-list-item-title>删除</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
+      <ProxyActionMenu
+          :proxy="proxyData"
+          @change-status="(disabled) => emit('changeStatus', proxyData.data.name, disabled)"
+          @show-yaml="emit('showYaml', proxyData.data)"
+          @edit="emit('editProxy', proxyData)"
+          @delete="emit('deleteProxy', proxyData.data.name)"
+          @copy-to-clipboard="(text) => emit('copyToClipboard', text)"
+      />
     </v-card-actions>
   </v-card>
 </template>

@@ -1,9 +1,10 @@
 <script setup lang="ts">
 
-import {getProxyColor, isInvalid, isManual, getSourceColor} from "@/components/utils";
+import {getProxyColor, getSourceColor} from "@/components/utils";
 import {PropType, ref} from "vue";
 import {ProxyData} from "@/components/types";
 import {itemsPerPageOptions} from "@/components/constants";
+import ProxyActionMenu from "@/components/menu/ProxyActionMenu.vue";
 
 defineProps({
   proxies: {
@@ -55,7 +56,7 @@ const headers = ref([
       fixed-header
   >
     <template #item.name="{ item }">
-      <v-chip size="small" pill color="secondary">{{ item.proxy.name }}</v-chip>
+      <v-chip size="small" pill color="secondary">{{ item.data.name }}</v-chip>
       <v-btn v-if="item.v2ray_link" icon size="small" color="secondary" variant="text"
              @click="emit('copyToClipboard', item.v2ray_link)">
         <v-icon>mdi-link</v-icon>
@@ -63,13 +64,13 @@ const headers = ref([
     </template>
 
     <template #item.type="{ item }">
-      <v-chip :color="getProxyColor(item.proxy.type)" size="small" label variant="tonal">
-        {{ item.proxy.type }}
+      <v-chip :color="getProxyColor(item.data.type)" size="small" label variant="tonal">
+        {{ item.data.type }}
       </v-chip>
     </template>
 
     <template #item.server="{ item }">
-      <small>{{ item.proxy.server }}</small>
+      <small>{{ item.data.server }}</small>
     </template>
 
     <template #item.port="{ item }">
@@ -79,7 +80,7 @@ const headers = ref([
           variant="tonal"
           color="primary"
       >
-        {{ item.proxy.port }}
+        {{ item.data.port }}
       </v-chip>
     </template>
 
@@ -102,44 +103,14 @@ const headers = ref([
     </template>
 
     <template #item.actions="{ item }">
-      <v-menu min-width="120">
-        <template v-slot:activator="{ props }">
-          <v-btn color="secondary" icon size="small" variant="text" v-bind="props">
-            <v-icon>mdi-dots-vertical</v-icon>
-          </v-btn>
-        </template>
-        <v-list density="compact">
-          <v-list-item @click="emit('changeStatus', item.proxy.name, !item.meta.disabled)">
-            <template v-slot:prepend>
-              <v-icon size="small" :color="item.meta.disabled ? 'success' : 'warning'">
-                {{ item.meta.disabled ? 'mdi-check' : 'mdi-close' }}
-              </v-icon>
-            </template>
-            <v-list-item-title>{{ item.meta.disabled ? '启用' : '禁用' }}</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="emit('showYaml', item.proxy)">
-            <template v-slot:prepend>
-              <v-icon size="small" color="info">mdi-code-json</v-icon>
-            </template>
-            <v-list-item-title>查看配置</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="emit('editProxy', item)">
-            <template v-slot:prepend>
-              <v-icon size="small" color="primary">mdi-file-edit-outline</v-icon>
-            </template>
-            <v-list-item-title>编辑</v-list-item-title>
-          </v-list-item>
-          <v-list-item
-              @click="emit('deleteProxy', item.proxy.name)"
-              :disabled="!(isManual(item.meta.source)||isInvalid(item.meta.source))"
-          >
-            <template v-slot:prepend>
-              <v-icon size="small" color="error">mdi-trash-can-outline</v-icon>
-            </template>
-            <v-list-item-title>删除</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
+      <ProxyActionMenu
+          :proxy="item"
+          @change-status="(disabled) => emit('changeStatus', item.data.name, disabled)"
+          @show-yaml="emit('showYaml', item.data)"
+          @edit="emit('editProxy', item)"
+          @delete="emit('deleteProxy', item.data.name)"
+          @copy-to-clipboard="(text) => emit('copyToClipboard', text)"
+      />
     </template>
   </v-data-table>
 </template>

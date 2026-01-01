@@ -21,7 +21,8 @@ export const defaultRule: RuleData = {
     payload: '',
     action: 'DIRECT',
     priority: 0,
-    meta: {...defaultMetadata}
+    meta: {...defaultMetadata},
+    rule_string: "DOMAIN-SUFFIX,,DIRECT"
 }
 
 export const defaultProxy: Proxy = {

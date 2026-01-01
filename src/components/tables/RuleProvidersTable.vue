@@ -60,19 +60,19 @@ const headersRuleProviders = ref([
     </template>
     <template #item.type="{ item }">
       <v-chip size="small" label variant="tonal" color="primary">
-        {{ item.rule_provider.type }}
+        {{ item.data.type }}
       </v-chip>
     </template>
 
     <template #item.behavior="{ item }">
-      <v-chip v-if="item.rule_provider?.behavior" :color="getBehaviorColor(item.rule_provider.behavior)" size="small" label variant="tonal">
-        {{ item.rule_provider.behavior }}
+      <v-chip v-if="item.data?.behavior" :color="getBehaviorColor(item.data.behavior)" size="small" label variant="tonal">
+        {{ item.data.behavior }}
       </v-chip>
     </template>
 
     <template #item.format="{ item }">
-      <v-chip :color="getFormatColor(item.rule_provider.format)" size="small" label variant="tonal">
-        {{ item.rule_provider.format }}
+      <v-chip :color="getFormatColor(item.data.format)" size="small" label variant="tonal">
+        {{ item.data.format }}
       </v-chip>
     </template>
 
@@ -107,7 +107,7 @@ const headersRuleProviders = ref([
             <v-list-item-title>编辑</v-list-item-title>
           </v-list-item>
 
-          <v-list-item @click="emit('showYaml', item.rule_provider)">
+          <v-list-item @click="emit('showYaml', item.data)">
             <template v-slot:prepend>
               <v-icon size="small" color="info">mdi-code-json</v-icon>
             </template>

@@ -2,7 +2,8 @@
 import {PropType, ref} from "vue";
 import {ProxyGroupData} from "@/components/types";
 import {itemsPerPageOptions} from "@/components/constants";
-import {isManual, isRegion, getProxyGroupTypeColor, getSourceColor} from "@/components/utils";
+import {getProxyGroupTypeColor, getSourceColor} from "@/components/utils";
+import ProxyGroupActionMenu from "@/components/menu/ProxyGroupActionMenu.vue";
 
 defineProps({
   proxyGroups: {
@@ -52,12 +53,12 @@ const proxyGroupHeaders = ref([
       item-key="name"
   >
     <template #item.name="{ item }">
-      <v-chip size="small" pill color="secondary">{{ item.proxy_group.name }}</v-chip>
+      <v-chip size="small" pill color="secondary">{{ item.data.name }}</v-chip>
     </template>
 
     <template #item.type="{ item }">
-      <v-chip :color="getProxyGroupTypeColor(item.proxy_group.type)" size="small" label variant="tonal">
-        {{ item.proxy_group.type }}
+      <v-chip :color="getProxyGroupTypeColor(item.data.type)" size="small" label variant="tonal">
+        {{ item.data.type }}
       </v-chip>
     </template>
 
@@ -74,49 +75,13 @@ const proxyGroupHeaders = ref([
     </template>
 
     <template #item.actions="{ item }">
-      <v-menu min-width="120">
-        <template v-slot:activator="{ props }">
-          <v-btn color="secondary" icon size="small" variant="text" v-bind="props">
-            <v-icon>mdi-dots-vertical</v-icon>
-          </v-btn>
-        </template>
-        <v-list density="compact">
-          <v-list-item
-              :disabled="!isManual(item.meta.source)"
-              @click="emit('changeStatus', item.proxy_group.name, !item.meta.disabled)">
-            <template v-slot:prepend>
-              <v-icon size="small" :color="item.meta.disabled ? 'success' : 'warning'">
-                {{ item.meta.disabled ? 'mdi-check' : 'mdi-close' }}
-              </v-icon>
-            </template>
-            <v-list-item-title>{{ item.meta.disabled ? '启用' : '禁用' }}</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="emit('showYaml', item.proxy_group)">
-            <template v-slot:prepend>
-              <v-icon size="small" color="info">mdi-code-json</v-icon>
-            </template>
-            <v-list-item-title>查看配置</v-list-item-title>
-          </v-list-item>
-          <v-list-item
-              @click="emit('editProxyGroup', item.proxy_group.name)"
-              :disabled="!(isManual(item.meta.source)||isRegion(item.meta.source))"
-          >
-            <template v-slot:prepend>
-              <v-icon size="small" color="primary">mdi-file-edit-outline</v-icon>
-            </template>
-            <v-list-item-title>编辑</v-list-item-title>
-          </v-list-item>
-          <v-list-item
-              @click="emit('deleteProxyGroup', item.proxy_group.name)"
-              :disabled="!isManual(item.meta.source)"
-          >
-            <template v-slot:prepend>
-              <v-icon size="small" color="error">mdi-trash-can-outline</v-icon>
-            </template>
-            <v-list-item-title>删除</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
+      <ProxyGroupActionMenu
+          :proxy-group="item"
+          @change-status="(disabled) => emit('changeStatus', item.data.name, disabled)"
+          @show-yaml="emit('showYaml', item.data)"
+          @edit="emit('editProxyGroup', item.data.name)"
+          @delete="emit('deleteProxyGroup', item.data.name)"
+      />
     </template>
   </v-data-table>
 </template>

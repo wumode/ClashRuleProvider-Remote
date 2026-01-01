@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import {PropType} from "vue";
 import {RuleData, RuleSetType} from "@/components/types";
-import {getActionColor, getRuleTypeColor, isSystemRule} from '@/components/utils'
+import {getActionColor, getRuleTypeColor} from '@/components/utils'
+import RuleActionMenu from "@/components/menu/RuleActionMenu.vue";
 
 const props = defineProps({
   rule: {
@@ -81,50 +82,12 @@ function updateStatus(disabled: boolean) {
         {{ rule.meta.disabled ? 'mdi-close-circle-outline' : 'mdi-check-circle-outline' }}
       </v-icon>
       <v-spacer></v-spacer>
-      <v-menu min-width="120">
-        <template v-slot:activator="{ props }">
-          <v-btn
-              color="secondary"
-              icon
-              size="small"
-              variant="text"
-              v-bind="props"
-          >
-            <v-icon>mdi-dots-vertical</v-icon>
-          </v-btn>
-          <v-tooltip activator="parent" location="top" v-if="isSystemRule(rule)">
-            根据规则集自动添加
-          </v-tooltip>
-        </template>
-        <v-list density="compact">
-          <v-list-item @click="updateStatus(!rule.meta.disabled)">
-            <template v-slot:prepend>
-              <v-icon size="small" :color="rule.meta.disabled ? 'success' : 'warning'">
-                {{ rule.meta.disabled ? 'mdi-check' : 'mdi-close' }}
-              </v-icon>
-            </template>
-            <v-list-item-title>{{ rule.meta.disabled ? '启用' : '禁用' }}</v-list-item-title>
-          </v-list-item>
-          <v-list-item
-              @click="editRule(rule.priority)"
-              :disabled="isSystemRule(rule)"
-          >
-            <template v-slot:prepend>
-              <v-icon size="small" color="primary">mdi-file-edit-outline</v-icon>
-            </template>
-            <v-list-item-title>编辑</v-list-item-title>
-          </v-list-item>
-          <v-list-item
-              @click="deleteRule(rule.priority)"
-              :disabled="isSystemRule(rule)"
-          >
-            <template v-slot:prepend>
-              <v-icon size="small" color="error">mdi-trash-can-outline</v-icon>
-            </template>
-            <v-list-item-title>删除</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
+      <RuleActionMenu
+          :rule="rule"
+          @edit="editRule(rule.priority)"
+          @delete="deleteRule(rule.priority)"
+          @change-status="updateStatus"
+      />
     </v-card-actions>
   </v-card>
 </template>

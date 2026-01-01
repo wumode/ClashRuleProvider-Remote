@@ -23,7 +23,7 @@ defineProps({
   }
 })
 
-const emit = defineEmits(['edit', 'delete', 'update:page', 'update:itemsPerPage'])
+const emit = defineEmits(['edit', 'delete'])
 
 const headersHosts = ref([
   {title: '域名', key: 'domain', sortable: true},

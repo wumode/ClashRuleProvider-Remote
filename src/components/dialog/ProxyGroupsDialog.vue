@@ -30,7 +30,7 @@ const props = defineProps({
 const emit = defineEmits(['close', 'refresh', 'show-snackbar', 'show-error']);
 
 const proxyGroup = ref<ProxyGroup>(
-    props.initialValue ? structuredClone(toRaw(props.initialValue.proxy_group)) : {...defaultProxyGroup}
+    props.initialValue ? structuredClone(toRaw(props.initialValue.data)) : {...defaultProxyGroup}
 );
 
 const proxyGroupTypes = ref(['select', 'url-test', 'fallback', 'load-balance', 'smart'])
@@ -58,13 +58,13 @@ async function saveProxyGroup() {
   if (!form.value) return;
   const {valid} = await form.value.validate();
   if (!valid) return;
-  const name = encodeURIComponent(props.isAdding ? proxyGroup.value.name : (props.initialValue?.proxy_group.name || ''))
+  const name = encodeURIComponent(props.isAdding ? proxyGroup.value.name : (props.initialValue?.data.name || ''))
   const action = props.isAdding ? '添加代理组' : '更新代理组';
   loading.value = true
   try {
     const path = props.isAdding ? '' : `/${name}`
     const method = props.isAdding ? 'post' : 'patch';
-    const requestData = props.isAdding ? proxyGroup.value : {"meta": props.initialValue?.meta, "proxy_group": proxyGroup.value}
+    const requestData = props.isAdding ? proxyGroup.value : {"source": props.initialValue?.meta.source, "proxy_group": proxyGroup.value}
     const result = await props.api[method](`/plugin/ClashRuleProvider/proxy-groups${path}`, requestData);
     if (!result.success) {
       emit('show-error',action + '失败: ' + (result.message || '未知错误'));

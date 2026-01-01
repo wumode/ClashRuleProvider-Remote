@@ -90,11 +90,11 @@ function openImportProxiesDialog() {
   importExtraProxiesDialog.value = true;
 }
 
-async function importExtraProxiesFun() {
+async function importExtraProxies() {
   try {
     importProxiesLoading.value = true
     const requestData = {
-      type: importProxies.value.type,
+      vehicle: importProxies.value.type,
       payload: importProxies.value.payload
     }
     const result = await props.api.put('/plugin/ClashRuleProvider/proxies', requestData);
@@ -132,7 +132,8 @@ async function importExtraProxiesFun() {
 const proxiesDialogVisible = ref(false)
 const editingProxy = ref<ProxyData>({
   meta:{...defaultMetadata},
-  proxy: {...defaultProxy}
+  data: {...defaultProxy},
+  name: defaultProxy.name
 })
 
 function openProxiesDialog(proxyData: ProxyData) {
@@ -161,16 +162,19 @@ async function deleteProxy(name: string) {
 async function handleStatusChange(name: string, disabled: boolean) {
   loading.value = true;
   try {
-    const proxy = props.proxies.find(p => p.proxy.name === name);
-    if (!proxy) throw new Error("Proxy not found");
+    const proxy = props.proxies.find(p => p.data.name === name);
+    if (!proxy) {
+      emit("show-error", "Proxy not found");
+      return
+    }
     const n = encodeURIComponent(name);
     // Send full metadata with updated disabled status
     const newMeta = { ...proxy.meta, disabled: disabled };
     await props.api.patch(`/plugin/ClashRuleProvider/proxies/${n}/meta`, newMeta);
-    emit('refresh', ["proxies", "clash-outbounds"]);
+    emit("refresh", ["proxies", "clash-outbounds"]);
   } catch (err: unknown) {
     if (err instanceof Error) {
-      emit('show-error', err.message || '更新代理状态失败');
+      emit("show-error", err.message || '更新代理状态失败');
     }
   } finally {
     loading.value = false;
@@ -215,7 +219,6 @@ async function handleStatusChange(name: string, disabled: boolean) {
     </div>
 
     <!-- 桌面端表格 -->
-
     <div class="d-none d-sm-flex clash-data-table">
       <ProxiesTable
           :items-per-page="itemsPerPageProxies"
@@ -235,7 +238,7 @@ async function handleStatusChange(name: string, disabled: boolean) {
       <v-row>
         <v-col
             v-for="item in paginatedExtraProxies"
-            :key="item.proxy.name"
+            :key="item.data.name"
             cols="12"
         >
           <ProxyCard
@@ -357,7 +360,7 @@ async function handleStatusChange(name: string, disabled: boolean) {
           <v-btn color="secondary" @click="importExtraProxiesDialog=false">取消</v-btn>
           <v-btn
               color="primary"
-              @click="importExtraProxiesFun"
+              @click="importExtraProxies"
               :loading="importProxiesLoading"
           >
             导入

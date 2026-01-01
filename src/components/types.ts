@@ -146,7 +146,7 @@ export interface RuleProvider {
 
 export interface RuleProviderData {
     name: string;
-    rule_provider: RuleProvider;
+    data: RuleProvider;
     meta: Metadata;
 }
 
@@ -199,7 +199,7 @@ export interface ProxyProvider {
 
 export interface ProxyProviderData {
     name: string;
-    proxy_provider: ProxyProvider;
+    data: ProxyProvider;
     meta: Metadata;
 }
 
@@ -289,15 +289,17 @@ export interface Proxy {
 }
 
 export interface ProxyData {
-    proxy: Proxy;
+    data: Proxy;
+    name: string
     raw?: string | Record<string, any> | null;
     v2ray_link?: string | null;
     meta: Metadata;
 }
 
 export interface ProxyGroupData {
-    proxy_group: ProxyGroup
+    data: ProxyGroup;
     meta: Metadata;
+    name: string;
 }
 
 interface DataUsage {

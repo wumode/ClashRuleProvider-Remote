@@ -19,7 +19,7 @@ const proxyForm = ref<any>(null)
 const loading = ref(false)
 
 const tab = ref('general')
-const proxy = ref<Proxy>(structuredClone(toRaw(props.proxyData.proxy)))
+const proxy = ref<Proxy>(structuredClone(toRaw(props.proxyData.data)))
 const wsHeaderString = ref('')
 const httpHeaderString = ref('')
 
@@ -147,8 +147,11 @@ const handleSave = async () => {
 const saveProxy = async (proxy: Proxy) => {
   loading.value = true
   try {
-    const requestData = proxy
-    const name = encodeURIComponent(props.proxyData.proxy.name)
+    const requestData = {
+      'source': props.proxyData?.meta.source,
+      'proxy': proxy
+    }
+    const name = encodeURIComponent(props.proxyData.data.name)
     const result = await props.api.patch(`/plugin/ClashRuleProvider/proxies/${name}`, requestData);
     if (!result.success) {
       emit('show-error', '保存出站代理失败: ' + (result.message || '未知错误'));
@@ -183,7 +186,7 @@ const saveProxy = async (proxy: Proxy) => {
 <template>
   <v-dialog max-width="50rem" persistent>
     <v-card>
-      <v-card-title>'编辑代理'</v-card-title>
+      <v-card-title>编辑代理</v-card-title>
       <v-card-text class="pa-2">
         <v-form ref="proxyForm" @submit.prevent="handleSave">
           <v-tabs v-model="tab" background-color="primary" dark grow>
