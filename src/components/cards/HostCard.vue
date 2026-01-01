@@ -3,7 +3,7 @@ import {PropType} from "vue";
 import {HostData} from "@/components/types";
 import {getBoolColor} from '@/components/utils'
 
-const props = defineProps({
+defineProps({
   hostData: {
     type: Object as PropType<HostData>,
     required: true,

@@ -4,7 +4,7 @@ import {itemsPerPageOptions} from "@/components/constants"
 import {getBoolColor} from '@/components/utils'
 import type {HostData} from "@/components/types"
 
-const props = defineProps({
+defineProps({
   hosts: {
     type: Array as PropType<HostData[]>,
     required: true

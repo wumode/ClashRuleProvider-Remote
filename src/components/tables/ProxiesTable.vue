@@ -5,7 +5,7 @@ import {PropType, ref} from "vue";
 import {ProxyData} from "@/components/types";
 import {itemsPerPageOptions} from "@/components/constants";
 
-const props = defineProps({
+defineProps({
   proxies: {
     type: Array as PropType<ProxyData[]>,
     required: true,

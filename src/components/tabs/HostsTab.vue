@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {ref, computed} from 'vue'
 import {itemsPerPageOptions} from "@/components/constants"
-import {getBoolColor, pageTitle} from '@/components/utils'
+import {pageTitle} from '@/components/utils'
 import type {HostData} from "@/components/types"
 import {defaultHost} from "@/components/constants";
 import HostsTable from "@/components/tables/HostsTable.vue";

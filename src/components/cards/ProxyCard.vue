@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import {PropType} from "vue";
 import {ProxyData} from "@/components/types";
-import {isManual, isTemplate, getProxyColor, getSourceColor} from '@/components/utils'
+import {isManual, getProxyColor, getSourceColor} from '@/components/utils'
 
-const props = defineProps({
+defineProps({
   proxyData: {
     type: Object as PropType<ProxyData>,
     required: true,

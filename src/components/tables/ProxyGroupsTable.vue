@@ -4,7 +4,7 @@ import {ProxyGroupData} from "@/components/types";
 import {itemsPerPageOptions} from "@/components/constants";
 import {isManual, isRegion, getProxyGroupTypeColor, getSourceColor} from "@/components/utils";
 
-const props = defineProps({
+defineProps({
   proxyGroups: {
     type: Array as PropType<ProxyGroupData[]>,
     required: true,

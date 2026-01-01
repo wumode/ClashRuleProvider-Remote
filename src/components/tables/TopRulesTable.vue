@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// v-data-table 的 headers 定义
 import {ref, PropType} from 'vue'
 import {RuleData, RuleSetType} from "@/components/types";
 import {getActionColor, getRuleTypeColor, timestampToDate, isSystemRule} from "@/components/utils";

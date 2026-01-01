@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import {PropType} from "vue";
 import {RuleProviderData} from "@/components/types";
-import {isManual, isTemplate, getBehaviorColor, getSourceColor} from '@/components/utils'
+import {isManual, getBehaviorColor, getSourceColor} from '@/components/utils'
 
-const props = defineProps({
+defineProps({
   ruleProviderData: {
     type: Object as PropType<RuleProviderData>,
     required: true,

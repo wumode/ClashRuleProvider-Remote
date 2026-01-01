@@ -9,16 +9,7 @@ import {
   getFormatColor
 } from "@/components/utils";
 
-const headersRuleProviders = ref([
-  {title: '名称', key: 'name', sortable: true},
-  {title: '类型', key: 'type', sortable: true},
-  {title: '行为', key: 'behavior', sortable: false},
-  {title: '格式', key: 'format', sortable: false},
-  {title: '来源', key: 'source', sortable: false},
-  {title: '', key: 'actions', sortable: false, width: '1rem'},
-]);
-
-const props = defineProps({
+defineProps({
   ruleProviders: {
     type: Array as PropType<RuleProviderData[]>,
     required: true,
@@ -33,11 +24,21 @@ const props = defineProps({
   },
   search: String
 })
+
 const emit = defineEmits<{
   (e: 'editRuleProvider', name: string): void
   (e: 'deleteRuleProvider', name: string): void
   (e: 'showYaml', obj: any): void
 }>()
+
+const headersRuleProviders = ref([
+  {title: '名称', key: 'name', sortable: true},
+  {title: '类型', key: 'type', sortable: true},
+  {title: '行为', key: 'behavior', sortable: false},
+  {title: '格式', key: 'format', sortable: false},
+  {title: '来源', key: 'source', sortable: false},
+  {title: '', key: 'actions', sortable: false, width: '1rem'},
+]);
 </script>
 
 <template>

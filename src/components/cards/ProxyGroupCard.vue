@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import {PropType} from "vue";
 import {ProxyGroupData} from "@/components/types";
-import {isManual, isTemplate, isRegion, getProxyGroupTypeColor, getSourceColor} from '@/components/utils'
+import {isManual, isRegion, getProxyGroupTypeColor, getSourceColor} from '@/components/utils'
 
-const props = defineProps({
+defineProps({
   proxyGroupData: {
     type: Object as PropType<ProxyGroupData>,
     required: true,
