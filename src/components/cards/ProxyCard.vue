@@ -15,6 +15,7 @@ const emit = defineEmits<{
   (e: 'showYaml', obj: any): void,
   (e: 'editProxy', proxyData: ProxyData): void
   (e: 'deleteProxy', name: string): void
+  (e: 'changeStatus', name: string, disabled: boolean): void
 }>()
 
 </script>
@@ -66,6 +67,14 @@ const emit = defineEmits<{
           </v-btn>
         </template>
         <v-list density="compact">
+          <v-list-item @click="emit('changeStatus', proxyData.proxy.name, !proxyData.meta.disabled)">
+            <template v-slot:prepend>
+              <v-icon size="small" :color="proxyData.meta.disabled ? 'success' : 'warning'">
+                {{ proxyData.meta.disabled ? 'mdi-check' : 'mdi-close' }}
+              </v-icon>
+            </template>
+            <v-list-item-title>{{ proxyData.meta.disabled ? '启用' : '禁用' }}</v-list-item-title>
+          </v-list-item>
           <v-list-item
               @click="emit('editProxy', proxyData)"
               :disabled="!isManual(proxyData.meta.source)"

@@ -157,6 +157,25 @@ async function deleteProxy(name: string) {
     loading.value = false;
   }
 }
+
+async function handleStatusChange(name: string, disabled: boolean) {
+  loading.value = true;
+  try {
+    const proxy = props.proxies.find(p => p.proxy.name === name);
+    if (!proxy) throw new Error("Proxy not found");
+    const n = encodeURIComponent(name);
+    // Send full metadata with updated disabled status
+    const newMeta = { ...proxy.meta, disabled: disabled };
+    await props.api.patch(`/plugin/ClashRuleProvider/proxies/${n}/meta`, newMeta);
+    emit('refresh', ["proxies", "clash-outbounds"]);
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      emit('show-error', err.message || '更新代理状态失败');
+    }
+  } finally {
+    loading.value = false;
+  }
+}
 </script>
 
 <template>
@@ -206,6 +225,7 @@ async function deleteProxy(name: string) {
           @show-yaml="(o) => emit('show-yaml', o)"
           @edit-proxy="openProxiesDialog"
           @delete-proxy="deleteProxy"
+          @change-status="handleStatusChange"
       >
       </ProxiesTable>
     </div>
@@ -224,6 +244,7 @@ async function deleteProxy(name: string) {
               @show-yaml="(o) => emit('show-yaml', o)"
               @edit-proxy="openProxiesDialog"
               @delete-proxy="deleteProxy"
+              @change-status="handleStatusChange"
           ></ProxyCard>
         </v-col>
       </v-row>
