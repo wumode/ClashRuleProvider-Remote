@@ -81,7 +81,9 @@ const proxyGroupHeaders = ref([
           </v-btn>
         </template>
         <v-list density="compact">
-          <v-list-item @click="emit('changeStatus', item.proxy_group.name, !item.meta.disabled)">
+          <v-list-item
+              :disabled="!isManual(item.meta.source)"
+              @click="emit('changeStatus', item.proxy_group.name, !item.meta.disabled)">
             <template v-slot:prepend>
               <v-icon size="small" :color="item.meta.disabled ? 'success' : 'warning'">
                 {{ item.meta.disabled ? 'mdi-check' : 'mdi-close' }}

@@ -60,7 +60,9 @@ const emit = defineEmits<{
           </v-btn>
         </template>
         <v-list density="compact">
-          <v-list-item @click="emit('changeStatus', proxyGroupData.proxy_group.name, !proxyGroupData.meta.disabled)">
+          <v-list-item
+              :disabled="!isManual(proxyGroupData.meta.source)"
+              @click="emit('changeStatus', proxyGroupData.proxy_group.name, !proxyGroupData.meta.disabled)">
             <template v-slot:prepend>
               <v-icon size="small" :color="proxyGroupData.meta.disabled ? 'success' : 'warning'">
                 {{ proxyGroupData.meta.disabled ? 'mdi-check' : 'mdi-close' }}
