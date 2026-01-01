@@ -25,12 +25,14 @@ const emit = defineEmits<{
   (e: 'showYaml', obj: any): void,
   (e: 'editProxyGroup', name: string): void
   (e: 'deleteProxyGroup', name: string): void
+  (e: 'changeStatus', name: string, disabled: boolean): void
 }>()
 
 const proxyGroupHeaders = ref([
   {title: '名称', key: 'name', sortable: true},
   {title: '类型', key: 'type', sortable: false},
   {title: '来源', key: 'source', sortable: false},
+  {title: '', key: 'status', sortable: false, width: '1rem'},
   {title: '', key: 'actions', sortable: false, width: '1rem'},
 ]);
 </script>
@@ -63,6 +65,14 @@ const proxyGroupHeaders = ref([
       <v-chip size="small" :color="getSourceColor(item.meta.source)" variant="outlined">{{ item.meta.source }}</v-chip>
     </template>
 
+    <template #item.status="{ item }">
+      <v-icon
+          :color="item.meta.disabled ? 'grey' : 'success'"
+      >
+        {{ item.meta.disabled ? 'mdi-close-circle-outline' : 'mdi-check-circle-outline' }}
+      </v-icon>
+    </template>
+
     <template #item.actions="{ item }">
       <v-menu min-width="120">
         <template v-slot:activator="{ props }">
@@ -71,6 +81,14 @@ const proxyGroupHeaders = ref([
           </v-btn>
         </template>
         <v-list density="compact">
+          <v-list-item @click="emit('changeStatus', item.proxy_group.name, !item.meta.disabled)">
+            <template v-slot:prepend>
+              <v-icon size="small" :color="item.meta.disabled ? 'success' : 'warning'">
+                {{ item.meta.disabled ? 'mdi-check' : 'mdi-close' }}
+              </v-icon>
+            </template>
+            <v-list-item-title>{{ item.meta.disabled ? '启用' : '禁用' }}</v-list-item-title>
+          </v-list-item>
           <v-list-item @click="emit('showYaml', item.proxy_group)">
             <template v-slot:prepend>
               <v-icon size="small" color="info">mdi-code-json</v-icon>

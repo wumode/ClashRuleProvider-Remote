@@ -86,6 +86,25 @@ async function deleteProxyGroup(name: string) {
   }
 }
 
+async function handleStatusChange(name: string, disabled: boolean) {
+  loading.value = true;
+  try {
+    const group = props.proxyGroups.find(g => g.proxy_group.name === name);
+    if (!group) throw new Error("Proxy group not found");
+    const n = encodeURIComponent(name);
+    // Send full metadata with updated disabled status
+    const newMeta = { ...group.meta, disabled: disabled };
+    await props.api.patch(`/plugin/ClashRuleProvider/proxy-groups/${n}/meta`, newMeta);
+    emit('refresh', ["proxy-groups", "clash-outbounds"]);
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      emit('show-error', err.message || '更新代理组状态失败');
+    }
+  } finally {
+    loading.value = false;
+  }
+}
+
 
 
 function closeProxyGroupsDialog() {
@@ -142,6 +161,7 @@ function closeProxyGroupsDialog() {
           @show-yaml="(o) => emit('show-yaml', o)"
           @edit-proxy-group="editProxyGroup"
           @delete-proxy-group="deleteProxyGroup"
+          @change-status="handleStatusChange"
       ></ProxyGroupsTable>
     </div>
     <!-- 移动端卡片 -->
@@ -157,6 +177,7 @@ function closeProxyGroupsDialog() {
               @edit-proxy-group="editProxyGroup"
               @delete-proxy-group="deleteProxyGroup"
               @show-yaml="(o) => emit('show-yaml', o)"
+              @change-status="handleStatusChange"
           ></ProxyGroupCard>
         </v-col>
       </v-row>

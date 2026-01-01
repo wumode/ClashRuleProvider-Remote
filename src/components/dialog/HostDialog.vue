@@ -41,11 +41,6 @@ async function saveHost() {
   try {
     saveHostLoading.value = true
     newHost.value.domain = newHost.value.domain.trim();
-    const requestData = {
-      domain: props.isAdding ? newHost.value.domain : props.initialHost.domain,
-      value: newHost.value
-    };
-    
     const targetDomain = props.isAdding ? newHost.value.domain : props.initialHost.domain;
 
     const result = await props.api.post('/plugin/ClashRuleProvider/hosts', {

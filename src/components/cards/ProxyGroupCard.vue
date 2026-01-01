@@ -14,6 +14,7 @@ const emit = defineEmits<{
   (e: 'showYaml', obj: any): void,
   (e: 'editProxyGroup', name: string): void
   (e: 'deleteProxyGroup', name: string): void
+  (e: 'changeStatus', name: string, disabled: boolean): void
 }>()
 </script>
 
@@ -59,6 +60,14 @@ const emit = defineEmits<{
           </v-btn>
         </template>
         <v-list density="compact">
+          <v-list-item @click="emit('changeStatus', proxyGroupData.proxy_group.name, !proxyGroupData.meta.disabled)">
+            <template v-slot:prepend>
+              <v-icon size="small" :color="proxyGroupData.meta.disabled ? 'success' : 'warning'">
+                {{ proxyGroupData.meta.disabled ? 'mdi-check' : 'mdi-close' }}
+              </v-icon>
+            </template>
+            <v-list-item-title>{{ proxyGroupData.meta.disabled ? '启用' : '禁用' }}</v-list-item-title>
+          </v-list-item>
           <v-list-item
               @click="emit('editProxyGroup', proxyGroupData.proxy_group.name)"
               :disabled="!(isManual(proxyGroupData.meta.source)||isRegion(proxyGroupData.meta.source))"
