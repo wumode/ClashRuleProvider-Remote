@@ -36,6 +36,7 @@ const props = defineProps({
 const emit = defineEmits<{
   (e: 'editRuleProvider', name: string): void
   (e: 'deleteRuleProvider', name: string): void
+  (e: 'showYaml', obj: any): void
 }>()
 </script>
 
@@ -104,6 +105,14 @@ const emit = defineEmits<{
             </template>
             <v-list-item-title>编辑</v-list-item-title>
           </v-list-item>
+
+          <v-list-item @click="emit('showYaml', item.rule_provider)">
+            <template v-slot:prepend>
+              <v-icon size="small" color="info">mdi-code-json</v-icon>
+            </template>
+            <v-list-item-title>查看配置</v-list-item-title>
+          </v-list-item>
+
           <v-list-item
               @click="emit('deleteRuleProvider', item.name)"
               :disabled="!isManual(item.meta.source)"

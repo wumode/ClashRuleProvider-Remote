@@ -16,6 +16,7 @@ const emit = defineEmits<{
   (e: 'refresh', regions: string[]): void;
   (e: 'show-snackbar', value: any): void;
   (e: 'show-error', msg: string): void;
+  (e: 'show-yaml', obj: any): void;
 }>()
 
 const searchRuleProviders = ref('')
@@ -132,6 +133,7 @@ function closeRuleProviderDialog() {
           :rule-providers="filteredExtraRuleProviders"
           @edit-rule-provider="editRuleProvider"
           @delete-rule-provider="deleteRuleProvider"
+          @show-yaml="(o) => emit('show-yaml', o)"
       ></RuleProvidersTable>
     </div>
     <!-- 移动端卡片 -->
@@ -146,6 +148,7 @@ function closeRuleProviderDialog() {
               :rule-provider-data="item"
               @edit-rule-provider="editRuleProvider"
               @delete-rule-provider="deleteRuleProvider"
+              @show-yaml="(o) => emit('show-yaml', o)"
           ></RuleProviderCard>
         </v-col>
       </v-row>

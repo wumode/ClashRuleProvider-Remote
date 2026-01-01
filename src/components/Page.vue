@@ -404,6 +404,7 @@ onMounted(() => {
                   @refresh="refreshAllRegions"
                   @show-snackbar="val => snackbar = val"
                   @show-error="showError"
+                  @show-yaml="showYaml"
               />
             </v-window-item>
             <!-- Hosts Tab -->
