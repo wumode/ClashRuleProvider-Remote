@@ -142,7 +142,7 @@ export function getBoolColor(value: boolean) {
 }
 
 export function isSystemRule(rule: RuleData) {
-    return rule.source?.startsWith('Auto');
+    return rule.meta.source?.startsWith('Auto');
 }
 
 export function isManual(source: string) {
@@ -204,11 +204,6 @@ export function getExpireColor(timestamp: number|null|undefined) {
     const secondsLeft = timestamp - Math.floor(Date.now() / 1000);
     const daysLeft = secondsLeft / 86400;
     return daysLeft < 7 ? 'error' : daysLeft < 30 ? 'warning' : 'success';
-}
-
-// 格式化日期
-export function formatDate(dateStr: string) {
-    return new Date(dateStr).toLocaleDateString();
 }
 
 export function extractDomain(url: string) {

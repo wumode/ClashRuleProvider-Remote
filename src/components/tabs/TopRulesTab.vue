@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import {computed, ref, toRaw} from 'vue';
 import TopRulesTable from '../tables/TopRulesTable.vue';
 import RuleCard from '../cards/RuleCard.vue';
 import RuleDialog from '../dialog/RuleDialog.vue';
@@ -80,7 +80,7 @@ function editRule(priority: number) {
   const rule = props.rules.find(r => r.priority === priority);
   if (rule) {
     editingPriority.value = priority;
-    currentRule.value = {...rule};
+    currentRule.value = structuredClone(toRaw(rule));
     ruleDialogVisible.value = true;
   }
 }
@@ -229,6 +229,7 @@ async function handleBatchStatusChange(priorities: number[], disabled: boolean) 
             :rule="item"
             @delete="deleteRule"
             @edit="editRule"
+            @change-status="handleStatusChange"
           >
           </RuleCard>
         </v-col>

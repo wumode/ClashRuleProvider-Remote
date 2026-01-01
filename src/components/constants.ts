@@ -7,12 +7,21 @@ export const itemsPerPageOptions = [
     {title: '50', value: 50},
     {title: 'All', value: -1},
 ];
+export const defaultMetadata: Metadata = {
+    source: "Manual",
+    disabled: false,
+    invisible_to: [],
+    remark: "",
+    time_modified: 0,
+    patched: false
+}
 
 export const defaultRule: RuleData = {
     type: 'DOMAIN-SUFFIX',
     payload: '',
     action: 'DIRECT',
-    priority: 0
+    priority: 0,
+    meta: {...defaultMetadata}
 }
 
 export const defaultProxy: Proxy = {
@@ -66,11 +75,7 @@ export const defaultHost: HostData = {
     domain: '',
     value: [],
     using_cloudflare: false,
-    source: 'Manual',
-    disabled: false,
-    invisible_to: [],
-    remark: "",
-    time_modified: 0
+    meta: {...defaultMetadata}
 }
 
 export const defaultRuleProvider: RuleProvider = {
@@ -82,11 +87,3 @@ export const defaultRuleProvider: RuleProvider = {
     payload: [],
 }
 
-export const defaultMetadata: Metadata = {
-    source: "Manual",
-    disabled: false,
-    invisible_to: [],
-    remark: "",
-    time_modified: 0,
-    patched: false
-}

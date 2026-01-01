@@ -17,6 +17,7 @@ const props = defineProps({
 const emit = defineEmits<{
   (e: 'edit', priority: number, type: RuleSetType): void
   (e: 'delete', priority: number, type: RuleSetType): void
+  (e: 'change-status', priority: number, disabled: boolean, type: RuleSetType): void
 }>()
 
 function editRule(priority: number) {
@@ -26,50 +27,110 @@ function editRule(priority: number) {
 function deleteRule(priority: number) {
   emit('delete', priority, props.ruleset);
 }
+
+function updateStatus(disabled: boolean) {
+  emit('change-status', props.rule.priority, disabled, props.ruleset);
+}
 </script>
 
 <template>
-  <v-card rounded="lg" elevation="1">
-    <v-card-title class="d-flex justify-space-between align-center">
-      <div>
-        <v-icon small class="mr-1">mdi-order-numeric-ascending</v-icon>
-        <span class="font-weight-bold">优先级 {{ rule.priority }}</span>
-      </div>
-      <v-chip :color="getActionColor(rule.action)" size="small" label>
-        {{ rule.action }}
+  <v-card rounded="lg" elevation="2" class="rule-card h-100 transition-swing">
+    <div class="d-flex justify-space-between align-center px-4 pt-3">
+      <v-chip
+          variant="flat"
+          color="secondary"
+          class="font-weight-bold mr-2"
+          size="small"
+      >
+        {{ rule.priority }}
       </v-chip>
-    </v-card-title>
-    <v-card-text>
-      <div class="text-body-2 mb-2">
-        <strong>类型：</strong>
-        <v-chip :color="getRuleTypeColor(rule.type)" size="x-small" label>
-          {{ rule.type }}
-        </v-chip>
-      </div>
-      <div class="text-body-2"><strong>内容：</strong>{{ rule.payload }}</div>
+
+    </div>
+
+    <v-card-text class="pt-2 pb-4">
+      <v-row no-gutters class="mb-2 align-center">
+        <v-col cols="3" class="text-caption text-medium-emphasis">类型</v-col>
+        <v-col cols="9">
+          <v-chip :color="getRuleTypeColor(rule.type)" size="x-small" label variant="tonal" class="font-weight-medium">
+            {{ rule.type }}
+          </v-chip>
+        </v-col>
+      </v-row>
+
+      <v-row no-gutters class="mb-2 align-center">
+        <v-col cols="3" class="text-caption text-medium-emphasis">内容</v-col>
+        <v-col cols="9" class="text-body-2 text-truncate font-weight-bold">
+          <span :title="rule.payload">{{ rule.payload }}</span>
+        </v-col>
+      </v-row>
+
+      <v-row no-gutters class="align-center">
+        <v-col cols="3" class="text-caption text-medium-emphasis">出站</v-col>
+        <v-col cols="9">
+          <v-chip :color="getActionColor(rule.action)" size="x-small" variant="outlined" class="font-weight-medium">
+            {{ rule.action }}
+          </v-chip>
+        </v-col>
+      </v-row>
     </v-card-text>
     <v-divider></v-divider>
-    <v-card-actions class="d-flex justify-center">
-      <v-btn
-          icon color="primary"
-          size="small"
-          :disabled="isSystemRule(rule)"
-          @click="editRule(rule.priority)">
-        <v-icon>mdi-pencil</v-icon>
-      </v-btn>
-      <v-spacer></v-spacer>
-      <v-btn
-          icon color="error"
-          size="small"
-          @click="deleteRule(rule.priority)"
-          :disabled="isSystemRule(rule)"
+    <v-card-actions>
+      <v-icon
+          :color="rule.meta.disabled ? 'grey' : 'success'"
       >
-        <v-icon>mdi-delete</v-icon>
-      </v-btn>
+        {{ rule.meta.disabled ? 'mdi-close-circle-outline' : 'mdi-check-circle-outline' }}
+      </v-icon>
+      <v-spacer></v-spacer>
+      <v-menu min-width="120">
+        <template v-slot:activator="{ props }">
+          <v-btn
+              color="secondary"
+              icon
+              size="small"
+              variant="text"
+              v-bind="props"
+          >
+            <v-icon>mdi-dots-vertical</v-icon>
+          </v-btn>
+          <v-tooltip activator="parent" location="top" v-if="isSystemRule(rule)">
+            根据规则集自动添加
+          </v-tooltip>
+        </template>
+        <v-list density="compact">
+          <v-list-item @click="updateStatus(!rule.meta.disabled)">
+            <template v-slot:prepend>
+              <v-icon size="small" :color="rule.meta.disabled ? 'success' : 'warning'">
+                {{ rule.meta.disabled ? 'mdi-check' : 'mdi-close' }}
+              </v-icon>
+            </template>
+            <v-list-item-title>{{ rule.meta.disabled ? '启用' : '禁用' }}</v-list-item-title>
+          </v-list-item>
+          <v-list-item
+              @click="editRule(rule.priority)"
+              :disabled="isSystemRule(rule)"
+          >
+            <template v-slot:prepend>
+              <v-icon size="small" color="primary">mdi-file-edit-outline</v-icon>
+            </template>
+            <v-list-item-title>编辑</v-list-item-title>
+          </v-list-item>
+          <v-list-item
+              @click="deleteRule(rule.priority)"
+              :disabled="isSystemRule(rule)"
+          >
+            <template v-slot:prepend>
+              <v-icon size="small" color="error">mdi-trash-can-outline</v-icon>
+            </template>
+            <v-list-item-title>删除</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
     </v-card-actions>
   </v-card>
 </template>
 
 <style scoped>
-
+.rule-card:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+}
 </style>

@@ -205,6 +205,7 @@ export interface ProxyProviderData {
 
 export interface RuleData {
     priority: number;
+    rule_string: string;
     type: string;
     payload?: string;
     action: string;

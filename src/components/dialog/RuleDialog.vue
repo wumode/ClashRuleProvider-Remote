@@ -40,6 +40,11 @@ const props = defineProps({
 // 2. 定义 Emits
 // 使用 defineEmits 宏。传入一个字符串数组，列出组件会触发的事件
 const emit = defineEmits(['close', 'refresh', 'show-snackbar', 'show-error']);
+
+// 3. 响应式数据
+// 将 props 中的 initialRule 复制到 rule 中，以便在组件内部修改而不影响父组件的 prop
+const rule = ref<RuleData>( structuredClone(toRaw(props.initialRule)));
+
 const loading = ref(false);
 const ruleForm = ref<any>(null)
 const geoSearch = ref('')
@@ -125,9 +130,6 @@ const additionalParamOptions = ref([
   {title: 'src', value: 'src'}
 ])
 
-// 3. 响应式数据
-// 将 props 中的 initialRule 复制到 rule 中，以便在组件内部修改而不影响父组件的 prop
-const rule = ref<RuleData>( structuredClone(toRaw(props.initialRule)));
 const payloadRules = computed(() => {
   return [
     (v: any) => {
@@ -149,14 +151,7 @@ async function saveRule() {
     if (rule.value?.payload) {
       rule.value.payload = rule.value.payload.trim();
     }
-    const requestData =
-        {
-          ...rule.value,
-          additional_params: rule.value.additional_params
-              ? rule.value.additional_params
-              : null
-        }
-    ;
+    const requestData = {...rule.value};
     const priority = props.isAdding? '' : `/${props.initialRule.priority}`
     const method = props.isAdding ? 'post' : 'patch';
     const result = await props.api[method](`/plugin/ClashRuleProvider/rules/${props.editingType}${priority}`, requestData);

@@ -64,7 +64,7 @@ async function saveProxyGroup() {
   try {
     const path = props.isAdding ? '' : `/${name}`
     const method = props.isAdding ? 'post' : 'patch';
-    const requestData = props.isAdding ? proxyGroup.value : {"source": props.initialValue?.source, "proxy_group": proxyGroup.value}
+    const requestData = props.isAdding ? proxyGroup.value : {"meta": props.initialValue?.meta, "proxy_group": proxyGroup.value}
     const result = await props.api[method](`/plugin/ClashRuleProvider/proxy-groups${path}`, requestData);
     if (!result.success) {
       emit('show-error',action + '失败: ' + (result.message || '未知错误'));

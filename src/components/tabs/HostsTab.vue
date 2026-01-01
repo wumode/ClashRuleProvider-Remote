@@ -6,6 +6,7 @@ import type {HostData} from "@/components/types"
 import {defaultHost} from "@/components/constants";
 import HostsTable from "@/components/tables/HostsTable.vue";
 import HostDialog from "@/components/dialog/HostDialog.vue";
+import HostCard from "@/components/cards/HostCard.vue";
 
 const props = defineProps<{
   hosts: HostData[],
@@ -128,45 +129,12 @@ async function deleteHost(name: string) {
             :key="item.domain"
             cols="12"
         >
-          <v-card rounded="lg" elevation="1">
-            <v-card-title class="d-flex justify-space-between align-center">
-              <div>
-                <span class="font-weight-bold">{{ item.domain }}</span>
-              </div>
-              <v-chip :color="getBoolColor(item.using_cloudflare)" size="small" label>
-                {{ item.using_cloudflare ? 'Cloudflare' : 'hosts' }}
-              </v-chip>
-            </v-card-title>
-            <v-divider></v-divider>
-            <v-card-text>
-              <div class="text-body-2"><strong>IP：</strong>
-                <v-chip
-                    v-for="ip in (item.using_cloudflare? bestCloudflareIPs : item.value)"
-                    :key="ip"
-                    size="small"
-                    class="ma-1"
-                >
-                  {{ ip }}
-                </v-chip>
-              </div>
-            </v-card-text>
-            <v-divider></v-divider>
-            <v-card-actions class="d-flex justify-center">
-              <v-btn icon size="small" color="primary" variant="text"
-                     @click="editHost(item.domain)"
-                     :disabled="loading"
-              >
-                <v-icon>mdi-file-edit-outline</v-icon>
-              </v-btn>
-              <v-spacer></v-spacer>
-              <v-btn icon size="small" color="error" variant="text"
-                     @click="deleteHost(item.domain)"
-                     :disabled="loading"
-              >
-                <v-icon>mdi-trash-can-outline</v-icon>
-              </v-btn>
-            </v-card-actions>
-          </v-card>
+          <HostCard
+              :host-data="item"
+              :best-cloudflare-i-ps="bestCloudflareIPs"
+              @edit-host="editHost"
+              @delete-host="deleteHost"
+          />
         </v-col>
       </v-row>
     </div>

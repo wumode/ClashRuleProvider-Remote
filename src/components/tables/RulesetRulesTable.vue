@@ -45,6 +45,7 @@ const headersRuleset = [
   {title: '出站', key: 'action', sortable: true},
   {title: '规则集合', key: 'name', value: 'action', sortable: true},
   {title: '日期', key: 'time_modified', sortable: true},
+  {title: '', key: 'status', sortable: false, width: '1rem'},
   {title: '', key: 'actions', sortable: false, width: '1rem'},
 ];
 
@@ -53,6 +54,7 @@ const groupHeaders = [
   {title: '类型', key: 'type', sortable: true},
   {title: '内容', key: 'payload', sortable: true},
   {title: '日期', key: 'time_modified', sortable: true},
+  {title: '', key: 'status', sortable: false, width: '1rem'},
   {title: '', key: 'actions', sortable: false, width: '1rem'},
 ]
 
@@ -229,7 +231,13 @@ const rowProps = (data: any) => {
     <template #item.time_modified="{ item }">
       <small>{{ item.meta?.time_modified ? timestampToDate(item.meta.time_modified) : '' }}</small>
     </template>
-
+    <template #item.status="{ item }">
+      <v-icon
+          :color="item.meta.disabled ? 'grey' : 'success'"
+      >
+        {{ item.meta.disabled ? 'mdi-close-circle-outline' : 'mdi-check-circle-outline' }}
+      </v-icon>
+    </template>
     <template #item.actions="{ item }">
       <v-menu min-width="120">
         <template v-slot:activator="{ props }">
@@ -319,7 +327,13 @@ const rowProps = (data: any) => {
     <template #item.time_modified="{ item }">
       <small>{{ item.meta?.time_modified ? timestampToDate(item.meta.time_modified) : '' }}</small>
     </template>
-
+    <template #item.status="{ item }">
+      <v-icon
+          :color="item.meta.disabled ? 'grey' : 'success'"
+      >
+        {{ item.meta.disabled ? 'mdi-close-circle-outline' : 'mdi-check-circle-outline' }}
+      </v-icon>
+    </template>
     <template #item.actions="{ item }">
       <v-menu min-width="120">
         <template v-slot:activator="{ props }">
