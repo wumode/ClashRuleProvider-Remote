@@ -8,6 +8,7 @@ import {
   getSourceColor,
   getFormatColor
 } from "@/components/utils";
+import RuleProviderActionMenu from "@/components/menu/RuleProviderActionMenu.vue";
 
 defineProps({
   ruleProviders: {
@@ -29,6 +30,7 @@ const emit = defineEmits<{
   (e: 'editRuleProvider', name: string): void
   (e: 'deleteRuleProvider', name: string): void
   (e: 'showYaml', obj: any): void
+  (e: 'changeStatus', name: string, disabled: boolean): void
 }>()
 
 const headersRuleProviders = ref([
@@ -37,6 +39,7 @@ const headersRuleProviders = ref([
   {title: '行为', key: 'behavior', sortable: false},
   {title: '格式', key: 'format', sortable: false},
   {title: '来源', key: 'source', sortable: false},
+  {title: '', key: 'status', sortable: false, width: '1rem'},
   {title: '', key: 'actions', sortable: false, width: '1rem'},
 ]);
 </script>
@@ -86,45 +89,25 @@ const headersRuleProviders = ref([
       </v-chip>
     </template>
 
+    <template #item.status="{ item }">
+      <v-icon
+          :color="item.meta.disabled ? 'grey' : 'success'"
+      >
+        {{ item.meta.disabled ? 'mdi-close-circle-outline' : 'mdi-check-circle-outline' }}
+      </v-icon>
+    </template>
+
     <template #item.actions="{ item }">
-      <v-menu min-width="120">
-        <template v-slot:activator="{ props }">
-          <v-btn color="secondary" icon size="small" variant="text" v-bind="props">
-            <v-icon>mdi-dots-vertical</v-icon>
-          </v-btn>
-          <v-tooltip activator="parent" location="top" v-if="!isManual(item.meta.source)">
-            非手动添加
-          </v-tooltip>
-        </template>
-        <v-list density="compact">
-          <v-list-item
-              @click="emit('editRuleProvider', item.name)"
-              :disabled="!isManual(item.meta.source)"
-          >
-            <template v-slot:prepend>
-              <v-icon size="small" color="primary">mdi-file-edit-outline</v-icon>
-            </template>
-            <v-list-item-title>编辑</v-list-item-title>
-          </v-list-item>
-
-          <v-list-item @click="emit('showYaml', item.data)">
-            <template v-slot:prepend>
-              <v-icon size="small" color="info">mdi-code-json</v-icon>
-            </template>
-            <v-list-item-title>查看配置</v-list-item-title>
-          </v-list-item>
-
-          <v-list-item
-              @click="emit('deleteRuleProvider', item.name)"
-              :disabled="!isManual(item.meta.source)"
-          >
-            <template v-slot:prepend>
-              <v-icon size="small" color="error">mdi-trash-can-outline</v-icon>
-            </template>
-            <v-list-item-title>删除</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
+      <RuleProviderActionMenu
+          :rule-provider="item"
+          @change-status="(disabled) => emit('changeStatus', item.name, disabled)"
+          @edit="emit('editRuleProvider', item.name)"
+          @show-yaml="emit('showYaml', item.data)"
+          @delete="emit('deleteRuleProvider', item.name)"
+      />
+      <v-tooltip activator="parent" location="top" v-if="!isManual(item.meta.source)">
+        非手动添加
+      </v-tooltip>
     </template>
   </v-data-table>
 </template>

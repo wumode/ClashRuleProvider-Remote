@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref, computed} from 'vue'
+import {ref, computed, toRaw} from 'vue'
 import {RuleProviderData} from "@/components/types";
 import RuleProvidersTable from "@/components/tables/RuleProvidersTable.vue";
 import RuleProviderCard from "@/components/cards/RuleProviderCard.vue";
@@ -63,7 +63,7 @@ function editRuleProvider(name: string) {
   const ruleProvider = props.ruleProviders.find(r => r.name === name);
   if (ruleProvider) {
     editingRuleProviderName.value = name;
-    editingRuleProvider.value = {...ruleProvider}
+    editingRuleProvider.value = structuredClone(toRaw(ruleProvider))
     ruleProviderDialogVisible.value = true;
   }
 }
@@ -77,6 +77,28 @@ async function deleteRuleProvider(name: string) {
   } catch (err: unknown) {
     if (err instanceof Error)
       emit('show-error', err.message || '删除规则集合失败');
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function handleStatusChange(name: string, disabled: boolean) {
+  loading.value = true;
+  try {
+    const provider = props.ruleProviders.find(p => p.name === name);
+    if (!provider) {
+      emit('show-error', "Rule provider not found");
+      return
+    }
+    const n = encodeURIComponent(name);
+    // Send full metadata with updated disabled status
+    const newMeta = { ...provider.meta, disabled: disabled };
+    await props.api.patch(`/plugin/ClashRuleProvider/rule-providers/${n}/meta`, newMeta);
+    emit('refresh', ["rule-providers"]);
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      emit('show-error', err.message || '更新规则集合状态失败');
+    }
   } finally {
     loading.value = false;
   }
@@ -134,6 +156,7 @@ function closeRuleProviderDialog() {
           @edit-rule-provider="editRuleProvider"
           @delete-rule-provider="deleteRuleProvider"
           @show-yaml="(o) => emit('show-yaml', o)"
+          @change-status="handleStatusChange"
       ></RuleProvidersTable>
     </div>
     <!-- 移动端卡片 -->
@@ -149,6 +172,7 @@ function closeRuleProviderDialog() {
               @edit-rule-provider="editRuleProvider"
               @delete-rule-provider="deleteRuleProvider"
               @show-yaml="(o) => emit('show-yaml', o)"
+              @change-status="handleStatusChange"
           ></RuleProviderCard>
         </v-col>
       </v-row>
