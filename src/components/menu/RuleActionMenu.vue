@@ -30,8 +30,8 @@ const emit = defineEmits<{
     <v-list density="compact">
       <v-list-item @click="emit('changeStatus', !rule.meta?.disabled)">
         <template v-slot:prepend>
-          <v-icon size="small" :color="rule.meta?.disabled ? 'success' : 'warning'">
-            {{ rule.meta?.disabled ? 'mdi-check' : 'mdi-close' }}
+          <v-icon size="small" :color="rule.meta?.disabled ? 'success' : 'grey'">
+            {{ rule.meta?.disabled ? 'mdi-play-circle-outline' : 'mdi-stop-circle-outline' }}
           </v-icon>
         </template>
         <v-list-item-title>{{ rule.meta?.disabled ? '启用' : '禁用' }}</v-list-item-title>

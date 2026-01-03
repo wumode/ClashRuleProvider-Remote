@@ -29,8 +29,8 @@ const emit = defineEmits<{
     <v-list density="compact">
       <v-list-item :disabled="!isManual(proxy.meta.source)" @click="emit('changeStatus', !proxy.meta.disabled)">
         <template v-slot:prepend>
-          <v-icon size="small" :color="proxy.meta.disabled ? 'success' : 'warning'">
-            {{ proxy.meta.disabled ? 'mdi-check' : 'mdi-close' }}
+          <v-icon size="small" :color="proxy.meta.disabled ? 'success' : 'grey'">
+            {{ proxy.meta.disabled ? 'mdi-play-circle-outline' : 'mdi-stop-circle-outline' }}
           </v-icon>
         </template>
         <v-list-item-title>{{ proxy.meta.disabled ? '启用' : '禁用' }}</v-list-item-title>

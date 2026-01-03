@@ -30,8 +30,8 @@ const emit = defineEmits<{
           :disabled="!isManual(proxyGroup.meta.source)"
           @click="emit('changeStatus', !proxyGroup.meta.disabled)">
         <template v-slot:prepend>
-          <v-icon size="small" :color="proxyGroup.meta.disabled ? 'success' : 'warning'">
-            {{ proxyGroup.meta.disabled ? 'mdi-check' : 'mdi-close' }}
+          <v-icon size="small" :color="proxyGroup.meta.disabled ? 'success' : 'grey'">
+            {{ proxyGroup.meta.disabled ? 'mdi-play-circle-outline' : 'mdi-stop-circle-outline' }}
           </v-icon>
         </template>
         <v-list-item-title>{{ proxyGroup.meta.disabled ? '启用' : '禁用' }}</v-list-item-title>
