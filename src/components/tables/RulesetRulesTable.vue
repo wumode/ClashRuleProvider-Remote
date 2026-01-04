@@ -3,6 +3,7 @@ import {ref, PropType } from 'vue'
 import {RuleData, RuleSetType} from "@/components/types";
 import {getActionColor, getRuleTypeColor, timestampToDate} from "@/components/utils";
 import {itemsPerPageOptions} from "@/components/constants";
+import RuleActionMenu from "@/components/menu/RuleActionMenu.vue";
 
 const props = defineProps({
   sortedRules: {
@@ -239,35 +240,12 @@ const rowProps = (data: any) => {
       </v-icon>
     </template>
     <template #item.actions="{ item }">
-      <v-menu min-width="120">
-        <template v-slot:activator="{ props }">
-          <v-btn color="secondary" icon size="small" variant="text" v-bind="props">
-            <v-icon>mdi-dots-vertical</v-icon>
-          </v-btn>
-        </template>
-        <v-list density="compact">
-          <v-list-item @click="updateStatus(item, !item.meta?.disabled)">
-            <template v-slot:prepend>
-              <v-icon size="small" :color="item.meta?.disabled ? 'success' : 'warning'">
-                {{ item.meta?.disabled ? 'mdi-check' : 'mdi-close' }}
-              </v-icon>
-            </template>
-            <v-list-item-title>{{ item.meta?.disabled ? '启用' : '禁用' }}</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="editRule(item.priority)">
-            <template v-slot:prepend>
-              <v-icon size="small" color="primary">mdi-file-edit-outline</v-icon>
-            </template>
-            <v-list-item-title>编辑</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="deleteRule(item.priority)">
-            <template v-slot:prepend>
-              <v-icon size="small" color="error">mdi-trash-can-outline</v-icon>
-            </template>
-            <v-list-item-title>删除</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
+      <RuleActionMenu
+          :rule="item"
+          @edit="editRule(item.priority)"
+          @delete="deleteRule(item.priority)"
+          @change-status="(disabled) => updateStatus(item, disabled)"
+      />
     </template>
   </v-data-table>
   <v-data-table
@@ -335,35 +313,12 @@ const rowProps = (data: any) => {
       </v-icon>
     </template>
     <template #item.actions="{ item }">
-      <v-menu min-width="120">
-        <template v-slot:activator="{ props }">
-          <v-btn color="secondary" icon size="small" variant="text" v-bind="props">
-            <v-icon>mdi-dots-vertical</v-icon>
-          </v-btn>
-        </template>
-        <v-list density="compact">
-          <v-list-item @click="updateStatus(item, !item.meta?.disabled)">
-            <template v-slot:prepend>
-              <v-icon size="small" :color="item.meta?.disabled ? 'success' : 'warning'">
-                {{ item.meta?.disabled ? 'mdi-check' : 'mdi-close' }}
-              </v-icon>
-            </template>
-            <v-list-item-title>{{ item.meta?.disabled ? '启用' : '禁用' }}</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="editRule(item.priority)">
-            <template v-slot:prepend>
-              <v-icon size="small" color="primary">mdi-file-edit-outline</v-icon>
-            </template>
-            <v-list-item-title>编辑</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="deleteRule(item.priority)">
-            <template v-slot:prepend>
-              <v-icon size="small" color="error">mdi-trash-can-outline</v-icon>
-            </template>
-            <v-list-item-title>删除</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
+      <RuleActionMenu
+          :rule="item"
+          @edit="editRule(item.priority)"
+          @delete="deleteRule(item.priority)"
+          @change-status="(disabled) => updateStatus(item, disabled)"
+      />
     </template>
   </v-data-table>
 </template>
