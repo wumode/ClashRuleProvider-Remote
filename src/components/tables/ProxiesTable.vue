@@ -28,6 +28,7 @@ const emit = defineEmits<{
   (e: 'editProxy', proxyData: ProxyData): void
   (e: 'deleteProxy', name: string): void
   (e: 'changeStatus', name: string, disabled: boolean): void
+  (e: 'editVisibility', name: string): void
 }>()
 
 const headers = ref([
@@ -95,11 +96,25 @@ const headers = ref([
     </template>
 
     <template #item.status="{ item }">
-      <v-icon
-          :color="item.meta.disabled ? 'grey' : 'success'"
-      >
-        {{ item.meta.disabled ? 'mdi-close-circle-outline' : 'mdi-check-circle-outline' }}
-      </v-icon>
+      <div class="d-flex align-center">
+        <v-icon
+            :color="item.meta.disabled ? 'grey' : 'success'"
+            class="mr-1"
+        >
+          {{ item.meta.disabled ? 'mdi-close-circle-outline' : 'mdi-check-circle-outline' }}
+        </v-icon>
+        <v-tooltip v-if="item.meta.invisible_to && item.meta.invisible_to.length > 0" text="已配置可见性限制" location="top">
+          <template v-slot:activator="{ props }">
+            <v-icon
+                v-bind="props"
+                size="small"
+                color="warning"
+            >
+              mdi-eye-off-outline
+            </v-icon>
+          </template>
+        </v-tooltip>
+      </div>
     </template>
 
     <template #item.actions="{ item }">
@@ -110,6 +125,7 @@ const headers = ref([
           @edit="emit('editProxy', item)"
           @delete="emit('deleteProxy', item.data.name)"
           @copy-to-clipboard="(text) => emit('copyToClipboard', text)"
+          @edit-visibility="emit('editVisibility', item.data.name)"
       />
     </template>
   </v-data-table>

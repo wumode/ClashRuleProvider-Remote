@@ -5,7 +5,7 @@ import ProxyGroupCard from '@/components/cards/ProxyGroupCard.vue';
 import ProxyGroupsDialog from '@/components/dialog/ProxyGroupsDialog.vue';
 import {itemsPerPageOptions} from '@/components/constants';
 import {pageTitle} from '@/components/utils';
-import {ProxyGroupData, ProxyProviderData} from '@/components/types';
+import {Metadata, ProxyGroupData, ProxyProviderData} from '@/components/types';
 
 const props = defineProps<{
   proxyGroups: ProxyGroupData[];
@@ -20,6 +20,7 @@ const emit = defineEmits<{
   (e: 'show-error', msg: string): void;
   (e: 'show-yaml', obj: any): void;
   (e: 'copy-to-clipboard', text: string): void;
+  (e: 'edit-visibility', meta: Metadata, endpoint: string, region: string): void;
 }>();
 
 const searchProxyGroups = ref('');
@@ -108,6 +109,16 @@ async function handleStatusChange(name: string, disabled: boolean) {
   }
 }
 
+function editVisibility(name: string) {
+  const group = props.proxyGroups.find(g => g.data.name === name);
+  if (!group) {
+    emit('show-error', "Proxy group not found");
+    return;
+  }
+  const n = encodeURIComponent(name);
+  emit('edit-visibility', group.meta, `/plugin/ClashRuleProvider/proxy-groups/${n}/meta`, 'proxy-groups');
+}
+
 function closeProxyGroupsDialog() {
   currentProxyGroup.value = null;
   proxyGroupDialogVisible.value = false;
@@ -163,6 +174,7 @@ function closeProxyGroupsDialog() {
           @edit-proxy-group="editProxyGroup"
           @delete-proxy-group="deleteProxyGroup"
           @change-status="handleStatusChange"
+          @edit-visibility="editVisibility"
       ></ProxyGroupsTable>
     </div>
     <!-- 移动端卡片 -->

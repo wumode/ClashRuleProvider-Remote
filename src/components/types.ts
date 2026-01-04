@@ -365,5 +365,5 @@ export interface PluginConfig {
     apikey?: string | null;
     clash_dashboards: ClashApi[];
     active_dashboard?: number | null;
-    roles: string[];
+    identifiers: string[];
 }

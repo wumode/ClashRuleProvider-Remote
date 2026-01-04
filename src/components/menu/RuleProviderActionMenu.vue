@@ -15,6 +15,7 @@ const emit = defineEmits<{
   (e: 'edit'): void
   (e: 'delete'): void
   (e: 'changeStatus', disabled: boolean): void
+  (e: 'editVisibility'): void
 }>()
 </script>
 
@@ -53,6 +54,13 @@ const emit = defineEmits<{
           <v-icon size="small" color="info">mdi-code-json</v-icon>
         </template>
         <v-list-item-title>查看配置</v-list-item-title>
+      </v-list-item>
+      
+      <v-list-item :disabled="!isManual(ruleProvider.meta.source)" @click="emit('editVisibility')">
+        <template v-slot:prepend>
+          <v-icon size="small" color="warning">mdi-eye-off-outline</v-icon>
+        </template>
+        <v-list-item-title>限制可见性</v-list-item-title>
       </v-list-item>
 
       <v-list-item

@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import yaml from 'js-yaml';
 import ShowYamlDialog from "./dialog/ShowYamlDialog.vue";
+import DataVisibilityDialog from "./dialog/DataVisibilityDialog.vue";
 import RulesetRulesTab from "./tabs/RulesetRulesTab.vue";
 import TopRulesTab from "./tabs/TopRulesTab.vue";
 import ProxyGroupsTab from "./tabs/ProxyGroupsTab.vue";
@@ -18,8 +19,9 @@ import {
   RuleProviderData,
   ProxyData,
   SubscriptionInfo,
-  HostData, GeoRules, ProxyProviderData
+  HostData, GeoRules, ProxyProviderData, Metadata
 } from "@/components/types";
+import {defaultMetadata} from "@/components/constants";
 
 // 接收初始配置
 const props = defineProps({
@@ -52,6 +54,7 @@ const subUrl = ref('');
 const proxyGroups = ref<ProxyGroupData[]>([])
 const proxyProviders = ref<ProxyProviderData[]>([])
 const proxies = ref<ProxyData[]>([])
+const presetIdentifiers = ref<string[]>([])
 
 // 组件状态
 const expand = ref(false)
@@ -71,6 +74,12 @@ const geoRules = ref<GeoRules>({
 const lastUpdated = ref('')
 const showYamlDialog = ref(false)
 const displayedYaml = ref('')
+
+// Visibility Dialog State
+const visibilityDialogVisible = ref(false)
+const currentVisibilityMeta = ref<Metadata>({...defaultMetadata})
+const currentVisibilityEndpoint = ref('')
+const currentVisibilityRegion = ref('')
 
 // 排序后的规则
 const sortedRules = computed<RuleData[]>(() => [...rules.value].sort((a, b) => a.priority - b.priority))
@@ -104,6 +113,22 @@ function copyPluginLink() {
   copyToClipboard(url);
 }
 
+function generateIdentifierUrl(identifier: string) {
+  if (!subUrl.value) return '';
+  try {
+    const url = new URL(subUrl.value, window.location.origin);
+    // Ensure pathname ends with / before appending if not empty
+    if (!url.pathname.endsWith('/')) {
+      url.pathname += '/';
+    }
+    url.pathname += `identifier=${identifier}`;
+    return url.toString();
+  } catch (e) {
+    console.error("Failed to parse URL", e);
+    return subUrl.value;
+  }
+}
+
 function showYaml(obj: any) {
   // 生成 YAML 并显示
   displayedYaml.value = yaml.dump(obj);
@@ -113,6 +138,13 @@ function showYaml(obj: any) {
 function showError(Msg: string) {
   error.value = true
   errorMsg.value = Msg;
+}
+
+function handleEditVisibility(meta: Metadata, endpoint: string, region: string) {
+  currentVisibilityMeta.value = meta;
+  currentVisibilityEndpoint.value = endpoint;
+  currentVisibilityRegion.value = region;
+  visibilityDialogVisible.value = true;
 }
 
 async function refreshStatus() {
@@ -247,6 +279,7 @@ async function refreshData() {
     bestCloudflareIPs.value = state?.data?.best_cf_ip || []
     rulesetPrefix.value = state?.data?.ruleset_prefix || '📂<=';
     geoRules.value = state?.data?.geoRules ?? geoRules.value;
+    presetIdentifiers.value = state?.data?.preset_identifiers || [];
     rules.value = response?.data || [];
     rulesetRules.value = response_ruleset?.data || [];
     customOutbounds.value = outboundsResponse?.data || [];
@@ -355,6 +388,7 @@ onMounted(() => {
                   @refresh="refreshAllRegions"
                   @show-snackbar="val => snackbar = val"
                   @show-error="showError"
+                  @edit-visibility="handleEditVisibility"
               />
             </v-window-item>
             <!-- Top Rules Tab -->
@@ -368,6 +402,7 @@ onMounted(() => {
                   @refresh="refreshAllRegions"
                   @show-snackbar="val => snackbar = val"
                   @show-error="showError"
+                  @edit-visibility="handleEditVisibility"
               />
             </v-window-item>
             <!-- Proxy Groups Tab -->
@@ -382,6 +417,7 @@ onMounted(() => {
                   @show-error="showError"
                   @show-yaml="showYaml"
                   @copy-to-clipboard="copyToClipboard"
+                  @edit-visibility="handleEditVisibility"
               />
             </v-window-item>
             <!-- Proxies Tab -->
@@ -394,6 +430,7 @@ onMounted(() => {
                   @show-error="showError"
                   @show-yaml="showYaml"
                   @copy-to-clipboard="copyToClipboard"
+                  @edit-visibility="handleEditVisibility"
               />
             </v-window-item>
             <!-- Rule Providers Tab -->
@@ -405,6 +442,7 @@ onMounted(() => {
                   @show-snackbar="val => snackbar = val"
                   @show-error="showError"
                   @show-yaml="showYaml"
+                  @edit-visibility="handleEditVisibility"
               />
             </v-window-item>
             <!-- Hosts Tab -->
@@ -452,7 +490,34 @@ onMounted(() => {
           <v-icon left>mdi-refresh</v-icon>
           刷新数据
         </v-btn>
-        <v-btn color="info" :href=subUrl target="_blank">
+        <v-menu v-if="presetIdentifiers.length > 0">
+          <template v-slot:activator="{ props }">
+            <v-btn color="info" v-bind="props">
+              <v-icon left>mdi-link-variant</v-icon>
+              生成链接
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item :href="subUrl" target="_blank">
+              <template v-slot:prepend>
+                <v-icon icon="mdi-link-variant"></v-icon>
+              </template>
+              <v-list-item-title>默认</v-list-item-title>
+            </v-list-item>
+            <v-list-item
+                v-for="id in presetIdentifiers"
+                :key="id"
+                :href="generateIdentifierUrl(id)"
+                target="_blank"
+            >
+              <template v-slot:prepend>
+                <v-icon icon="mdi-devices"></v-icon>
+              </template>
+              <v-list-item-title>{{ id }}</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+        <v-btn v-else color="info" :href="subUrl" target="_blank">
           <v-icon left>mdi-link-variant</v-icon>
           生成链接
         </v-btn>
@@ -486,6 +551,19 @@ onMounted(() => {
         @close="showYamlDialog = false"
     >
     </ShowYamlDialog>
+    <DataVisibilityDialog
+        v-if="visibilityDialogVisible"
+        v-model="visibilityDialogVisible"
+        :meta="currentVisibilityMeta"
+        :endpoint="currentVisibilityEndpoint"
+        :region="currentVisibilityRegion"
+        :api="api"
+        :preset-identifiers="presetIdentifiers"
+        @refresh="refreshAllRegions"
+        @show-snackbar="val => snackbar = val"
+        @show-error="showError"
+        @close="visibilityDialogVisible = false"
+    />
   </div>
 </template>
 <style scoped>

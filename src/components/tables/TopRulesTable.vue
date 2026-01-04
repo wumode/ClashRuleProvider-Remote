@@ -28,6 +28,7 @@ const emit = defineEmits<{
   (e: 'reorder', targetPriority: number, movedPriority: number, type: RuleSetType): void
   (e: 'change-status', priority: number, disabled: boolean, type: RuleSetType): void
   (e: 'change-status-batch', priorities: number[], disabled: boolean, type: RuleSetType): void
+  (e: 'editVisibility', priority: number, type: RuleSetType): void
 }>()
 
 const headers = ref([
@@ -203,11 +204,25 @@ const rowProps = (data: any) => {
       <small>{{ item.meta?.time_modified ? timestampToDate(item.meta.time_modified) : '' }}</small>
     </template>
     <template #item.status="{ item }">
-      <v-icon
-          :color="item.meta.disabled ? 'grey' : 'success'"
-      >
-        {{ item.meta.disabled ? 'mdi-close-circle-outline' : 'mdi-check-circle-outline' }}
-      </v-icon>
+      <div class="d-flex align-center">
+        <v-icon
+            :color="item.meta.disabled ? 'grey' : 'success'"
+            class="mr-1"
+        >
+          {{ item.meta.disabled ? 'mdi-close-circle-outline' : 'mdi-check-circle-outline' }}
+        </v-icon>
+        <v-tooltip v-if="item.meta.invisible_to && item.meta.invisible_to.length > 0" text="已配置可见性限制" location="top">
+          <template v-slot:activator="{ props }">
+            <v-icon
+                v-bind="props"
+                size="small"
+                color="warning"
+            >
+              mdi-eye-off-outline
+            </v-icon>
+          </template>
+        </v-tooltip>
+      </div>
     </template>
     <template #item.actions="{ item }">
       <RuleActionMenu
@@ -215,6 +230,7 @@ const rowProps = (data: any) => {
           @edit="editRule(item.priority)"
           @delete="deleteRule(item.priority)"
           @change-status="(disabled) => updateStatus(item, disabled)"
+          @edit-visibility="emit('editVisibility', item.priority, ruleset)"
       />
     </template>
   </v-data-table>

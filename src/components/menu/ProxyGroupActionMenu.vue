@@ -15,6 +15,7 @@ const emit = defineEmits<{
   (e: 'edit'): void
   (e: 'delete'): void
   (e: 'changeStatus', disabled: boolean): void
+  (e: 'editVisibility'): void
 }>()
 </script>
 
@@ -52,6 +53,16 @@ const emit = defineEmits<{
           <v-icon size="small" color="primary">mdi-file-edit-outline</v-icon>
         </template>
         <v-list-item-title>编辑</v-list-item-title>
+      </v-list-item>
+
+      <v-list-item
+          :disabled="!isManual(proxyGroup.meta.source)"
+          @click="emit('editVisibility')"
+      >
+        <template v-slot:prepend>
+          <v-icon size="small" color="warning">mdi-eye-off-outline</v-icon>
+        </template>
+        <v-list-item-title>限制可见性</v-list-item-title>
       </v-list-item>
       
       <v-list-item

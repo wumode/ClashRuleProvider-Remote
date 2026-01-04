@@ -83,7 +83,7 @@ const defaultConfig: PluginConfig = {
   best_cf_ip: [],
   active_dashboard: 0,
   apikey: null,
-  roles: []
+  identifiers: []
 }
 
 // 响应式配置对象
@@ -271,19 +271,19 @@ function resetForm() {
         <v-form ref="form" v-model="isFormValid" @submit.prevent="saveConfig">
           <!-- 标签页 -->
           <v-row>
-            <v-col cols="12" md="3">
+            <v-col cols="6" md="3">
               <v-switch v-model="config.enabled" label="启用插件" color="primary" inset density="compact"
                         hint="启用插件"/>
             </v-col>
-            <v-col cols="12" md="3">
+            <v-col cols="6" md="3">
               <v-switch v-model="config.proxy" label="启用代理" color="primary" inset density="compact"
                         hint="是否使用系统代理进行网络请求"/>
             </v-col>
-            <v-col cols="12" md="3">
+            <v-col cols="6" md="3">
               <v-switch v-model="config.notify" label="启用通知" color="primary" inset density="compact"
                         hint="执行完成后发送通知消息"/>
             </v-col>
-            <v-col cols="12" md="3">
+            <v-col cols="6" md="3">
               <v-switch v-model="config.auto_update_subscriptions" label="自动更新订阅" color="primary" inset
                         density="compact" hint="定期自动更新 Clash 订阅配置"/>
             </v-col>
@@ -413,7 +413,7 @@ function resetForm() {
                                 variant="underlined"
                                 placeholder="https://xxx.com/clash/config.yaml"
                                 density="compact"
-                                :rules="[v => !!v || '订阅链接不能为空', v => isValidUrl(v) || '请输入有效的URL地址']"
+                                :rules="[v => !!v || '订阅链接不能为空', v => isValidUrl(v) || '请输入有效的 URL 地址']"
                             >
                               <template #prepend-inner>
                                 <v-icon color="primary">mdi-link</v-icon>
@@ -649,6 +649,30 @@ function resetForm() {
                       clearable
                       hint="用于设置 Hosts 中的 Cloudflare 域名"
                       :rules="[validateIPs]"
+                  >
+                    <template #chip="{ props, item }">
+                      <v-chip
+                          v-bind="props"
+                          closable
+                          size="small"
+                      >
+                        {{ item.value }}
+                      </v-chip>
+                    </template>
+                  </v-combobox>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="12" md="12">
+                  <v-combobox
+                      v-model="config.identifiers"
+                      label="预设设备标识"
+                      variant="outlined"
+                      multiple
+                      chips
+                      closable-chips
+                      clearable
+                      hint="获取配置时的额外查询参数 「identifier」"
                   >
                     <template #chip="{ props, item }">
                       <v-chip

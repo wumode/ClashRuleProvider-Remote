@@ -14,6 +14,7 @@ const emit = defineEmits<{
   (e: 'edit'): void
   (e: 'delete'): void
   (e: 'changeStatus', disabled: boolean): void
+  (e: 'editVisibility'): void
 }>()
 </script>
 
@@ -45,6 +46,17 @@ const emit = defineEmits<{
         </template>
         <v-list-item-title>编辑</v-list-item-title>
       </v-list-item>
+
+      <v-list-item
+          @click="emit('editVisibility')"
+          :disabled="isSystemRule(rule)"
+      >
+        <template v-slot:prepend>
+          <v-icon size="small" color="warning">mdi-eye-off-outline</v-icon>
+        </template>
+        <v-list-item-title>可见性配置</v-list-item-title>
+      </v-list-item>
+
       <v-list-item
           @click="emit('delete')"
           :disabled="isSystemRule(rule)"

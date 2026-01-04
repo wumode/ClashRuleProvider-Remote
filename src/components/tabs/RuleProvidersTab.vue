@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {ref, computed, toRaw} from 'vue'
-import {RuleProviderData} from "@/components/types";
+import {Metadata, RuleProviderData} from "@/components/types";
 import RuleProvidersTable from "@/components/tables/RuleProvidersTable.vue";
 import RuleProviderCard from "@/components/cards/RuleProviderCard.vue";
 import RuleProviderDialog from "@/components/dialog/RuleProviderDialog.vue";
@@ -17,6 +17,7 @@ const emit = defineEmits<{
   (e: 'show-snackbar', value: any): void;
   (e: 'show-error', msg: string): void;
   (e: 'show-yaml', obj: any): void;
+  (e: 'edit-visibility', meta: Metadata, endpoint: string, region: string): void;
 }>()
 
 const searchRuleProviders = ref('')
@@ -104,6 +105,16 @@ async function handleStatusChange(name: string, disabled: boolean) {
   }
 }
 
+function editVisibility(name: string) {
+  const provider = props.ruleProviders.find(p => p.name === name);
+  if (!provider) {
+    emit('show-error', "Rule provider not found");
+    return;
+  }
+  const n = encodeURIComponent(name);
+  emit('edit-visibility', provider.meta, `/plugin/ClashRuleProvider/rule-providers/${n}/meta`, 'rule-providers');
+}
+
 function closeRuleProviderDialog() {
   editingRuleProviderName.value = null;
   ruleProviderDialogVisible.value = false;
@@ -157,6 +168,7 @@ function closeRuleProviderDialog() {
           @delete-rule-provider="deleteRuleProvider"
           @show-yaml="(o) => emit('show-yaml', o)"
           @change-status="handleStatusChange"
+          @edit-visibility="editVisibility"
       ></RuleProvidersTable>
     </div>
     <!-- 移动端卡片 -->

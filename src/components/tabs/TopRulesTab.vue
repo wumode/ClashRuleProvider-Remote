@@ -6,7 +6,7 @@ import RuleDialog from '../dialog/RuleDialog.vue';
 import ImportRuleDialog from '../dialog/ImportRuleDialog.vue';
 import { itemsPerPageOptions, defaultRule } from '@/components/constants';
 import { pageTitle } from '@/components/utils';
-import { RuleData, RuleSetType, GeoRules } from '@/components/types';
+import { RuleData, RuleSetType, GeoRules, Metadata } from '@/components/types';
 
 const props = defineProps<{
   rules: RuleData[];
@@ -20,6 +20,7 @@ const emit = defineEmits<{
   (e: 'refresh', regions: string[]): void;
   (e: 'show-snackbar', value: any): void;
   (e: 'show-error', msg: string): void;
+  (e: 'edit-visibility', meta: Metadata, endpoint: string, region: string): void;
 }>();
 
 const searchTopRule = ref('');
@@ -158,6 +159,14 @@ async function handleBatchStatusChange(priorities: number[], disabled: boolean) 
   }
 }
 
+function editVisibility(priority: number, type: RuleSetType) {
+  const rule = props.rules.find(r => r.priority === priority);
+  if (!rule) {
+    emit('show-error', "Rule not found");
+    return;
+  }
+  emit('edit-visibility', rule.meta, `/plugin/ClashRuleProvider/rules/${type}/${priority}/meta`, type);
+}
 </script>
 
 <template>
@@ -214,6 +223,7 @@ async function handleBatchStatusChange(priorities: number[], disabled: boolean) 
         @reorder="handleReorderRule"
         @change-status="handleStatusChange"
         @change-status-batch="handleBatchStatusChange"
+        @edit-visibility="editVisibility"
       ></TopRulesTable>
     </div>
     <!-- 移动端卡片 -->
@@ -316,3 +326,4 @@ async function handleBatchStatusChange(priorities: number[], disabled: boolean) 
 
 <style scoped>
 </style>
+

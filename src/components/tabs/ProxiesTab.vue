@@ -9,7 +9,7 @@ import ProxyCard from "@/components/cards/ProxyCard.vue";
 import ProxiesDialog from "@/components/dialog/ProxiesDialog.vue";
 import {itemsPerPageOptions, defaultMetadata, defaultProxy} from "@/components/constants";
 import {pageTitle} from '@/components/utils'
-import {ProxyData} from "@/components/types";
+import {Metadata, ProxyData} from "@/components/types";
 
 const props = defineProps<{
   proxies: ProxyData[];
@@ -22,6 +22,7 @@ const emit = defineEmits<{
   (e: 'show-error', msg: string): void;
   (e: 'show-yaml', obj: any): void;
   (e: 'copy-to-clipboard', text: string): void;
+  (e: 'edit-visibility', meta: Metadata, endpoint: string, region: string): void;
 }>();
 
 const editorOptions = {
@@ -180,6 +181,16 @@ async function handleStatusChange(name: string, disabled: boolean) {
     loading.value = false;
   }
 }
+
+function editVisibility(name: string) {
+  const proxy = props.proxies.find(p => p.data.name === name);
+  if (!proxy) {
+    emit("show-error", "Proxy not found");
+    return;
+  }
+  const n = encodeURIComponent(name);
+  emit('edit-visibility', proxy.meta, `/plugin/ClashRuleProvider/proxies/${n}/meta`, 'proxies');
+}
 </script>
 
 <template>
@@ -229,6 +240,7 @@ async function handleStatusChange(name: string, disabled: boolean) {
           @edit-proxy="openProxiesDialog"
           @delete-proxy="deleteProxy"
           @change-status="handleStatusChange"
+          @edit-visibility="editVisibility"
       >
       </ProxiesTable>
     </div>
@@ -384,3 +396,4 @@ async function handleStatusChange(name: string, disabled: boolean) {
 
 <style scoped>
 </style>
+
