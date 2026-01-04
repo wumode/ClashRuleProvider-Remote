@@ -14,6 +14,7 @@ const emit = defineEmits<{
   (e: 'showYaml'): void
   (e: 'edit'): void
   (e: 'delete'): void
+  (e: 'deletePatch'): void
   (e: 'changeStatus', disabled: boolean): void
   (e: 'editVisibility'): void
 }>()
@@ -28,7 +29,7 @@ const emit = defineEmits<{
     </template>
     <v-list density="compact">
       <v-list-item
-          :disabled="!isManual(proxyGroup.meta.source)"
+          v-if="isManual(proxyGroup.meta.source)"
           @click="emit('changeStatus', !proxyGroup.meta.disabled)">
         <template v-slot:prepend>
           <v-icon size="small" :color="proxyGroup.meta.disabled ? 'success' : 'grey'">
@@ -47,16 +48,17 @@ const emit = defineEmits<{
 
       <v-list-item
           @click="emit('edit')"
-          :disabled="!(isManual(proxyGroup.meta.source)||isRegion(proxyGroup.meta.source))"
+          v-if="(isManual(proxyGroup.meta.source)||isRegion(proxyGroup.meta.source))"
       >
         <template v-slot:prepend>
-          <v-icon size="small" color="primary">mdi-file-edit-outline</v-icon>
+          <v-icon size="small" color="primary" v-if="proxyGroup.meta.patched">mdi-wrench-check</v-icon>
+          <v-icon size="small" color="primary" v-else>mdi-file-edit-outline</v-icon>
         </template>
         <v-list-item-title>编辑</v-list-item-title>
       </v-list-item>
 
       <v-list-item
-          :disabled="!isManual(proxyGroup.meta.source)"
+          v-if="isManual(proxyGroup.meta.source)"
           @click="emit('editVisibility')"
       >
         <template v-slot:prepend>
@@ -64,10 +66,20 @@ const emit = defineEmits<{
         </template>
         <v-list-item-title>限制可见性</v-list-item-title>
       </v-list-item>
+
+      <v-list-item
+          v-if="proxyGroup.meta.patched"
+          @click="emit('deletePatch')"
+      >
+        <template v-slot:prepend>
+          <v-icon size="small" color="error">mdi-close-box-outline</v-icon>
+        </template>
+        <v-list-item-title>删除补丁</v-list-item-title>
+      </v-list-item>
       
       <v-list-item
           @click="emit('delete')"
-          :disabled="!isManual(proxyGroup.meta.source)"
+          v-if="isManual(proxyGroup.meta.source)"
       >
         <template v-slot:prepend>
           <v-icon size="small" color="error">mdi-trash-can-outline</v-icon>

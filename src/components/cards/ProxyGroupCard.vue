@@ -15,6 +15,7 @@ const emit = defineEmits<{
   (e: 'showYaml', obj: any): void,
   (e: 'editProxyGroup', name: string): void
   (e: 'deleteProxyGroup', name: string): void
+  (e: 'deletePatch', name: string): void
   (e: 'changeStatus', name: string, disabled: boolean): void
 }>()
 </script>
@@ -54,6 +55,7 @@ const emit = defineEmits<{
           @show-yaml="emit('showYaml', proxyGroupData.data)"
           @edit="emit('editProxyGroup', proxyGroupData.data.name)"
           @delete="emit('deleteProxyGroup', proxyGroupData.data.name)"
+          @delete-patch="emit('deletePatch', proxyGroupData.data.name)"
       />
     </v-card-actions>
   </v-card>

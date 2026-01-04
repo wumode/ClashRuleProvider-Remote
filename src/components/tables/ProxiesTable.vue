@@ -27,6 +27,7 @@ const emit = defineEmits<{
   (e: 'showYaml', obj: any): void,
   (e: 'editProxy', proxyData: ProxyData): void
   (e: 'deleteProxy', name: string): void
+  (e: 'deletePatch', name: string): void
   (e: 'changeStatus', name: string, disabled: boolean): void
   (e: 'editVisibility', name: string): void
 }>()
@@ -135,6 +136,7 @@ const headers = ref([
           @show-yaml="emit('showYaml', item.data)"
           @edit="emit('editProxy', item)"
           @delete="emit('deleteProxy', item.data.name)"
+          @delete-patch="emit('deletePatch', item.data.name)"
           @copy-to-clipboard="(text) => emit('copyToClipboard', text)"
           @edit-visibility="emit('editVisibility', item.data.name)"
       />

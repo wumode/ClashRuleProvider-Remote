@@ -87,6 +87,21 @@ async function deleteProxyGroup(name: string) {
   }
 }
 
+async function deletePatch(name: string) {
+  loading.value = true;
+  try {
+    const n = encodeURIComponent(name);
+    await props.api.delete(`/plugin/ClashRuleProvider/proxy-groups/${n}/patch`);
+    emit('refresh', ["proxy-groups", "clash-outbounds"]);
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      emit('show-error', err.message || '删除补丁失败');
+    }
+  } finally {
+    loading.value = false;
+  }
+}
+
 async function handleStatusChange(name: string, disabled: boolean) {
   loading.value = true;
   try {
@@ -173,6 +188,7 @@ function closeProxyGroupsDialog() {
           @show-yaml="(o) => emit('show-yaml', o)"
           @edit-proxy-group="editProxyGroup"
           @delete-proxy-group="deleteProxyGroup"
+          @delete-patch="deletePatch"
           @change-status="handleStatusChange"
           @edit-visibility="editVisibility"
       ></ProxyGroupsTable>
@@ -189,6 +205,7 @@ function closeProxyGroupsDialog() {
               :proxy-group-data="item"
               @edit-proxy-group="editProxyGroup"
               @delete-proxy-group="deleteProxyGroup"
+              @delete-patch="deletePatch"
               @show-yaml="(o) => emit('show-yaml', o)"
               @change-status="handleStatusChange"
           ></ProxyGroupCard>

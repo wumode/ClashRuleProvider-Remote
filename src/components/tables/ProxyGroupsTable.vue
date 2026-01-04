@@ -26,6 +26,7 @@ const emit = defineEmits<{
   (e: 'showYaml', obj: any): void,
   (e: 'editProxyGroup', name: string): void
   (e: 'deleteProxyGroup', name: string): void
+  (e: 'deletePatch', name: string): void
   (e: 'changeStatus', name: string, disabled: boolean): void
   (e: 'editVisibility', name: string): void
 }>()
@@ -107,6 +108,7 @@ const proxyGroupHeaders = ref([
           @show-yaml="emit('showYaml', item.data)"
           @edit="emit('editProxyGroup', item.data.name)"
           @delete="emit('deleteProxyGroup', item.data.name)"
+          @delete-patch="emit('deletePatch', item.data.name)"
           @edit-visibility="emit('editVisibility', item.data.name)"
       />
     </template>

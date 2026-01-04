@@ -16,6 +16,7 @@ const emit = defineEmits<{
   (e: 'showYaml', obj: any): void,
   (e: 'editProxy', proxyData: ProxyData): void
   (e: 'deleteProxy', name: string): void
+  (e: 'deletePatch', name: string): void
   (e: 'changeStatus', name: string, disabled: boolean): void
 }>()
 
@@ -61,6 +62,7 @@ const emit = defineEmits<{
           @show-yaml="emit('showYaml', proxyData.data)"
           @edit="emit('editProxy', proxyData)"
           @delete="emit('deleteProxy', proxyData.data.name)"
+          @delete-patch="emit('deletePatch', proxyData.data.name)"
           @copy-to-clipboard="(text) => emit('copyToClipboard', text)"
       />
     </v-card-actions>

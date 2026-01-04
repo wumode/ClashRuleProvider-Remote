@@ -14,6 +14,7 @@ const emit = defineEmits<{
   (e: 'showYaml'): void
   (e: 'edit'): void
   (e: 'delete'): void
+  (e: 'deletePatch'): void
   (e: 'changeStatus', disabled: boolean): void
   (e: 'copyToClipboard', text: string): void
   (e: 'editVisibility'): void
@@ -28,7 +29,7 @@ const emit = defineEmits<{
       </v-btn>
     </template>
     <v-list density="compact">
-      <v-list-item :disabled="!isManual(proxy.meta.source)" @click="emit('changeStatus', !proxy.meta.disabled)">
+      <v-list-item v-if="isManual(proxy.meta.source)" @click="emit('changeStatus', !proxy.meta.disabled)">
         <template v-slot:prepend>
           <v-icon size="small" :color="proxy.meta.disabled ? 'success' : 'grey'">
             {{ proxy.meta.disabled ? 'mdi-play-circle-outline' : 'mdi-stop-circle-outline' }}
@@ -46,13 +47,12 @@ const emit = defineEmits<{
 
       <v-list-item @click="emit('edit')">
         <template v-slot:prepend>
-          <v-icon size="small" color="primary" v-if="proxy.meta.patched">mdi-wrench-check</v-icon>
-          <v-icon size="small" color="primary" v-else>mdi-file-edit-outline</v-icon>
+          <v-icon size="small" color="primary">mdi-file-edit-outline</v-icon>
         </template>
         <v-list-item-title>编辑</v-list-item-title>
       </v-list-item>
 
-      <v-list-item :disabled="!isManual(proxy.meta.source)" @click="emit('editVisibility')">
+      <v-list-item v-if="isManual(proxy.meta.source)" @click="emit('editVisibility')">
         <template v-slot:prepend>
           <v-icon size="small" color="warning">mdi-eye-off-outline</v-icon>
         </template>
@@ -67,6 +67,16 @@ const emit = defineEmits<{
           <v-icon size="small" color="secondary">mdi-link</v-icon>
         </template>
         <v-list-item-title>复制链接</v-list-item-title>
+      </v-list-item>
+
+      <v-list-item
+          v-if="proxy.meta.patched"
+          @click="emit('deletePatch')"
+      >
+        <template v-slot:prepend>
+          <v-icon size="small" color="error">mdi-close-box-outline</v-icon>
+        </template>
+        <v-list-item-title>删除补丁</v-list-item-title>
       </v-list-item>
 
       <v-list-item

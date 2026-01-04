@@ -160,6 +160,21 @@ async function deleteProxy(name: string) {
   }
 }
 
+async function deletePatch(name: string) {
+  loading.value = true;
+  try {
+    const n = encodeURIComponent(name);
+    await props.api.delete(`/plugin/ClashRuleProvider/proxies/${n}/patch`);
+    emit('refresh', ["proxies", "clash-outbounds"]);
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      emit('show-error', err.message || '删除补丁失败');
+    }
+  } finally {
+    loading.value = false;
+  }
+}
+
 async function handleStatusChange(name: string, disabled: boolean) {
   loading.value = true;
   try {
@@ -239,6 +254,7 @@ function editVisibility(name: string) {
           @show-yaml="(o) => emit('show-yaml', o)"
           @edit-proxy="openProxiesDialog"
           @delete-proxy="deleteProxy"
+          @delete-patch="deletePatch"
           @change-status="handleStatusChange"
           @edit-visibility="editVisibility"
       >
@@ -259,6 +275,7 @@ function editVisibility(name: string) {
               @show-yaml="(o) => emit('show-yaml', o)"
               @edit-proxy="openProxiesDialog"
               @delete-proxy="deleteProxy"
+              @delete-patch="deletePatch"
               @change-status="handleStatusChange"
           ></ProxyCard>
         </v-col>
