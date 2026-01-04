@@ -20,7 +20,6 @@ const emit = defineEmits<{
   (e: 'refresh', regions: string[]): void;
   (e: 'show-snackbar', value: any): void;
   (e: 'show-error', msg: string): void;
-  (e: 'edit-visibility', meta: Metadata, endpoint: string, region: string): void;
 }>();
 
 const searchRulesetRule = ref('');
@@ -151,15 +150,6 @@ async function handleBatchStatusChange(priorities: number[], disabled: boolean) 
   }
 }
 
-function editVisibility(priority: number, type: RuleSetType) {
-  const rule = props.rules.find(r => r.priority === priority);
-  if (!rule) {
-    emit('show-error', "Rule not found");
-    return;
-  }
-  emit('edit-visibility', rule.meta, `/plugin/ClashRuleProvider/rules/${type}/${priority}/meta`, type);
-}
-
 function closeRuleDialog() {
   ruleDialogVisible.value = false;
 }
@@ -218,7 +208,6 @@ function closeRuleDialog() {
           @reorder="handleReorderRule"
           @change-status="handleStatusChange"
           @change-status-batch="handleBatchStatusChange"
-          @edit-visibility="editVisibility"
       ></RulesetRulesTable>
     </div>
     <!-- 移动端卡片 -->

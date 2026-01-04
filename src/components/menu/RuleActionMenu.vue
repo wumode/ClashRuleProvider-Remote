@@ -7,6 +7,10 @@ defineProps({
   rule: {
     type: Object as PropType<RuleData>,
     required: true
+  },
+  hideVisibility: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -48,8 +52,8 @@ const emit = defineEmits<{
       </v-list-item>
 
       <v-list-item
+          v-if="!hideVisibility"
           @click="emit('editVisibility')"
-          :disabled="isSystemRule(rule)"
       >
         <template v-slot:prepend>
           <v-icon size="small" color="warning">mdi-eye-off-outline</v-icon>

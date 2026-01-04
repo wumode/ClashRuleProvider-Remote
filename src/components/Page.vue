@@ -384,7 +384,6 @@ onMounted(() => {
                   @refresh="refreshAllRegions"
                   @show-snackbar="val => snackbar = val"
                   @show-error="showError"
-                  @edit-visibility="handleEditVisibility"
               />
             </v-window-item>
             <!-- Top Rules Tab -->
