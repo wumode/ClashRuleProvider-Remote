@@ -117,11 +117,7 @@ function generateIdentifierUrl(identifier: string) {
   if (!subUrl.value) return '';
   try {
     const url = new URL(subUrl.value, window.location.origin);
-    // Ensure pathname ends with / before appending if not empty
-    if (!url.pathname.endsWith('/')) {
-      url.pathname += '/';
-    }
-    url.pathname += `identifier=${identifier}`;
+    url.searchParams.set('identifier', identifier);
     return url.toString();
   } catch (e) {
     console.error("Failed to parse URL", e);
