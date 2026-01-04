@@ -29,7 +29,7 @@ const emit = defineEmits<{
     <v-list density="compact">
       <v-list-item
           @click="emit('changeStatus', !ruleProvider.meta.disabled)"
-          :disabled="!isManual(ruleProvider.meta.source)"
+          v-if="isManual(ruleProvider.meta.source)"
       >
         <template v-slot:prepend>
           <v-icon size="small" :color="ruleProvider.meta.disabled ? 'success' : 'grey'">
@@ -41,7 +41,7 @@ const emit = defineEmits<{
 
       <v-list-item
           @click="emit('edit')"
-          :disabled="!isManual(ruleProvider.meta.source)"
+          v-if="isManual(ruleProvider.meta.source)"
       >
         <template v-slot:prepend>
           <v-icon size="small" color="primary">mdi-file-edit-outline</v-icon>
@@ -56,7 +56,7 @@ const emit = defineEmits<{
         <v-list-item-title>查看配置</v-list-item-title>
       </v-list-item>
       
-      <v-list-item :disabled="!isManual(ruleProvider.meta.source)" @click="emit('editVisibility')">
+      <v-list-item v-if="isManual(ruleProvider.meta.source)" @click="emit('editVisibility')">
         <template v-slot:prepend>
           <v-icon size="small" color="warning">mdi-eye-off-outline</v-icon>
         </template>
@@ -65,7 +65,7 @@ const emit = defineEmits<{
 
       <v-list-item
           @click="emit('delete')"
-          :disabled="!isManual(ruleProvider.meta.source)"
+          v-if="isManual(ruleProvider.meta.source)"
       >
         <template v-slot:prepend>
           <v-icon size="small" color="error">mdi-trash-can-outline</v-icon>

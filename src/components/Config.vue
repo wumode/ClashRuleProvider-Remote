@@ -83,7 +83,8 @@ const defaultConfig: PluginConfig = {
   best_cf_ip: [],
   active_dashboard: 0,
   apikey: null,
-  identifiers: []
+  identifiers: [],
+  cache_ttl: 3600
 }
 
 // 响应式配置对象
@@ -610,7 +611,7 @@ function resetForm() {
                 </v-col>
               </v-row>
               <v-row>
-                <v-col cols="12" md="6">
+                <v-col cols="12" md="4">
                   <v-text-field
                       v-model="config.ruleset_prefix"
                       label="规则集前缀"
@@ -623,7 +624,7 @@ function resetForm() {
                     </template>
                   </v-text-field>
                 </v-col>
-                <v-col cols="12" md="6">
+                <v-col cols="12" md="4">
                   <v-text-field
                       v-model="config.acl4ssr_prefix"
                       label="ACL4SSR 规则集前缀"
@@ -633,6 +634,21 @@ function resetForm() {
                   >
                     <template #prepend-inner>
                       <v-icon color="primary">mdi-palette</v-icon>
+                    </template>
+                  </v-text-field>
+                </v-col>
+                <v-col cols="12" md="4">
+                  <v-text-field
+                      v-model="config.cache_ttl"
+                      label="缓存 TTL"
+                      variant="outlined"
+                      placeholder="3600"
+                      type="number"
+                      min="600"
+                      suffix="秒"
+                  >
+                    <template #prepend-inner>
+                      <v-icon color="primary">mdi-alarm</v-icon>
                     </template>
                   </v-text-field>
                 </v-col>

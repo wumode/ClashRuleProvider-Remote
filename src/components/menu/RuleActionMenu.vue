@@ -43,7 +43,7 @@ const emit = defineEmits<{
       </v-list-item>
       <v-list-item
           @click="emit('edit')"
-          :disabled="isSystemRule(rule)"
+          v-if="!isSystemRule(rule)"
       >
         <template v-slot:prepend>
           <v-icon size="small" color="primary">mdi-file-edit-outline</v-icon>
@@ -63,7 +63,7 @@ const emit = defineEmits<{
 
       <v-list-item
           @click="emit('delete')"
-          :disabled="isSystemRule(rule)"
+          v-if="!isSystemRule(rule)"
       >
         <template v-slot:prepend>
           <v-icon size="small" color="error">mdi-trash-can-outline</v-icon>

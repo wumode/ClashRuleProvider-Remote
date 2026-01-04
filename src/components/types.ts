@@ -365,4 +365,5 @@ export interface PluginConfig {
     clash_dashboards: ClashApi[];
     active_dashboard?: number | null;
     identifiers: string[];
+    cache_ttl: number;
 }
