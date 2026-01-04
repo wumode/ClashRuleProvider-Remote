@@ -34,6 +34,10 @@ const proxyGroup = ref<ProxyGroup>(
 );
 
 const proxyGroupTypes = ref(['select', 'url-test', 'fallback', 'load-balance', 'smart'])
+const proxyTypes = ref([
+  'http', 'socks5', 'ss', 'ssr', 'vmess', 'vless', 'trojan', 'hysteria', 'hysteria2',
+  'wireguard', 'tuic', 'mieru', 'direct', 'dns', 'snell', 'ssh', 'anytls'
+])
 const form = ref<any>(null)
 const loading = ref(false)
 const proxyProviderNames = computed(() => Object.keys(props.proxyProviders))

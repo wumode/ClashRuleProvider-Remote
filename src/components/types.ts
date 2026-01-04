@@ -284,7 +284,6 @@ export interface Proxy {
     "routing-mark"?: number;
     "dialer-proxy"?: string;
     smux?: Smux;
-    rescind?: boolean;
     [key: string]: any; // To support other proxy-specific fields without defining each one
 }
 

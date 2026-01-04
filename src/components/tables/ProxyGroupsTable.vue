@@ -34,7 +34,7 @@ const proxyGroupHeaders = ref([
   {title: '名称', key: 'name', sortable: true},
   {title: '类型', key: 'type', sortable: false},
   {title: '来源', key: 'source', sortable: false},
-  {title: '', key: 'status', sortable: false, width: '1rem'},
+  {title: '', key: 'status', sortable: false, width: '1.5rem'},
   {title: '', key: 'actions', sortable: false, width: '1rem'},
 ]);
 </script>
@@ -83,6 +83,17 @@ const proxyGroupHeaders = ref([
                 color="warning"
             >
               mdi-eye-off-outline
+            </v-icon>
+          </template>
+        </v-tooltip>
+        <v-tooltip v-if="item.meta.patched" text="已应用补丁" location="top">
+          <template v-slot:activator="{ props }">
+            <v-icon
+                v-bind="props"
+                size="small"
+                color="info"
+            >
+              mdi-auto-fix
             </v-icon>
           </template>
         </v-tooltip>

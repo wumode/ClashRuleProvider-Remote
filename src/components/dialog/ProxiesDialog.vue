@@ -462,7 +462,6 @@ const saveProxy = async (proxy: Proxy) => {
         </v-alert>
       </v-card-text>
       <v-card-actions>
-        <v-checkbox v-model="proxy.rescind" label="删除覆写"></v-checkbox>
         <v-spacer></v-spacer>
         <v-btn @click="emit('close')">取消</v-btn>
         <v-btn color="primary" :loading="loading" :disabled="loading" @click="handleSave">保存</v-btn>

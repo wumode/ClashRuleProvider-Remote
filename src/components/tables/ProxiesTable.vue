@@ -37,7 +37,7 @@ const headers = ref([
   {title: '服务器', key: 'server', sortable: false},
   {title: '端口', key: 'port', sortable: false},
   {title: '来源', key: 'source', sortable: false},
-  {title: '', key: 'status', sortable: false, width: '1rem'},
+  {title: '', key: 'status', sortable: false, width: '1.5rem'},
   {title: '', key: 'actions', sortable: false, width: '1rem'},
 ]);
 </script>
@@ -111,6 +111,17 @@ const headers = ref([
                 color="warning"
             >
               mdi-eye-off-outline
+            </v-icon>
+          </template>
+        </v-tooltip>
+        <v-tooltip v-if="item.meta.patched" text="已应用补丁" location="top">
+          <template v-slot:activator="{ props }">
+            <v-icon
+                v-bind="props"
+                size="small"
+                color="info"
+            >
+              mdi-auto-fix
             </v-icon>
           </template>
         </v-tooltip>
