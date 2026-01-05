@@ -69,9 +69,7 @@ function editHost(domain: string) {
 async function deleteHost(name: string) {
   loading.value = true;
   try {
-    await props.api.delete('/plugin/ClashRuleProvider/hosts', {
-      domain: name
-    });
+    await props.api.delete(`/plugin/ClashRuleProvider/hosts/${encodeURIComponent(name)}`);
     emit('refresh');
   } catch (err: any) {
     emit('show-error', err.message || '删除 host 失败');

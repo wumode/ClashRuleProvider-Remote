@@ -58,7 +58,7 @@ const emit = defineEmits<{
         <template v-slot:prepend>
           <v-icon size="small" color="warning">mdi-eye-off-outline</v-icon>
         </template>
-        <v-list-item-title>可见性配置</v-list-item-title>
+        <v-list-item-title>隐藏</v-list-item-title>
       </v-list-item>
 
       <v-list-item

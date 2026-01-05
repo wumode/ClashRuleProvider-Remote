@@ -53,14 +53,14 @@ const emit = defineEmits<{
         <template v-slot:prepend>
           <v-icon size="small" color="info">mdi-code-json</v-icon>
         </template>
-        <v-list-item-title>查看配置</v-list-item-title>
+        <v-list-item-title>查看</v-list-item-title>
       </v-list-item>
       
       <v-list-item v-if="isManual(ruleProvider.meta.source)" @click="emit('editVisibility')">
         <template v-slot:prepend>
           <v-icon size="small" color="warning">mdi-eye-off-outline</v-icon>
         </template>
-        <v-list-item-title>限制可见性</v-list-item-title>
+        <v-list-item-title>隐藏</v-list-item-title>
       </v-list-item>
 
       <v-list-item

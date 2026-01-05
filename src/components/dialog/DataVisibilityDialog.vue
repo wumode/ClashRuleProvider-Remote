@@ -115,7 +115,7 @@ async function updateDataVisibility() {
   <v-dialog max-width="40rem">
     <v-card>
       <v-card-title>
-        可见性配置
+        限制可见性
       </v-card-title>
       <v-card-text>
         <v-alert type="info" variant="tonal" class="mb-4" density="compact">

@@ -648,7 +648,7 @@ function resetForm() {
                       suffix="秒"
                   >
                     <template #prepend-inner>
-                      <v-icon color="primary">mdi-alarm</v-icon>
+                      <v-icon color="warning">mdi-alarm</v-icon>
                     </template>
                   </v-text-field>
                 </v-col>

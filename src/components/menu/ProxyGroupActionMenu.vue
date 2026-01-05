@@ -43,7 +43,7 @@ const emit = defineEmits<{
         <template v-slot:prepend>
           <v-icon size="small" color="info">mdi-code-json</v-icon>
         </template>
-        <v-list-item-title>查看配置</v-list-item-title>
+        <v-list-item-title>查看</v-list-item-title>
       </v-list-item>
 
       <v-list-item
@@ -51,8 +51,7 @@ const emit = defineEmits<{
           v-if="(isManual(proxyGroup.meta.source)||isRegion(proxyGroup.meta.source))"
       >
         <template v-slot:prepend>
-          <v-icon size="small" color="primary" v-if="proxyGroup.meta.patched">mdi-wrench-check</v-icon>
-          <v-icon size="small" color="primary" v-else>mdi-file-edit-outline</v-icon>
+          <v-icon size="small" color="primary">mdi-file-edit-outline</v-icon>
         </template>
         <v-list-item-title>编辑</v-list-item-title>
       </v-list-item>
@@ -64,7 +63,7 @@ const emit = defineEmits<{
         <template v-slot:prepend>
           <v-icon size="small" color="warning">mdi-eye-off-outline</v-icon>
         </template>
-        <v-list-item-title>限制可见性</v-list-item-title>
+        <v-list-item-title>隐藏</v-list-item-title>
       </v-list-item>
 
       <v-list-item
