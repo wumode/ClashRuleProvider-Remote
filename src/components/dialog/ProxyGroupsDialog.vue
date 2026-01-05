@@ -34,10 +34,7 @@ const proxyGroup = ref<ProxyGroup>(
 );
 
 const proxyGroupTypes = ref(['select', 'url-test', 'fallback', 'load-balance', 'smart'])
-const proxyTypes = ref([
-  'http', 'socks5', 'ss', 'ssr', 'vmess', 'vless', 'trojan', 'hysteria', 'hysteria2',
-  'wireguard', 'tuic', 'mieru', 'direct', 'dns', 'snell', 'ssh', 'anytls'
-])
+
 const form = ref<any>(null)
 const loading = ref(false)
 const proxyProviderNames = computed(() => Object.keys(props.proxyProviders))
@@ -68,7 +65,16 @@ async function saveProxyGroup() {
   try {
     const path = props.isAdding ? '' : `/${name}`
     const method = props.isAdding ? 'post' : 'patch';
-    const requestData = props.isAdding ? proxyGroup.value : {"source": props.initialValue?.meta.source, "proxy_group": proxyGroup.value}
+
+    // 清理数据，将空字符串转换为null，避免后端校验失败
+    const cleanedProxyGroup = JSON.parse(JSON.stringify(toRaw(proxyGroup.value)));
+    Object.keys(cleanedProxyGroup).forEach(key => {
+      if (cleanedProxyGroup[key] === "") {
+        cleanedProxyGroup[key] = null;
+      }
+    });
+
+    const requestData = props.isAdding ? cleanedProxyGroup : {"source": props.initialValue?.meta.source, "proxy_group": cleanedProxyGroup}
     const result = await props.api[method](`/plugin/ClashRuleProvider/proxy-groups${path}`, requestData);
     if (!result.success) {
       emit('show-error',action + '失败: ' + (result.message || '未知错误'));
@@ -191,13 +197,16 @@ async function saveProxyGroup() {
                   v-model="proxyGroup['policy-priority']"
                   label="policy-priority"
                   hint="优先级"
+                  clearable
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="6">
               <v-text-field
-                  v-model="proxyGroup['sample-rate']"
+                  v-model.number="proxyGroup['sample-rate']"
                   label="sample-rate"
+                  type="number"
                   hint="数据采集率"
+                  clearable
               ></v-text-field>
             </v-col>
           </v-row>
@@ -207,6 +216,7 @@ async function saveProxyGroup() {
                   v-model="proxyGroup.filter"
                   label="filter"
                   hint="筛选满足关键词或正则表达式的节点"
+                  clearable
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="6">
@@ -214,6 +224,7 @@ async function saveProxyGroup() {
                   v-model="proxyGroup['exclude-filter']"
                   label="exclude-filter"
                   hint="排除满足关键词或正则表达式的节点"
+                  clearable
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="6">
@@ -221,6 +232,7 @@ async function saveProxyGroup() {
                   v-model="proxyGroup['exclude-type']"
                   label="exclude-type"
                   hint="不支持正则表达式，通过 | 分割"
+                  clearable
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="6">
@@ -228,6 +240,7 @@ async function saveProxyGroup() {
                   v-model="proxyGroup['expected-status']"
                   label="expected-status"
                   hint="健康检查时期望的 HTTP 响应状态码"
+                  clearable
               ></v-text-field>
             </v-col>
           </v-row>
@@ -285,6 +298,7 @@ async function saveProxyGroup() {
                   variant="outlined"
                   type="number"
                   min="0"
+                  clearable
                   hint="最大失败次数"
                   :rules="[v => v >= 0 || '最大失败次数必须大于等于0']"
               >
