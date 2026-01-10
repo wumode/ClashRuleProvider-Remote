@@ -263,6 +263,7 @@ function editVisibility(name: string) {
             @delete-proxy="deleteProxy"
             @delete-patch="deletePatch"
             @change-status="handleStatusChange"
+            @edit-visibility="editVisibility"
           ></ProxyCard>
         </v-col>
       </v-row>

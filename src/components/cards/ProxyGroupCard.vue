@@ -17,6 +17,7 @@ const emit = defineEmits<{
   (e: 'deleteProxyGroup', name: string): void
   (e: 'deletePatch', name: string): void
   (e: 'changeStatus', name: string, disabled: boolean): void
+  (e: 'editVisibility', name: string): void
 }>()
 </script>
 
@@ -31,9 +32,22 @@ const emit = defineEmits<{
       <span class="font-weight-bold text-truncate" :title="proxyGroupData.data.name">{{
         proxyGroupData.data.name
       }}</span>
-      <v-chip size="small" :color="getSourceColor(proxyGroupData.meta.source)" variant="outlined">
-        {{ proxyGroupData.meta.source }}
-      </v-chip>
+      <div class="d-flex align-center">
+        <v-tooltip
+          v-if="proxyGroupData.meta.invisible_to && proxyGroupData.meta.invisible_to.length > 0"
+          text="已配置可见性限制"
+          location="top"
+        >
+          <template #activator="{ props }">
+            <v-icon v-bind="props" size="small" color="warning" class="mr-2">
+              mdi-eye-off-outline
+            </v-icon>
+          </template>
+        </v-tooltip>
+        <v-chip size="small" :color="getSourceColor(proxyGroupData.meta.source)" variant="outlined">
+          {{ proxyGroupData.meta.source }}
+        </v-chip>
+      </div>
     </div>
     <v-card-text class="pt-2 pb-4">
       <v-row no-gutters class="align-center">
@@ -65,6 +79,7 @@ const emit = defineEmits<{
         @edit="emit('editProxyGroup', proxyGroupData.data.name)"
         @delete="emit('deleteProxyGroup', proxyGroupData.data.name)"
         @delete-patch="emit('deletePatch', proxyGroupData.data.name)"
+        @edit-visibility="emit('editVisibility', proxyGroupData.data.name)"
       />
     </v-card-actions>
   </v-card>

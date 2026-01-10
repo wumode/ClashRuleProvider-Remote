@@ -176,6 +176,7 @@ function closeRuleProviderDialog() {
             @delete-rule-provider="deleteRuleProvider"
             @show-yaml="(o) => emit('show-yaml', o)"
             @change-status="handleStatusChange"
+            @edit-visibility="editVisibility"
           ></RuleProviderCard>
         </v-col>
       </v-row>

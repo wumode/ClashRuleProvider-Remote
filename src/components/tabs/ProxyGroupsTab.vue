@@ -201,6 +201,7 @@ function closeProxyGroupsDialog() {
             @delete-patch="deletePatch"
             @show-yaml="(o) => emit('show-yaml', o)"
             @change-status="handleStatusChange"
+            @edit-visibility="editVisibility"
           ></ProxyGroupCard>
         </v-col>
       </v-row>

@@ -19,6 +19,7 @@ const emit = defineEmits<{
   (e: 'edit', priority: number, type: RuleSetType): void
   (e: 'delete', priority: number, type: RuleSetType): void
   (e: 'change-status', priority: number, disabled: boolean, type: RuleSetType): void
+  (e: 'edit-visibility', priority: number, type: RuleSetType): void
 }>()
 
 function editRule(priority: number) {
@@ -32,6 +33,10 @@ function deleteRule(priority: number) {
 function updateStatus(disabled: boolean) {
   emit('change-status', props.rule.priority, disabled, props.ruleset)
 }
+
+function editVisibility() {
+  emit('edit-visibility', props.rule.priority, props.ruleset)
+}
 </script>
 
 <template>
@@ -40,6 +45,15 @@ function updateStatus(disabled: boolean) {
       <v-chip variant="flat" color="secondary" class="font-weight-bold mr-2" size="small">
         {{ rule.priority }}
       </v-chip>
+      <v-tooltip
+        v-if="rule.meta.invisible_to && rule.meta.invisible_to.length > 0"
+        text="已配置可见性限制"
+        location="top"
+      >
+        <template #activator="{ props }">
+          <v-icon v-bind="props" size="small" color="warning"> mdi-eye-off-outline </v-icon>
+        </template>
+      </v-tooltip>
     </div>
 
     <v-card-text class="pt-2 pb-4">
@@ -87,9 +101,11 @@ function updateStatus(disabled: boolean) {
       <v-spacer></v-spacer>
       <RuleActionMenu
         :rule="rule"
+        :hide-visibility="ruleset == 'ruleset'"
         @edit="editRule(rule.priority)"
         @delete="deleteRule(rule.priority)"
         @change-status="updateStatus"
+        @edit-visibility="editVisibility"
       />
     </v-card-actions>
   </v-card>

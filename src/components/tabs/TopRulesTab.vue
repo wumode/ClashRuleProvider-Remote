@@ -232,6 +232,7 @@ function editVisibility(priority: number, type: RuleSetType) {
             @delete="deleteRule"
             @edit="editRule"
             @change-status="handleStatusChange"
+            @edit-visibility="editVisibility"
           >
           </RuleCard>
         </v-col>
