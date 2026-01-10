@@ -5,7 +5,7 @@ import RuleCard from '../cards/RuleCard.vue';
 import RuleDialog from '../dialog/RuleDialog.vue';
 import {itemsPerPageOptions, defaultRule} from '@/components/constants';
 import {pageTitle} from '@/components/utils';
-import {RuleData, RuleSetType, GeoRules, Metadata} from '@/components/types';
+import {RuleData, RuleSetType, GeoRules} from '@/components/types';
 
 const props = defineProps<{
   rules: RuleData[];

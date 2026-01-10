@@ -156,7 +156,7 @@ async function updateDataVisibility() {
           </v-btn>
         </div>
 
-        <div v-for="(_, index) in customExpressions" :key="index" class="d-flex align-center mb-2">
+        <div v-for="index in customExpressions.keys()" :key="index" class="d-flex align-center mb-2">
           <v-text-field
               v-model="customExpressions[index]"
               label="表达式"
