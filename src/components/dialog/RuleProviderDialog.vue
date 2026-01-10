@@ -44,9 +44,9 @@ async function saveRuleProvider() {
   try {
     saveRuleProviderLoading.value = true
     const name = encodeURIComponent(props.isAdding ? newRuleProvider.value.name : (props.initialValue?.name || ''))
-    const requestData = newRuleProvider.value;
+    const requestData = props.isAdding ? newRuleProvider.value.data : newRuleProvider.value;
     const method = props.isAdding ? 'post' : 'patch';
-    const result = await props.api[method](`/plugin/ClashRuleProvider/rule-providers/${name}`, requestData.data);
+    const result = await props.api[method](`/plugin/ClashRuleProvider/rule-providers/${name}`, requestData);
     if (!result.success) {
       emit('show-error', '保存规则集合失败: ' + (result.message || '未知错误'));
       emit('show-snackbar', {
