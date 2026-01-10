@@ -19,7 +19,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <v-card rounded="lg" elevation="2" class="rule-provider-card h-100 transition-swing">
+  <v-card rounded="lg" elevation="2" class="rule-provider-card h-100 transition-swing" variant="tonal">
     <div class="d-flex justify-space-between align-center px-4 pt-3">
       <span class="font-weight-bold text-truncate" :title="ruleProviderData.name">{{ ruleProviderData.name }}</span>
       <v-chip size="small" :color="getSourceColor(ruleProviderData.meta.source)" variant="outlined">

@@ -35,7 +35,7 @@ function updateStatus(disabled: boolean) {
 </script>
 
 <template>
-  <v-card rounded="lg" elevation="2" class="rule-card h-100 transition-swing">
+  <v-card rounded="lg" elevation="2" class="rule-card h-100 transition-swing" variant="tonal">
     <div class="d-flex justify-space-between align-center px-4 pt-3">
       <v-chip
           variant="flat"
