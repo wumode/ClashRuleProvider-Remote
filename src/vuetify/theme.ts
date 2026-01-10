@@ -6,17 +6,17 @@ const theme: VuetifyOptions['theme'] = {
     light: {
       dark: false,
       colors: {
-        'primary': '#9155FD',
-        'secondary': '#8A8D93',
+        primary: '#9155FD',
+        secondary: '#8A8D93',
         'on-secondary': '#FFFFFF',
-        'success': '#56CA00',
-        'info': '#16B1FF',
-        'warning': '#FFB400',
-        'error': '#FF4C51',
+        success: '#56CA00',
+        info: '#16B1FF',
+        warning: '#FFB400',
+        error: '#FF4C51',
         'on-primary': '#FFFFFF',
         'on-success': '#FFFFFF',
         'on-warning': '#FFFFFF',
-        'background': '#F4F5FA',
+        background: '#F4F5FA',
         'on-background': '#3A3541',
         'on-surface': '#3A3541',
         'surface-variant': '#424242',
@@ -33,7 +33,7 @@ const theme: VuetifyOptions['theme'] = {
         'grey-900': '#212121',
         'perfect-scrollbar-thumb': '#DBDADE',
         'skin-bordered-background': '#FFFFFF',
-        'skin-bordered-surface': '#FFFFFF',
+        'skin-bordered-surface': '#FFFFFF'
       },
 
       variables: {
@@ -53,25 +53,25 @@ const theme: VuetifyOptions['theme'] = {
         // Shadows
         'shadow-key-umbra-opacity': 'rgba(var(--v-theme-on-surface), 0.08)',
         'shadow-key-penumbra-opacity': 'rgba(var(--v-theme-on-surface), 0.12)',
-        'shadow-key-ambient-opacity': 'rgba(var(--v-theme-on-surface), 0.04)',
-      },
+        'shadow-key-ambient-opacity': 'rgba(var(--v-theme-on-surface), 0.04)'
+      }
     },
     dark: {
       dark: true,
       colors: {
-        'primary': '#6E66ED',
-        'secondary': '#8A8D93',
+        primary: '#6E66ED',
+        secondary: '#8A8D93',
         'on-secondary': '#FFFFFF',
-        'success': '#56CA00',
-        'info': '#16B1FF',
-        'warning': '#FFB400',
-        'error': '#FF4C51',
+        success: '#56CA00',
+        info: '#16B1FF',
+        warning: '#FFB400',
+        error: '#FF4C51',
         'on-primary': '#FFFFFF',
         'on-success': '#FFFFFF',
         'on-warning': '#FFFFFF',
-        'background': '#0E1116',
+        background: '#0E1116',
         'on-background': '#E7E3FC',
-        'surface': '#14161F',
+        surface: '#14161F',
         'on-surface': '#E7E3FC',
         'surface-variant': '#BDBDBD',
         'on-surface-variant': '#424242',
@@ -87,7 +87,7 @@ const theme: VuetifyOptions['theme'] = {
         'grey-900': '#E7E9F6',
         'perfect-scrollbar-thumb': '#4A5072',
         'skin-bordered-background': '#312d4b',
-        'skin-bordered-surface': '#312d4b',
+        'skin-bordered-surface': '#312d4b'
       },
       variables: {
         'code-color': '#d400ff',
@@ -105,25 +105,25 @@ const theme: VuetifyOptions['theme'] = {
         // Shadows
         'shadow-key-umbra-opacity': 'rgba(20, 18, 33, 0.08)',
         'shadow-key-penumbra-opacity': 'rgba(20, 18, 33, 0.12)',
-        'shadow-key-ambient-opacity': 'rgba(20, 18, 33, 0.04)',
-      },
+        'shadow-key-ambient-opacity': 'rgba(20, 18, 33, 0.04)'
+      }
     },
     purple: {
       dark: true,
       colors: {
-        'primary': '#9155FD',
-        'secondary': '#8A8D93',
+        primary: '#9155FD',
+        secondary: '#8A8D93',
         'on-secondary': '#FFFFFF',
-        'success': '#56CA00',
-        'info': '#16B1FF',
-        'warning': '#FFB400',
-        'error': '#FF4C51',
+        success: '#56CA00',
+        info: '#16B1FF',
+        warning: '#FFB400',
+        error: '#FF4C51',
         'on-primary': '#FFFFFF',
         'on-success': '#FFFFFF',
         'on-warning': '#FFFFFF',
-        'background': '#28243D',
+        background: '#28243D',
         'on-background': '#E7E3FC',
-        'surface': '#312D4B',
+        surface: '#312D4B',
         'on-surface': '#E7E3FC',
         'surface-variant': '#BDBDBD',
         'on-surface-variant': '#424242',
@@ -139,7 +139,7 @@ const theme: VuetifyOptions['theme'] = {
         'grey-900': '#E7E9F6',
         'perfect-scrollbar-thumb': '#4A5072',
         'skin-bordered-background': '#312d4b',
-        'skin-bordered-surface': '#312d4b',
+        'skin-bordered-surface': '#312d4b'
       },
       variables: {
         'code-color': '#d400ff',
@@ -158,25 +158,25 @@ const theme: VuetifyOptions['theme'] = {
         // Shadows
         'shadow-key-umbra-opacity': 'rgba(20, 18, 33, 0.08)',
         'shadow-key-penumbra-opacity': 'rgba(20, 18, 33, 0.12)',
-        'shadow-key-ambient-opacity': 'rgba(20, 18, 33, 0.04)',
-      },
+        'shadow-key-ambient-opacity': 'rgba(20, 18, 33, 0.04)'
+      }
     },
     transparent: {
       dark: true,
       colors: {
-        'primary': '#A370F7',
-        'secondary': '#8A8D93',
+        primary: '#A370F7',
+        secondary: '#8A8D93',
         'on-secondary': '#FFFFFF',
-        'success': '#66BB6A',
-        'info': '#42A5F5',
-        'warning': '#FFA726',
-        'error': '#EF5350',
+        success: '#66BB6A',
+        info: '#42A5F5',
+        warning: '#FFA726',
+        error: '#EF5350',
         'on-primary': '#FFFFFF',
         'on-success': '#FFFFFF',
         'on-warning': '#FFFFFF',
-        'background': '#000000',
+        background: '#000000',
         'on-background': '#E7E3FC',
-        'surface': 'rgba(30, 30, 30, 0.3)',
+        surface: 'rgba(30, 30, 30, 0.3)',
         'on-surface': '#E7E3FC',
         'surface-variant': 'rgba(30, 30, 30, 0.2)',
         'on-surface-variant': 'rgba(255, 255, 255, 0.65)',
@@ -193,7 +193,7 @@ const theme: VuetifyOptions['theme'] = {
         'perfect-scrollbar-thumb': 'rgba(158, 158, 190, 0.4)',
         'skin-bordered-background': 'rgba(30, 30, 30, 0.3)',
         'skin-bordered-surface': 'rgba(30, 30, 30, 0.3)',
-        'card-background': 'rgba(30, 30, 30, 0.3)',
+        'card-background': 'rgba(30, 30, 30, 0.3)'
       },
       variables: {
         'code-color': '#6D9EEB',
@@ -213,10 +213,10 @@ const theme: VuetifyOptions['theme'] = {
         // Shadows
         'shadow-key-umbra-opacity': 'rgba(0, 0, 0, 0.07)',
         'shadow-key-penumbra-opacity': 'rgba(0, 0, 0, 0.1)',
-        'shadow-key-ambient-opacity': 'rgba(0, 0, 0, 0.05)',
-      },
-    },
-  },
+        'shadow-key-ambient-opacity': 'rgba(0, 0, 0, 0.05)'
+      }
+    }
+  }
 }
 
 export default theme

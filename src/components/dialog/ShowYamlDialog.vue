@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import {VAceEditor} from "vue3-ace-editor";
-import 'ace-builds/src-noconflict/ace';
-import 'ace-builds/src-noconflict/mode-yaml';
-import 'ace-builds/src-noconflict/theme-monokai';
+import { VAceEditor } from 'vue3-ace-editor'
+import 'ace-builds/src-noconflict/ace'
+import 'ace-builds/src-noconflict/mode-yaml'
+import 'ace-builds/src-noconflict/theme-monokai'
 
 // 输入参数
 const props = defineProps({
@@ -26,7 +26,6 @@ const emit = defineEmits<{
   (e: 'close'): void
   (e: 'copyToClipboard', content: string): void
 }>()
-
 </script>
 
 <template>
@@ -34,14 +33,14 @@ const emit = defineEmits<{
   <v-dialog :model-value="true" max-width="40rem" @update:model-value="emit('close')">
     <v-card>
       <v-card-title class="headline">YAML 配置</v-card-title>
-      <v-card-text style="max-height: 600px; overflow-y: auto;">
+      <v-card-text style="max-height: 600px; overflow-y: auto">
         <VAceEditor
-            v-model:value="props.content"
-            lang="yaml"
-            theme="monokai"
-            :options="readOnlyEditorOptions"
-            :placeholder="placeholder"
-            style="height: 30rem; width: 100%; margin-bottom: 16px;"
+          :value="props.content"
+          lang="yaml"
+          theme="monokai"
+          :options="readOnlyEditorOptions"
+          :placeholder="placeholder"
+          style="height: 30rem; width: 100%; margin-bottom: 16px"
         />
       </v-card-text>
       <v-card-actions>
@@ -53,6 +52,4 @@ const emit = defineEmits<{
   </v-dialog>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

@@ -1,46 +1,47 @@
 <script setup lang="ts">
-import {ref, onMounted, computed} from 'vue'
-import yaml from 'js-yaml';
-import ShowYamlDialog from "./dialog/ShowYamlDialog.vue";
-import DataVisibilityDialog from "./dialog/DataVisibilityDialog.vue";
-import RulesetRulesTab from "./tabs/RulesetRulesTab.vue";
-import TopRulesTab from "./tabs/TopRulesTab.vue";
-import ProxyGroupsTab from "./tabs/ProxyGroupsTab.vue";
-import ProxiesTab from "./tabs/ProxiesTab.vue";
-import SubscriptionTab from "./tabs/SubscriptionTab.vue";
-import RuleProvidersTab from "./tabs/RuleProvidersTab.vue";
-import HostsTab from "./tabs/HostsTab.vue";
-import StatisticsPanel from "./StatisticsPanel.vue";
-import MetaLogo from "@/assets/Meta.png";
-import "@/styles/common.css";
+import { ref, onMounted, computed } from 'vue'
+import yaml from 'js-yaml'
+import ShowYamlDialog from './dialog/ShowYamlDialog.vue'
+import DataVisibilityDialog from './dialog/DataVisibilityDialog.vue'
+import RulesetRulesTab from './tabs/RulesetRulesTab.vue'
+import TopRulesTab from './tabs/TopRulesTab.vue'
+import ProxyGroupsTab from './tabs/ProxyGroupsTab.vue'
+import ProxiesTab from './tabs/ProxiesTab.vue'
+import SubscriptionTab from './tabs/SubscriptionTab.vue'
+import RuleProvidersTab from './tabs/RuleProvidersTab.vue'
+import HostsTab from './tabs/HostsTab.vue'
+import StatisticsPanel from './StatisticsPanel.vue'
+import MetaLogo from '@/assets/Meta.png'
+import '@/styles/common.css'
 import {
   RuleData,
   ProxyGroupData,
   RuleProviderData,
   ProxyData,
   SubscriptionInfo,
-  HostData, GeoRules, ProxyProviderData, Metadata
-} from "@/components/types";
-import {defaultMetadata} from "@/components/constants";
+  HostData,
+  GeoRules,
+  ProxyProviderData,
+  Metadata
+} from '@/components/types'
+import { defaultMetadata } from '@/components/constants'
 
 // 接收初始配置
 const props = defineProps({
   model: {
     type: Object,
-    default: () => {
-    },
+    default: () => {}
   },
   api: {
     type: Object,
-    default: () => {
-    },
-  },
+    default: () => {}
+  }
 })
 
 // 自定义事件，用于通知主应用刷新数据
 const emit = defineEmits(['action', 'switch', 'close'])
 
-const activeTab = ref(0);
+const activeTab = ref(0)
 
 const snackbar = ref({
   show: false,
@@ -50,7 +51,7 @@ const snackbar = ref({
 // 添加自定义出站状态
 const customOutbounds = ref<string[]>([])
 
-const subUrl = ref('');
+const subUrl = ref('')
 const proxyGroups = ref<ProxyGroupData[]>([])
 const proxyProviders = ref<ProxyProviderData[]>([])
 const proxies = ref<ProxyData[]>([])
@@ -69,7 +70,7 @@ const status = ref('running')
 const rulesetPrefix = ref('📂<=')
 const geoRules = ref<GeoRules>({
   geoip: [],
-  geosite: [],
+  geosite: []
 })
 const lastUpdated = ref('')
 const showYamlDialog = ref(false)
@@ -77,15 +78,19 @@ const displayedYaml = ref('')
 
 // Visibility Dialog State
 const visibilityDialogVisible = ref(false)
-const currentVisibilityMeta = ref<Metadata>({...defaultMetadata})
+const currentVisibilityMeta = ref<Metadata>({ ...defaultMetadata })
 const currentVisibilityEndpoint = ref('')
 const currentVisibilityRegion = ref('')
 
 // 排序后的规则
-const sortedRules = computed<RuleData[]>(() => [...rules.value].sort((a, b) => a.priority - b.priority))
-const sortedRulesetRules = computed<RuleData[]>(() => [...rulesetRules.value].sort((a, b) => a.priority - b.priority))
+const sortedRules = computed<RuleData[]>(() =>
+  [...rules.value].sort((a, b) => a.priority - b.priority)
+)
+const sortedRulesetRules = computed<RuleData[]>(() =>
+  [...rulesetRules.value].sort((a, b) => a.priority - b.priority)
+)
 const ruleProviderNames = computed(() => {
-  return ruleProviders.value.map(provider => provider.name)
+  return ruleProviders.value.map((provider) => provider.name)
 })
 
 const subscriptionsInfo = ref<Record<string, SubscriptionInfo>>({})
@@ -93,154 +98,157 @@ const bestCloudflareIPs = ref([])
 
 // 复制功能
 function copyToClipboard(text: string) {
-  navigator.clipboard.writeText(text).then(() => {
-    snackbar.value = {
-      show: true,
-      message: '已复制到剪贴板',
-      color: 'success'
-    };
-  }).catch(() => {
-    snackbar.value = {
-      show: true,
-      message: '复制失败',
-      color: 'error'
-    };
-  });
+  navigator.clipboard
+    .writeText(text)
+    .then(() => {
+      snackbar.value = {
+        show: true,
+        message: '已复制到剪贴板',
+        color: 'success'
+      }
+    })
+    .catch(() => {
+      snackbar.value = {
+        show: true,
+        message: '复制失败',
+        color: 'error'
+      }
+    })
 }
 
 function copyPluginLink() {
-  const url = `${window.location.origin}/#/plugins?tab=installed&id=ClashRuleProvider`;
-  copyToClipboard(url);
+  const url = `${window.location.origin}/#/plugins?tab=installed&id=ClashRuleProvider`
+  copyToClipboard(url)
 }
 
 function generateIdentifierUrl(identifier: string) {
-  if (!subUrl.value) return '';
+  if (!subUrl.value) return ''
   try {
-    const url = new URL(subUrl.value, window.location.origin);
-    url.searchParams.set('identifier', identifier);
-    return url.toString();
+    const url = new URL(subUrl.value, window.location.origin)
+    url.searchParams.set('identifier', identifier)
+    return url.toString()
   } catch (e) {
-    console.error("Failed to parse URL", e);
-    return subUrl.value;
+    console.error('Failed to parse URL', e)
+    return subUrl.value
   }
 }
 
 function showYaml(obj: any) {
   // 生成 YAML 并显示
-  displayedYaml.value = yaml.dump(obj);
-  showYamlDialog.value = true;
+  displayedYaml.value = yaml.dump(obj)
+  showYamlDialog.value = true
 }
 
 function showError(Msg: string) {
   error.value = true
-  errorMsg.value = Msg;
+  errorMsg.value = Msg
 }
 
 function handleEditVisibility(meta: Metadata, endpoint: string, region: string) {
-  currentVisibilityMeta.value = meta;
-  currentVisibilityEndpoint.value = endpoint;
-  currentVisibilityRegion.value = region;
-  visibilityDialogVisible.value = true;
+  currentVisibilityMeta.value = meta
+  currentVisibilityEndpoint.value = endpoint
+  currentVisibilityRegion.value = region
+  visibilityDialogVisible.value = true
 }
 
 async function refreshStatus() {
   const state = await props.api.get('/plugin/ClashRuleProvider/status')
   // 处理状态请求的响应
-  status.value = state?.data?.state ? 'running' : 'disabled';
-  subUrl.value = state?.data?.sub_url || '';
+  status.value = state?.data?.state ? 'running' : 'disabled'
+  subUrl.value = state?.data?.sub_url || ''
 
   if (state?.data?.subscription_info) {
     subscriptionsInfo.value = state.data.subscription_info
   }
   bestCloudflareIPs.value = state?.data?.best_cf_ip || []
-  rulesetPrefix.value = state?.data?.ruleset_prefix || '📂<=';
-  geoRules.value = state?.data?.geoRules ?? geoRules.value;
+  rulesetPrefix.value = state?.data?.ruleset_prefix || '📂<='
+  geoRules.value = state?.data?.geoRules ?? geoRules.value
 }
 
 async function refreshTopRules() {
   const response = await props.api.get('/plugin/ClashRuleProvider/rules/top')
-  rules.value = response?.data || [];
+  rules.value = response?.data || []
 }
 
 async function refreshRulesetRules() {
   const response = await props.api.get('/plugin/ClashRuleProvider/rules/ruleset')
-  rulesetRules.value = response?.data || [];
+  rulesetRules.value = response?.data || []
 }
 
 async function refreshOutbounds() {
   const outboundsResponse = await props.api.get('/plugin/ClashRuleProvider/clash-outbound')
-  customOutbounds.value = outboundsResponse?.data || [];
+  customOutbounds.value = outboundsResponse?.data || []
 }
 
 async function refreshExtraRuleProviders() {
   const providersResponse = await props.api.get('/plugin/ClashRuleProvider/rule-providers')
-  ruleProviders.value = providersResponse?.data || [];
+  ruleProviders.value = providersResponse?.data || []
 }
 
 async function refreshProxyGroups() {
   const proxyGroupsResponse = await props.api.get('/plugin/ClashRuleProvider/proxy-groups')
-  proxyGroups.value = proxyGroupsResponse?.data || [];
+  proxyGroups.value = proxyGroupsResponse?.data || []
 }
 
 async function refreshExtraProxies() {
   const extraProxiesResponse = await props.api.get('/plugin/ClashRuleProvider/proxies')
-  proxies.value = extraProxiesResponse?.data || [];
+  proxies.value = extraProxiesResponse?.data || []
 }
 
 async function refreshHosts() {
   const hostsResponse = await props.api.get('/plugin/ClashRuleProvider/hosts')
-  hosts.value = hostsResponse?.data || [];
+  hosts.value = hostsResponse?.data || []
 }
 
 async function refreshProxyProviders() {
   const proxyProvidersResponse = await props.api.get('/plugin/ClashRuleProvider/proxy-providers')
-  proxyProviders.value = proxyProvidersResponse?.data || [];
+  proxyProviders.value = proxyProvidersResponse?.data || []
 }
 
 async function refreshDataOf(region: string) {
   switch (region) {
-    case "status":
-      return refreshStatus();
-    case "top":
-      return refreshTopRules();
-    case "ruleset":
-      return refreshRulesetRules();
-    case "clash-outbounds":
-      return refreshOutbounds();
-    case "rule-providers":
-      return refreshExtraRuleProviders();
-    case "proxy-groups":
-      return refreshProxyGroups();
-    case "proxies":
-      return refreshExtraProxies();
-    case "hosts":
-      return refreshHosts();
-    case "proxy-providers":
-      return refreshProxyProviders();
+    case 'status':
+      return refreshStatus()
+    case 'top':
+      return refreshTopRules()
+    case 'ruleset':
+      return refreshRulesetRules()
+    case 'clash-outbounds':
+      return refreshOutbounds()
+    case 'rule-providers':
+      return refreshExtraRuleProviders()
+    case 'proxy-groups':
+      return refreshProxyGroups()
+    case 'proxies':
+      return refreshExtraProxies()
+    case 'hosts':
+      return refreshHosts()
+    case 'proxy-providers':
+      return refreshProxyProviders()
     default:
-      throw new Error("Unknown region: " + region);
+      throw new Error('Unknown region: ' + region)
   }
 }
 
 async function refreshAllRegions(regions: string[]) {
   try {
-    await Promise.all(regions.map(refreshDataOf));
+    await Promise.all(regions.map(refreshDataOf))
   } catch (err: unknown) {
-    console.error('获取数据失败:', err);
+    console.error('获取数据失败:', err)
     if (err instanceof Error) {
-      showError(err.message || '获取数据失败');
+      showError(err.message || '获取数据失败')
     }
-    status.value = 'error';
+    status.value = 'error'
   } finally {
-    lastUpdated.value = new Date().toLocaleString();
+    lastUpdated.value = new Date().toLocaleString()
   }
 }
 
 // 获取和刷新数据
 async function refreshData() {
-  loading.value = true;
-  error.value = false;
-  errorMsg.value = '';
+  loading.value = true
+  error.value = false
+  errorMsg.value = ''
   try {
     // 并发发送所有独立的请求
     const [
@@ -252,7 +260,7 @@ async function refreshData() {
       proxyGroupsResponse,
       extraProxiesResponse,
       hostsResponse,
-      proxyProvidersResponse,
+      proxyProvidersResponse
     ] = await Promise.all([
       props.api.get('/plugin/ClashRuleProvider/status'),
       props.api.get('/plugin/ClashRuleProvider/rules/top'),
@@ -262,37 +270,37 @@ async function refreshData() {
       props.api.get('/plugin/ClashRuleProvider/proxy-groups'),
       props.api.get('/plugin/ClashRuleProvider/proxies'),
       props.api.get('/plugin/ClashRuleProvider/hosts'),
-      props.api.get('/plugin/ClashRuleProvider/proxy-providers'),
-    ]);
+      props.api.get('/plugin/ClashRuleProvider/proxy-providers')
+    ])
 
     // 处理状态请求的响应
-    status.value = state?.data?.state ? 'running' : 'disabled';
-    subUrl.value = state?.data?.sub_url || '';
+    status.value = state?.data?.state ? 'running' : 'disabled'
+    subUrl.value = state?.data?.sub_url || ''
 
     if (state?.data?.subscription_info) {
       subscriptionsInfo.value = state.data.subscription_info
     }
     bestCloudflareIPs.value = state?.data?.best_cf_ip || []
-    rulesetPrefix.value = state?.data?.ruleset_prefix || '📂<=';
-    geoRules.value = state?.data?.geoRules ?? geoRules.value;
-    presetIdentifiers.value = state?.data?.preset_identifiers || [];
-    rules.value = response?.data || [];
-    rulesetRules.value = response_ruleset?.data || [];
-    customOutbounds.value = outboundsResponse?.data || [];
-    ruleProviders.value = providersResponse?.data || [];
-    proxyGroups.value = proxyGroupsResponse?.data || [];
-    proxies.value = extraProxiesResponse?.data || [];
-    hosts.value = hostsResponse?.data || [];
-    proxyProviders.value = proxyProvidersResponse?.data || [];
-    lastUpdated.value = new Date().toLocaleString();
+    rulesetPrefix.value = state?.data?.ruleset_prefix || '📂<='
+    geoRules.value = state?.data?.geoRules ?? geoRules.value
+    presetIdentifiers.value = state?.data?.preset_identifiers || []
+    rules.value = response?.data || []
+    rulesetRules.value = response_ruleset?.data || []
+    customOutbounds.value = outboundsResponse?.data || []
+    ruleProviders.value = providersResponse?.data || []
+    proxyGroups.value = proxyGroupsResponse?.data || []
+    proxies.value = extraProxiesResponse?.data || []
+    hosts.value = hostsResponse?.data || []
+    proxyProviders.value = proxyProvidersResponse?.data || []
+    lastUpdated.value = new Date().toLocaleString()
   } catch (err: unknown) {
-    console.error('获取数据失败:', err);
+    console.error('获取数据失败:', err)
     if (err instanceof Error) {
-      showError(err.message || '获取数据失败');
+      showError(err.message || '获取数据失败')
     }
-    status.value = 'error';
+    status.value = 'error'
   } finally {
-    loading.value = false;
+    loading.value = false
   }
 }
 
@@ -310,22 +318,28 @@ function notifyClose() {
 onMounted(() => {
   refreshData()
 })
-
 </script>
 <template>
   <div class="plugin-page">
     <v-card>
-      <v-alert v-if="error" v-model="error" type="error" class="mb-4" closable>{{ errorMsg }}</v-alert>
+      <v-alert v-if="error" v-model="error" type="error" class="mb-4" closable>{{
+        errorMsg
+      }}</v-alert>
       <v-card-item>
         <v-card-title>
           <v-icon class="mr-2" size="24">
             <img
-                :src="`/api/v1/plugin/file/clashruleprovider/dist${MetaLogo}`"
-                alt="icon"
-                style="width: 100%; height: 100%;">
+              :src="`/api/v1/plugin/file/clashruleprovider/dist${MetaLogo}`"
+              alt="icon"
+              style="width: 100%; height: 100%"
+            />
           </v-icon>
           Clash Rule Provider
-          <v-chip @click="copyPluginLink" size="small" :color="status === 'running' ? 'success' : 'warning'">
+          <v-chip
+            size="small"
+            :color="status === 'running' ? 'success' : 'warning'"
+            @click="copyPluginLink"
+          >
             {{ status }}
           </v-chip>
         </v-card-title>
@@ -375,92 +389,92 @@ onMounted(() => {
             <!-- Ruleset Rules Tab -->
             <v-window-item>
               <RulesetRulesTab
-                  :rules="sortedRulesetRules"
-                  :ruleset-prefix="rulesetPrefix"
-                  :api="api"
-                  :rule-provider-names="ruleProviderNames"
-                  :geo-rules="geoRules"
-                  :custom-outbounds="customOutbounds"
-                  @refresh="refreshAllRegions"
-                  @show-snackbar="val => snackbar = val"
-                  @show-error="showError"
+                :rules="sortedRulesetRules"
+                :ruleset-prefix="rulesetPrefix"
+                :api="api"
+                :rule-provider-names="ruleProviderNames"
+                :geo-rules="geoRules"
+                :custom-outbounds="customOutbounds"
+                @refresh="refreshAllRegions"
+                @show-snackbar="(val) => (snackbar = val)"
+                @show-error="showError"
               />
             </v-window-item>
             <!-- Top Rules Tab -->
             <v-window-item>
               <TopRulesTab
-                  :rules="sortedRules"
-                  :api="api"
-                  :rule-provider-names="ruleProviderNames"
-                  :geo-rules="geoRules"
-                  :custom-outbounds="customOutbounds"
-                  @refresh="refreshAllRegions"
-                  @show-snackbar="val => snackbar = val"
-                  @show-error="showError"
-                  @edit-visibility="handleEditVisibility"
+                :rules="sortedRules"
+                :api="api"
+                :rule-provider-names="ruleProviderNames"
+                :geo-rules="geoRules"
+                :custom-outbounds="customOutbounds"
+                @refresh="refreshAllRegions"
+                @show-snackbar="(val) => (snackbar = val)"
+                @show-error="showError"
+                @edit-visibility="handleEditVisibility"
               />
             </v-window-item>
             <!-- Proxy Groups Tab -->
             <v-window-item>
               <ProxyGroupsTab
-                  :proxy-groups="proxyGroups"
-                  :proxy-providers="proxyProviders"
-                  :custom-outbounds="customOutbounds"
-                  :api="api"
-                  @refresh="refreshAllRegions"
-                  @show-snackbar="val => snackbar = val"
-                  @show-error="showError"
-                  @show-yaml="showYaml"
-                  @copy-to-clipboard="copyToClipboard"
-                  @edit-visibility="handleEditVisibility"
+                :proxy-groups="proxyGroups"
+                :proxy-providers="proxyProviders"
+                :custom-outbounds="customOutbounds"
+                :api="api"
+                @refresh="refreshAllRegions"
+                @show-snackbar="(val) => (snackbar = val)"
+                @show-error="showError"
+                @show-yaml="showYaml"
+                @copy-to-clipboard="copyToClipboard"
+                @edit-visibility="handleEditVisibility"
               />
             </v-window-item>
             <!-- Proxies Tab -->
             <v-window-item>
               <ProxiesTab
-                  :proxies="proxies"
-                  :api="api"
-                  @refresh="refreshAllRegions"
-                  @show-snackbar="val => snackbar = val"
-                  @show-error="showError"
-                  @show-yaml="showYaml"
-                  @copy-to-clipboard="copyToClipboard"
-                  @edit-visibility="handleEditVisibility"
+                :proxies="proxies"
+                :api="api"
+                @refresh="refreshAllRegions"
+                @show-snackbar="(val) => (snackbar = val)"
+                @show-error="showError"
+                @show-yaml="showYaml"
+                @copy-to-clipboard="copyToClipboard"
+                @edit-visibility="handleEditVisibility"
               />
             </v-window-item>
             <!-- Rule Providers Tab -->
             <v-window-item>
               <RuleProvidersTab
-                  :rule-providers="ruleProviders"
-                  :api="api"
-                  @refresh="refreshAllRegions"
-                  @show-snackbar="val => snackbar = val"
-                  @show-error="showError"
-                  @show-yaml="showYaml"
-                  @edit-visibility="handleEditVisibility"
+                :rule-providers="ruleProviders"
+                :api="api"
+                @refresh="refreshAllRegions"
+                @show-snackbar="(val) => (snackbar = val)"
+                @show-error="showError"
+                @show-yaml="showYaml"
+                @edit-visibility="handleEditVisibility"
               />
             </v-window-item>
             <!-- Hosts Tab -->
             <v-window-item>
               <HostsTab
-                  :hosts="hosts"
-                  :best-cloudflare-i-ps="bestCloudflareIPs"
-                  :api="api"
-                  @refresh="refreshAllRegions(['hosts'])"
-                  @show-snackbar="val => snackbar = val"
-                  @show-error="showError"
+                :hosts="hosts"
+                :best-cloudflare-i-ps="bestCloudflareIPs"
+                :api="api"
+                @refresh="refreshAllRegions(['hosts'])"
+                @show-snackbar="(val) => (snackbar = val)"
+                @show-error="showError"
               />
             </v-window-item>
             <!-- Sub Tab -->
             <v-window-item>
               <SubscriptionTab
-                  :subscriptions-info="subscriptionsInfo"
-                  :api="api"
-                  @refresh="refreshAllRegions"
-                  @show-snackbar="val => snackbar = val"
-                  @show-error="showError"
-                  @copy-to-clipboard="copyToClipboard"
-                  @switch="notifySwitch"
+                :subscriptions-info="subscriptionsInfo"
+                :api="api"
+                @refresh="refreshAllRegions"
+                @show-snackbar="(val) => (snackbar = val)"
+                @show-error="showError"
+                @copy-to-clipboard="copyToClipboard"
+                @switch="notifySwitch"
               />
             </v-window-item>
           </v-window>
@@ -469,24 +483,24 @@ onMounted(() => {
       <v-expand-transition>
         <div v-if="expand">
           <StatisticsPanel
-              :ruleset-rules-count="sortedRulesetRules.length"
-              :top-rules-count="sortedRules.length"
-              :proxy-groups-count="proxyGroups.length"
-              :extra-proxies-count="proxies.length"
-              :extra-rule-providers-count="ruleProviders.length"
-              :hosts-count="hosts.length"
-              :geosite-count="geoRules.geosite.length"
-              :last-updated="lastUpdated"
+            :ruleset-rules-count="sortedRulesetRules.length"
+            :top-rules-count="sortedRules.length"
+            :proxy-groups-count="proxyGroups.length"
+            :extra-proxies-count="proxies.length"
+            :extra-rule-providers-count="ruleProviders.length"
+            :hosts-count="hosts.length"
+            :geosite-count="geoRules.geosite.length"
+            :last-updated="lastUpdated"
           />
         </div>
       </v-expand-transition>
       <v-card-actions>
-        <v-btn color="primary" @click="refreshData" :loading="loading">
+        <v-btn color="primary" :loading="loading" @click="refreshData">
           <v-icon left>mdi-refresh</v-icon>
           刷新数据
         </v-btn>
         <v-menu v-if="presetIdentifiers.length > 0">
-          <template v-slot:activator="{ props }">
+          <template #activator="{ props }">
             <v-btn color="info" v-bind="props">
               <v-icon left>mdi-link-variant</v-icon>
               生成链接
@@ -494,18 +508,18 @@ onMounted(() => {
           </template>
           <v-list>
             <v-list-item :href="subUrl" target="_blank">
-              <template v-slot:prepend>
+              <template #prepend>
                 <v-icon icon="mdi-link-variant"></v-icon>
               </template>
               <v-list-item-title>默认</v-list-item-title>
             </v-list-item>
             <v-list-item
-                v-for="id in presetIdentifiers"
-                :key="id"
-                :href="generateIdentifierUrl(id)"
-                target="_blank"
+              v-for="id in presetIdentifiers"
+              :key="id"
+              :href="generateIdentifierUrl(id)"
+              target="_blank"
             >
-              <template v-slot:prepend>
+              <template #prepend>
                 <v-icon icon="mdi-devices"></v-icon>
               </template>
               <v-list-item-title>{{ id }}</v-list-item-title>
@@ -516,10 +530,7 @@ onMounted(() => {
           <v-icon left>mdi-link-variant</v-icon>
           生成链接
         </v-btn>
-        <v-btn
-            color="success"
-            @click="expand = !expand"
-        >
+        <v-btn color="success" @click="expand = !expand">
           <v-icon left>mdi-chart-bar</v-icon>
           统计信息
         </v-btn>
@@ -529,35 +540,30 @@ onMounted(() => {
           配置
         </v-btn>
       </v-card-actions>
-      <v-snackbar
-          v-model="snackbar.show"
-          :color="snackbar.color"
-          location="bottom"
-          class="mb-2"
-      >
+      <v-snackbar v-model="snackbar.show" :color="snackbar.color" location="bottom" class="mb-2">
         {{ snackbar.message }}
       </v-snackbar>
     </v-card>
 
     <ShowYamlDialog
-        v-if="showYamlDialog"
-        :content="displayedYaml"
-        @copy-to-clipboard="copyToClipboard"
-        @close="showYamlDialog = false"
+      v-if="showYamlDialog"
+      :content="displayedYaml"
+      @copy-to-clipboard="copyToClipboard"
+      @close="showYamlDialog = false"
     >
     </ShowYamlDialog>
     <DataVisibilityDialog
-        v-if="visibilityDialogVisible"
-        v-model="visibilityDialogVisible"
-        :meta="currentVisibilityMeta"
-        :endpoint="currentVisibilityEndpoint"
-        :region="currentVisibilityRegion"
-        :api="api"
-        :preset-identifiers="presetIdentifiers"
-        @refresh="refreshAllRegions"
-        @show-snackbar="val => snackbar = val"
-        @show-error="showError"
-        @close="visibilityDialogVisible = false"
+      v-if="visibilityDialogVisible"
+      v-model="visibilityDialogVisible"
+      :meta="currentVisibilityMeta"
+      :endpoint="currentVisibilityEndpoint"
+      :region="currentVisibilityRegion"
+      :api="api"
+      :preset-identifiers="presetIdentifiers"
+      @refresh="refreshAllRegions"
+      @show-snackbar="(val) => (snackbar = val)"
+      @show-error="showError"
+      @close="visibilityDialogVisible = false"
     />
   </div>
 </template>

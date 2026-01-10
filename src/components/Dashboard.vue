@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import TrafficStatsCard from "@/components/cards/TrafficStatsCard.vue";
-import ClashInfoCard from "@/components/cards/ClashInfoCard.vue";
+import TrafficStatsCard from '@/components/cards/TrafficStatsCard.vue'
+import ClashInfoCard from '@/components/cards/ClashInfoCard.vue'
 
 defineProps({
   config: {
@@ -13,8 +13,8 @@ defineProps({
   },
   api: {
     type: Object,
-    required: true,
-  },
+    required: true
+  }
 })
 </script>
 
@@ -22,16 +22,11 @@ defineProps({
   <div class="dashboard-widget">
     <!-- 仪表板内容 -->
     <TrafficStatsCard
-        v-if="config?.key === 'traffic_stats'"
-        :config="config"
-        :allow-refresh="allowRefresh"
+      v-if="config?.key === 'traffic_stats'"
+      :config="config"
+      :allow-refresh="allowRefresh"
     />
-    <ClashInfoCard
-        v-else
-        :config="config"
-        :allow-refresh="allowRefresh"
-        :api="api"
-    />
+    <ClashInfoCard v-else :config="config" :allow-refresh="allowRefresh" :api="api" />
   </div>
 </template>
 

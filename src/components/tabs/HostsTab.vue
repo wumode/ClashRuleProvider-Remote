@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import {ref, computed, toRaw} from 'vue'
-import {itemsPerPageOptions} from "@/components/constants"
-import {pageTitle} from '@/components/utils'
-import type {HostData} from "@/components/types"
-import {defaultHost} from "@/components/constants";
-import HostsTable from "@/components/tables/HostsTable.vue";
-import HostDialog from "@/components/dialog/HostDialog.vue";
-import HostCard from "@/components/cards/HostCard.vue";
+import { ref, computed, toRaw } from 'vue'
+import { itemsPerPageOptions } from '@/components/constants'
+import { pageTitle } from '@/components/utils'
+import type { HostData } from '@/components/types'
+import { defaultHost } from '@/components/constants'
+import HostsTable from '@/components/tables/HostsTable.vue'
+import HostDialog from '@/components/dialog/HostDialog.vue'
+import HostCard from '@/components/cards/HostCard.vue'
 
 const props = defineProps<{
-  hosts: HostData[],
-  bestCloudflareIPs: string[],
+  hosts: HostData[]
+  bestCloudflareIPs: string[]
   api: any
 }>()
 
@@ -21,20 +21,18 @@ const searchHosts = ref('')
 const pageHosts = ref(1)
 const itemsPerPageHosts = ref(10)
 const hostDialogVisible = ref(false)
-const currentHost = ref<HostData>({...defaultHost})
+const currentHost = ref<HostData>({ ...defaultHost })
 const isAdding = ref(true)
 const loading = ref(false)
 
 // Computed
 const filteredHosts = computed(() => {
-  if (!searchHosts.value) return props.hosts;
-  const keyword = searchHosts.value.toLowerCase();
-  return props.hosts.filter(item =>
-      Object.values(item).some(val =>
-          String(val).toLowerCase().includes(keyword)
-      )
-  );
-});
+  if (!searchHosts.value) return props.hosts
+  const keyword = searchHosts.value.toLowerCase()
+  return props.hosts.filter((item) =>
+    Object.values(item).some((val) => String(val).toLowerCase().includes(keyword))
+  )
+})
 
 const paginatedHosts = computed(() => {
   const start = (pageHosts.value - 1) * itemsPerPageHosts.value
@@ -44,37 +42,36 @@ const paginatedHosts = computed(() => {
 
 const pageCountHosts = computed(() => {
   if (itemsPerPageHosts.value === -1) {
-    return 1;
+    return 1
   }
-  return Math.ceil(props.hosts.length / itemsPerPageHosts.value);
-});
-
+  return Math.ceil(props.hosts.length / itemsPerPageHosts.value)
+})
 
 // Methods
 function openAddHostDialog() {
-  currentHost.value = {...defaultHost};
-  isAdding.value = true;
-  hostDialogVisible.value = true;
+  currentHost.value = { ...defaultHost }
+  isAdding.value = true
+  hostDialogVisible.value = true
 }
 
 function editHost(domain: string) {
-  const hostItem = props.hosts.find(r => r.domain === domain);
+  const hostItem = props.hosts.find((r) => r.domain === domain)
   if (hostItem) {
-    currentHost.value = structuredClone(toRaw(hostItem));
-    isAdding.value = false;
-    hostDialogVisible.value = true;
+    currentHost.value = structuredClone(toRaw(hostItem))
+    isAdding.value = false
+    hostDialogVisible.value = true
   }
 }
 
 async function deleteHost(name: string) {
-  loading.value = true;
+  loading.value = true
   try {
-    await props.api.delete(`/plugin/ClashRuleProvider/hosts/${encodeURIComponent(name)}`);
-    emit('refresh');
+    await props.api.delete(`/plugin/ClashRuleProvider/hosts/${encodeURIComponent(name)}`)
+    emit('refresh')
   } catch (err: any) {
-    emit('show-error', err.message || '删除 host 失败');
+    emit('show-error', err.message || '删除 host 失败')
   } finally {
-    loading.value = false;
+    loading.value = false
   }
 }
 </script>
@@ -87,23 +84,23 @@ async function deleteHost(name: string) {
       <v-row align="center" no-gutters>
         <v-col cols="10" sm="6" class="d-flex justify-start">
           <v-text-field
-              v-model="searchHosts"
-              label="搜索Hosts"
-              clearable
-              density="compact"
-              variant="solo-filled"
-              hide-details
-              class="search-field"
-              prepend-inner-icon="mdi-magnify"
-              flat
-              rounded="pill"
-              single-line
-              :disabled="loading"
+            v-model="searchHosts"
+            label="搜索Hosts"
+            clearable
+            density="compact"
+            variant="solo-filled"
+            hide-details
+            class="search-field"
+            prepend-inner-icon="mdi-magnify"
+            flat
+            rounded="pill"
+            single-line
+            :disabled="loading"
           ></v-text-field>
         </v-col>
         <v-col cols="2" sm="6" class="d-flex justify-end">
           <v-btn-group variant="outlined" rounded>
-            <v-btn @click="openAddHostDialog" icon="mdi-plus" :disabled="loading"></v-btn>
+            <v-btn icon="mdi-plus" :disabled="loading" @click="openAddHostDialog"></v-btn>
           </v-btn-group>
         </v-col>
       </v-row>
@@ -111,69 +108,63 @@ async function deleteHost(name: string) {
     <!-- 桌面端表格 -->
     <div class="d-none d-sm-flex clash-data-table">
       <HostsTable
-          :hosts="hosts"
-          :search="searchHosts"
-          :page="pageHosts"
-          :items-per-page="itemsPerPageHosts"
-          @edit="editHost"
-          @delete="deleteHost"
+        :hosts="hosts"
+        :search="searchHosts"
+        :page="pageHosts"
+        :items-per-page="itemsPerPageHosts"
+        @edit="editHost"
+        @delete="deleteHost"
       />
     </div>
     <!-- 移动端卡片 -->
     <div class="d-sm-none">
       <v-row>
-        <v-col
-            v-for="item in paginatedHosts"
-            :key="item.domain"
-            cols="12"
-        >
+        <v-col v-for="item in paginatedHosts" :key="item.domain" cols="12">
           <HostCard
-              :host-data="item"
-              :best-cloudflare-i-ps="bestCloudflareIPs"
-              @edit-host="editHost"
-              @delete-host="deleteHost"
+            :host-data="item"
+            :best-cloudflare-i-ps="bestCloudflareIPs"
+            @edit-host="editHost"
+            @delete-host="deleteHost"
           />
         </v-col>
       </v-row>
     </div>
-    <div class="pa-4" style="min-height: 4rem;">
+    <div class="pa-4" style="min-height: 4rem">
       <v-row align="center" no-gutters>
-        <v-col cols="2" md="1">
-        </v-col>
+        <v-col cols="2" md="1"> </v-col>
         <v-col cols="8" md="10" class="d-flex justify-center">
           <!-- 桌面端分页器：只在 sm 及以上显示 -->
           <v-pagination
-              v-model="pageHosts"
-              :length="pageCountHosts"
-              total-visible="5"
-              rounded="circle"
-              class="d-none d-sm-flex my-0"
-              :disabled="loading"
+            v-model="pageHosts"
+            :length="pageCountHosts"
+            total-visible="5"
+            rounded="circle"
+            class="d-none d-sm-flex my-0"
+            :disabled="loading"
           />
           <!-- 移动端分页器：只在 sm 以下显示 -->
           <v-pagination
-              v-model="pageHosts"
-              :length="pageCountHosts"
-              total-visible="0"
-              rounded="circle"
-              class="d-sm-none my-0"
-              :disabled="loading"
+            v-model="pageHosts"
+            :length="pageCountHosts"
+            total-visible="0"
+            rounded="circle"
+            class="d-sm-none my-0"
+            :disabled="loading"
           />
-
         </v-col>
         <v-col cols="2" md="1" class="d-flex justify-end">
           <v-menu>
-            <template v-slot:activator="{ props }">
+            <template #activator="{ props }">
               <v-btn v-bind="props" icon rounded="circle" variant="tonal" :disabled="loading">
                 {{ pageTitle(itemsPerPageHosts) }}
               </v-btn>
             </template>
             <v-list>
               <v-list-item
-                  v-for="(item, index) in itemsPerPageOptions"
-                  :key="index"
-                  :value="item.value"
-                  @click="itemsPerPageHosts = item.value"
+                v-for="(item, index) in itemsPerPageOptions"
+                :key="index"
+                :value="item.value"
+                @click="itemsPerPageHosts = item.value"
               >
                 <v-list-item-title>{{ item.title }}</v-list-item-title>
               </v-list-item>
@@ -186,18 +177,17 @@ async function deleteHost(name: string) {
   </div>
 
   <HostDialog
-      v-if="hostDialogVisible"
-      v-model="hostDialogVisible"
-      :initial-value="currentHost"
-      :is-adding="isAdding"
-      :best-cloudflare-i-ps="bestCloudflareIPs"
-      :api="api"
-      @refresh="emit('refresh')"
-      @show-snackbar="(v) => emit('show-snackbar', v)"
-      @show-error="(v) => emit('show-error', v)"
-      @close="hostDialogVisible = false"
+    v-if="hostDialogVisible"
+    v-model="hostDialogVisible"
+    :initial-value="currentHost"
+    :is-adding="isAdding"
+    :best-cloudflare-i-ps="bestCloudflareIPs"
+    :api="api"
+    @refresh="emit('refresh')"
+    @show-snackbar="(v) => emit('show-snackbar', v)"
+    @show-error="(v) => emit('show-error', v)"
+    @close="hostDialogVisible = false"
   />
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import {PropType} from "vue";
-import {RuleData, RuleSetType} from "@/components/types";
-import {getActionColor, getRuleTypeColor} from '@/components/utils'
-import RuleActionMenu from "@/components/menu/RuleActionMenu.vue";
+import { PropType } from 'vue'
+import { RuleData, RuleSetType } from '@/components/types'
+import { getActionColor, getRuleTypeColor } from '@/components/utils'
+import RuleActionMenu from '@/components/menu/RuleActionMenu.vue'
 
 const props = defineProps({
   rule: {
@@ -22,37 +22,37 @@ const emit = defineEmits<{
 }>()
 
 function editRule(priority: number) {
-  emit('edit', priority, props.ruleset);
+  emit('edit', priority, props.ruleset)
 }
 
 function deleteRule(priority: number) {
-  emit('delete', priority, props.ruleset);
+  emit('delete', priority, props.ruleset)
 }
 
 function updateStatus(disabled: boolean) {
-  emit('change-status', props.rule.priority, disabled, props.ruleset);
+  emit('change-status', props.rule.priority, disabled, props.ruleset)
 }
 </script>
 
 <template>
   <v-card rounded="lg" elevation="2" class="rule-card h-100 transition-swing" variant="tonal">
     <div class="d-flex justify-space-between align-center px-4 pt-3">
-      <v-chip
-          variant="flat"
-          color="secondary"
-          class="font-weight-bold mr-2"
-          size="small"
-      >
+      <v-chip variant="flat" color="secondary" class="font-weight-bold mr-2" size="small">
         {{ rule.priority }}
       </v-chip>
-
     </div>
 
     <v-card-text class="pt-2 pb-4">
       <v-row no-gutters class="mb-2 align-center">
         <v-col cols="3" class="text-caption text-medium-emphasis">类型</v-col>
         <v-col cols="9">
-          <v-chip :color="getRuleTypeColor(rule.type)" size="x-small" label variant="tonal" class="font-weight-medium">
+          <v-chip
+            :color="getRuleTypeColor(rule.type)"
+            size="x-small"
+            label
+            variant="tonal"
+            class="font-weight-medium"
+          >
             {{ rule.type }}
           </v-chip>
         </v-col>
@@ -68,7 +68,12 @@ function updateStatus(disabled: boolean) {
       <v-row no-gutters class="align-center">
         <v-col cols="3" class="text-caption text-medium-emphasis">出站</v-col>
         <v-col cols="9">
-          <v-chip :color="getActionColor(rule.action)" size="x-small" variant="outlined" class="font-weight-medium">
+          <v-chip
+            :color="getActionColor(rule.action)"
+            size="x-small"
+            variant="outlined"
+            class="font-weight-medium"
+          >
             {{ rule.action }}
           </v-chip>
         </v-col>
@@ -76,17 +81,15 @@ function updateStatus(disabled: boolean) {
     </v-card-text>
     <v-divider></v-divider>
     <v-card-actions>
-      <v-icon
-          :color="rule.meta.disabled ? 'grey' : 'success'"
-      >
+      <v-icon :color="rule.meta.disabled ? 'grey' : 'success'">
         {{ rule.meta.disabled ? 'mdi-close-circle-outline' : 'mdi-check-circle-outline' }}
       </v-icon>
       <v-spacer></v-spacer>
       <RuleActionMenu
-          :rule="rule"
-          @edit="editRule(rule.priority)"
-          @delete="deleteRule(rule.priority)"
-          @change-status="updateStatus"
+        :rule="rule"
+        @edit="editRule(rule.priority)"
+        @delete="deleteRule(rule.priority)"
+        @change-status="updateStatus"
       />
     </v-card-actions>
   </v-card>

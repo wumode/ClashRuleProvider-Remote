@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import {PropType} from "vue";
-import {ProxyGroupData} from "@/components/types";
-import {isManual, isRegion} from "@/components/utils";
+import { PropType } from 'vue'
+import { ProxyGroupData } from '@/components/types'
+import { isManual, isRegion } from '@/components/utils'
 
 defineProps({
   proxyGroup: {
@@ -22,16 +22,17 @@ const emit = defineEmits<{
 
 <template>
   <v-menu min-width="120">
-    <template v-slot:activator="{ props }">
+    <template #activator="{ props }">
       <v-btn color="secondary" icon size="small" variant="text" v-bind="props">
         <v-icon>mdi-dots-vertical</v-icon>
       </v-btn>
     </template>
     <v-list density="compact">
       <v-list-item
-          v-if="isManual(proxyGroup.meta.source)"
-          @click="emit('changeStatus', !proxyGroup.meta.disabled)">
-        <template v-slot:prepend>
+        v-if="isManual(proxyGroup.meta.source)"
+        @click="emit('changeStatus', !proxyGroup.meta.disabled)"
+      >
+        <template #prepend>
           <v-icon size="small" :color="proxyGroup.meta.disabled ? 'success' : 'grey'">
             {{ proxyGroup.meta.disabled ? 'mdi-play-circle-outline' : 'mdi-stop-circle-outline' }}
           </v-icon>
@@ -40,47 +41,38 @@ const emit = defineEmits<{
       </v-list-item>
 
       <v-list-item @click="emit('showYaml')">
-        <template v-slot:prepend>
+        <template #prepend>
           <v-icon size="small" color="info">mdi-code-json</v-icon>
         </template>
         <v-list-item-title>查看</v-list-item-title>
       </v-list-item>
 
       <v-list-item
-          @click="emit('edit')"
-          v-if="(isManual(proxyGroup.meta.source)||isRegion(proxyGroup.meta.source))"
+        v-if="isManual(proxyGroup.meta.source) || isRegion(proxyGroup.meta.source)"
+        @click="emit('edit')"
       >
-        <template v-slot:prepend>
+        <template #prepend>
           <v-icon size="small" color="primary">mdi-file-edit-outline</v-icon>
         </template>
         <v-list-item-title>编辑</v-list-item-title>
       </v-list-item>
 
-      <v-list-item
-          v-if="isManual(proxyGroup.meta.source)"
-          @click="emit('editVisibility')"
-      >
-        <template v-slot:prepend>
+      <v-list-item v-if="isManual(proxyGroup.meta.source)" @click="emit('editVisibility')">
+        <template #prepend>
           <v-icon size="small" color="warning">mdi-eye-off-outline</v-icon>
         </template>
         <v-list-item-title>隐藏</v-list-item-title>
       </v-list-item>
 
-      <v-list-item
-          v-if="proxyGroup.meta.patched"
-          @click="emit('deletePatch')"
-      >
-        <template v-slot:prepend>
+      <v-list-item v-if="proxyGroup.meta.patched" @click="emit('deletePatch')">
+        <template #prepend>
           <v-icon size="small" color="error">mdi-close-box-outline</v-icon>
         </template>
         <v-list-item-title>删除补丁</v-list-item-title>
       </v-list-item>
 
-      <v-list-item
-          @click="emit('delete')"
-          v-if="isManual(proxyGroup.meta.source)"
-      >
-        <template v-slot:prepend>
+      <v-list-item v-if="isManual(proxyGroup.meta.source)" @click="emit('delete')">
+        <template #prepend>
           <v-icon size="small" color="error">mdi-trash-can-outline</v-icon>
         </template>
         <v-list-item-title>删除</v-list-item-title>
@@ -89,5 +81,4 @@ const emit = defineEmits<{
   </v-menu>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

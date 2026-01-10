@@ -7,22 +7,22 @@ import {
   getUsedPercentageFloor,
   getUsageColor
 } from '@/components/utils'
-import {SubscriptionInfo} from "@/components/types";
-import {ref} from "vue";
+import { SubscriptionInfo } from '@/components/types'
+import { ref } from 'vue'
 
 const props = defineProps<{
-  info: SubscriptionInfo;
-  url: string;
-  api: any;
+  info: SubscriptionInfo
+  url: string
+  api: any
 }>()
 
 const emit = defineEmits<{
   (e: 'show-error', msg: string): void
-  (e: 'show-snackbar', value: any): void;
-  (e: 'refresh', regions: string[]): void;
-  (e: 'copy-to-clipboard', url: string): void;
-  (e: 'start-loading'): void;
-  (e: 'end-loading'): void;
+  (e: 'show-snackbar', value: any): void
+  (e: 'refresh', regions: string[]): void
+  (e: 'copy-to-clipboard', url: string): void
+  (e: 'start-loading'): void
+  (e: 'end-loading'): void
 }>()
 
 const loading = ref<boolean>(false)
@@ -40,46 +40,47 @@ async function updateSubscription() {
       show: true,
       message: '订阅更新成功',
       color: 'success'
-    });
-    emit('refresh', ["status", "clash-outbounds", "rule-providers", "proxy-groups", "proxies", "proxy-providers"]);
+    })
+    emit('refresh', [
+      'status',
+      'clash-outbounds',
+      'rule-providers',
+      'proxy-groups',
+      'proxies',
+      'proxy-providers'
+    ])
   } catch (err: unknown) {
-    if (err instanceof Error)
-      emit('show-error', '订阅更新失败: ' + (err.message || '未知错误'));
+    if (err instanceof Error) emit('show-error', '订阅更新失败: ' + (err.message || '未知错误'))
   } finally {
     loading.value = false
     emit('end-loading')
   }
 }
 
-async function toggleSubscription() {
+async function toggleSubscription(val: boolean) {
   emit('start-loading')
   try {
     await props.api.post('plugin/ClashRuleProvider/subscription-info', {
       url: props.url,
-      enabled: props.info.enabled,
+      enabled: val
     })
     // 显示成功提示
     emit('show-snackbar', {
       show: true,
       message: '设置成功',
       color: 'success'
-    });
-    emit('refresh', ["status"]);
+    })
+    emit('refresh', ['status'])
   } catch (err: unknown) {
-    if (err instanceof Error)
-      emit('show-error', '设置自动更新失败: ' + (err.message || '未知错误'));
-    emit('refresh', ["status"]);
+    if (err instanceof Error) emit('show-error', '设置自动更新失败: ' + (err.message || '未知错误'))
+    emit('refresh', ['status'])
   } finally {
     emit('end-loading')
   }
 }
 </script>
 <template>
-  <v-card
-      class="subscription-card mb-4"
-      elevation="0"
-      border
-  >
+  <v-card class="subscription-card mb-4" elevation="0" border>
     <div class="card-header pa-4">
       <div class="d-flex align-center overflow-hidden">
         <v-avatar color="primary" variant="tonal" rounded="lg" class="mr-3">
@@ -103,29 +104,24 @@ async function toggleSubscription() {
     <v-card-text class="pa-4">
       <div class="d-flex flex-wrap gap-2 mb-4" style="gap: 8px">
         <v-chip
-            v-if="info.proxy_num != null"
-            size="small"
-            color="primary"
-            variant="flat"
-            class="font-weight-medium"
+          v-if="info.proxy_num != null"
+          size="small"
+          color="primary"
+          variant="flat"
+          class="font-weight-medium"
         >
           <v-icon start size="small">mdi-server-network</v-icon>
           {{ info.proxy_num }} 节点
         </v-chip>
-        <v-chip
-            v-if="info.last_update"
-            size="small"
-            color="secondary"
-            variant="tonal"
-        >
+        <v-chip v-if="info.last_update" size="small" color="secondary" variant="tonal">
           <v-icon start size="small">mdi-clock-outline</v-icon>
           {{ formatTimestamp(info.last_update) }}
         </v-chip>
         <v-chip
-            v-if="info.expire"
-            size="small"
-            :color="getExpireColor(info.expire)"
-            variant="tonal"
+          v-if="info.expire"
+          size="small"
+          :color="getExpireColor(info.expire)"
+          variant="tonal"
         >
           <v-icon start size="small">mdi-calendar-clock</v-icon>
           到期：{{ formatTimestamp(info.expire) }}
@@ -135,20 +131,24 @@ async function toggleSubscription() {
       <div class="stats-grid mb-4">
         <div class="stat-item">
           <div class="text-caption text-medium-emphasis">已用</div>
-          <div class="text-body-2 font-weight-bold">{{ formatBytes(info.download + info.upload) }}</div>
+          <div class="text-body-2 font-weight-bold">
+            {{ formatBytes(info.download + info.upload) }}
+          </div>
         </div>
         <div class="stat-item text-right">
           <div class="text-caption text-medium-emphasis">剩余</div>
-          <div class="text-body-2 font-weight-bold">{{ formatBytes(info.total - info.download - info.upload) }}</div>
+          <div class="text-body-2 font-weight-bold">
+            {{ formatBytes(info.total - info.download - info.upload) }}
+          </div>
         </div>
       </div>
 
       <v-progress-linear
-          :model-value="getUsedPercentageFloor(info)"
-          :color="getUsageColor(getUsedPercentageFloor(info))"
-          height="8"
-          rounded
-          class="mb-2"
+        :model-value="getUsedPercentageFloor(info)"
+        :color="getUsageColor(getUsedPercentageFloor(info))"
+        height="8"
+        rounded
+        class="mb-2"
       ></v-progress-linear>
 
       <div class="d-flex justify-space-between text-caption text-medium-emphasis">
@@ -162,12 +162,12 @@ async function toggleSubscription() {
 
     <div class="card-actions px-4 py-2 d-flex align-center bg-surface-variant-lighten">
       <v-btn
-          icon
-          size="small"
-          variant="text"
-          color="primary"
-          @click="updateSubscription"
-          :loading="loading"
+        icon
+        size="small"
+        variant="text"
+        color="primary"
+        :loading="loading"
+        @click="updateSubscription"
       >
         <v-icon>mdi-refresh</v-icon>
         <v-tooltip activator="parent" location="top">刷新</v-tooltip>
@@ -178,12 +178,12 @@ async function toggleSubscription() {
       <div class="d-flex align-center">
         <span class="text-caption mr-2 text-medium-emphasis">自动更新</span>
         <v-switch
-            v-model="info.enabled"
-            hide-details
-            density="compact"
-            color="primary"
-            @change="toggleSubscription"
-            inset
+          :model-value="info.enabled"
+          hide-details
+          density="compact"
+          color="primary"
+          inset
+          @update:model-value="toggleSubscription"
         ></v-switch>
       </div>
     </div>

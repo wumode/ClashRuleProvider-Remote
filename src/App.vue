@@ -24,15 +24,26 @@
             <v-window-item value="config">
               <h2 class="text-h5 mb-4">Config组件</h2>
               <div class="component-preview">
-                <config-component :initial-config="initialConfig" @save="handleConfigSave"></config-component>
+                <config-component
+                  :initial-config="initialConfig"
+                  @save="handleConfigSave"
+                ></config-component>
               </div>
             </v-window-item>
 
             <v-window-item value="dashboard">
               <h2 class="text-h5 mb-4">Dashboard组件</h2>
-              <v-switch v-model="dashboardConfig.attrs.border" label="显示边框" color="primary" class="mb-4"></v-switch>
+              <v-switch
+                v-model="dashboardConfig.attrs.border"
+                label="显示边框"
+                color="primary"
+                class="mb-4"
+              ></v-switch>
               <div class="component-preview">
-                <dashboard-component :config="dashboardConfig" :allow-refresh="true"></dashboard-component>
+                <dashboard-component
+                  :config="dashboardConfig"
+                  :allow-refresh="true"
+                ></dashboard-component>
               </div>
             </v-window-item>
           </v-window>
@@ -47,7 +58,7 @@
     <!-- 通知弹窗 -->
     <v-snackbar v-model="snackbar.show" :color="snackbar.color" :timeout="snackbar.timeout">
       {{ snackbar.text }}
-      <template v-slot:actions>
+      <template #actions>
         <v-btn variant="text" @click="snackbar.show = false"> 关闭 </v-btn>
       </template>
     </v-snackbar>
@@ -72,7 +83,7 @@ const initialConfig = {
   api_url: 'https://api.example.com',
   api_key: 'test_api_key_123',
   concurrent_tasks: 2,
-  tags: ['电影', '测试'],
+  tags: ['电影', '测试']
 }
 
 // 仪表板配置
@@ -82,8 +93,8 @@ const dashboardConfig = reactive({
   attrs: {
     title: '仪表板示例',
     subtitle: '插件数据展示',
-    border: true,
-  },
+    border: true
+  }
 })
 
 // 通知状态
@@ -91,7 +102,7 @@ const snackbar = reactive({
   show: false,
   text: '',
   color: 'success',
-  timeout: 3000,
+  timeout: 3000
 })
 
 // 显示通知

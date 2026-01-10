@@ -12,23 +12,23 @@ export default defineConfig({
       exposes: {
         './Page': './src/components/Page.vue',
         './Config': './src/components/Config.vue',
-        './Dashboard': './src/components/Dashboard.vue',
+        './Dashboard': './src/components/Dashboard.vue'
       },
       shared: {
         vue: {
           requiredVersion: false,
-          generate: false,
+          generate: false
         },
         vuetify: {
           requiredVersion: false,
           generate: false,
-          singleton: true,
+          singleton: true
         },
         'vuetify/styles': {
           requiredVersion: false,
           generate: false,
-          singleton: true,
-        },
+          singleton: true
+        }
       },
       format: 'esm'
     })
@@ -39,14 +39,14 @@ export default defineConfig({
     }
   },
   build: {
-    target: 'esnext',   // 必须设置为esnext以支持顶层await
-    minify: false,      // 开发阶段建议关闭混淆
-    cssCodeSplit: true, // 改为true以便能分离样式文件
+    target: 'esnext', // 必须设置为esnext以支持顶层await
+    minify: false, // 开发阶段建议关闭混淆
+    cssCodeSplit: true // 改为true以便能分离样式文件
   },
   css: {
     preprocessorOptions: {
       scss: {
-        additionalData: '/* 覆盖vuetify样式 */',
+        additionalData: '/* 覆盖vuetify样式 */'
       }
     },
     postcss: {
@@ -56,7 +56,7 @@ export default defineConfig({
           AtRule: {
             charset: (atRule) => {
               if (atRule.name === 'charset') {
-                atRule.remove();
+                atRule.remove()
               }
             }
           }
@@ -65,13 +65,14 @@ export default defineConfig({
           postcssPlugin: 'vuetify-filter',
           Root(root) {
             // 过滤掉所有vuetify相关的CSS
-            root.walkRules(rule => {
-              if (rule.selector && (
-                  rule.selector.includes('.v-') || 
-                  rule.selector.includes('.mdi-'))) {
-                rule.remove();
+            root.walkRules((rule) => {
+              if (
+                rule.selector &&
+                (rule.selector.includes('.v-') || rule.selector.includes('.mdi-'))
+              ) {
+                rule.remove()
               }
-            });
+            })
           }
         }
       ]
@@ -79,8 +80,8 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0',
-    port: 5001,   // 使用不同于主应用的端口
-    cors: true,   // 启用CORS
+    port: 5001, // 使用不同于主应用的端口
+    cors: true, // 启用CORS
     origin: 'http://0.0.0.0:5001'
-  },
-}) 
+  }
+})
