@@ -99,7 +99,7 @@ onMounted(() => {
           }
         })
       }
-      
+
       const ctx = speedChartCanvas.value?.getContext('2d')
       const memCtx = memoryChartCanvas.value?.getContext('2d')
       if (!ctx || !memCtx) {
@@ -243,7 +243,7 @@ onMounted(() => {
             updateChart()
           }
         });
-        
+
         connectionsEvtSource = new EventSource('api/v1/plugin/ClashRuleProvider/clash/ws/connections?secret=' + componentConfig.secret);
         connectionsEvtSource.addEventListener("connections", (event) => {
           const data = JSON.parse(event.data);

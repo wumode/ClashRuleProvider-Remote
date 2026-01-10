@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {PropType} from "vue";
 import {RuleProviderData} from "@/components/types";
-import {isManual, getBehaviorColor, getSourceColor} from '@/components/utils'
+import {getBehaviorColor, getSourceColor} from '@/components/utils'
 import RuleProviderActionMenu from "@/components/menu/RuleProviderActionMenu.vue";
 
 defineProps({
@@ -38,13 +38,14 @@ const emit = defineEmits<{
       <v-row no-gutters class="mb-2 align-center">
         <v-col cols="3" class="text-caption text-medium-emphasis">行为</v-col>
         <v-col cols="9">
-           <v-chip v-if="ruleProviderData.data?.behavior" :color="getBehaviorColor(ruleProviderData.data.behavior)" size="x-small" label variant="tonal" class="font-weight-medium">
+          <v-chip v-if="ruleProviderData.data?.behavior" :color="getBehaviorColor(ruleProviderData.data.behavior)"
+                  size="x-small" label variant="tonal" class="font-weight-medium">
             {{ ruleProviderData.data.behavior }}
           </v-chip>
         </v-col>
       </v-row>
 
-       <v-row no-gutters class="align-center">
+      <v-row no-gutters class="align-center">
         <v-col cols="3" class="text-caption text-medium-emphasis">内容</v-col>
         <v-col cols="9" class="text-body-2 text-truncate font-weight-medium">
           <span :title="ruleProviderData.data.format">{{ ruleProviderData.data.format }}</span>
@@ -72,6 +73,6 @@ const emit = defineEmits<{
 
 <style scoped>
 .rule-provider-card:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
 }
 </style>

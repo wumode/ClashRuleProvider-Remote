@@ -93,7 +93,7 @@ async function handleStatusChange(name: string, disabled: boolean) {
     }
     const n = encodeURIComponent(name);
     // Send full metadata with updated disabled status
-    const newMeta = { ...provider.meta, disabled: disabled };
+    const newMeta = {...provider.meta, disabled: disabled};
     await props.api.patch(`/plugin/ClashRuleProvider/rule-providers/${n}/meta`, newMeta);
     emit('refresh', ["rule-providers"]);
   } catch (err: unknown) {

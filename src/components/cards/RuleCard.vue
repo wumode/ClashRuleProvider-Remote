@@ -94,6 +94,6 @@ function updateStatus(disabled: boolean) {
 
 <style scoped>
 .rule-card:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
 }
 </style>

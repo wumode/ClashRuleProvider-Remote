@@ -76,7 +76,8 @@ const proxyGroupHeaders = ref([
         >
           {{ item.meta.disabled ? 'mdi-close-circle-outline' : 'mdi-check-circle-outline' }}
         </v-icon>
-        <v-tooltip v-if="item.meta.invisible_to && item.meta.invisible_to.length > 0" text="已配置可见性限制" location="top">
+        <v-tooltip v-if="item.meta.invisible_to && item.meta.invisible_to.length > 0" text="已配置可见性限制"
+                   location="top">
           <template v-slot:activator="{ props }">
             <v-icon
                 v-bind="props"

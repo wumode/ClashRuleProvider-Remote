@@ -132,7 +132,7 @@ async function importExtraProxies() {
 // Edit Dialog State
 const proxiesDialogVisible = ref(false)
 const editingProxy = ref<ProxyData>({
-  meta:{...defaultMetadata},
+  meta: {...defaultMetadata},
   data: {...defaultProxy},
   name: defaultProxy.name
 })
@@ -185,7 +185,7 @@ async function handleStatusChange(name: string, disabled: boolean) {
     }
     const n = encodeURIComponent(name);
     // Send full metadata with updated disabled status
-    const newMeta = { ...proxy.meta, disabled: disabled };
+    const newMeta = {...proxy.meta, disabled: disabled};
     await props.api.patch(`/plugin/ClashRuleProvider/proxies/${n}/meta`, newMeta);
     emit("refresh", ["proxies", "clash-outbounds"]);
   } catch (err: unknown) {

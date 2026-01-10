@@ -58,7 +58,7 @@ const emit = defineEmits<{
         </template>
         <v-list-item-title>隐藏</v-list-item-title>
       </v-list-item>
-      
+
       <v-list-item
           v-if="proxy.v2ray_link"
           @click="emit('copyToClipboard', proxy.v2ray_link)"

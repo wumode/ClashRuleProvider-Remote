@@ -111,12 +111,12 @@ async function deleteHost(name: string) {
     <!-- 桌面端表格 -->
     <div class="d-none d-sm-flex clash-data-table">
       <HostsTable
-        :hosts="hosts"
-        :search="searchHosts"
-        :page="pageHosts"
-        :items-per-page="itemsPerPageHosts"
-        @edit="editHost"
-        @delete="deleteHost"
+          :hosts="hosts"
+          :search="searchHosts"
+          :page="pageHosts"
+          :items-per-page="itemsPerPageHosts"
+          @edit="editHost"
+          @delete="deleteHost"
       />
     </div>
     <!-- 移动端卡片 -->

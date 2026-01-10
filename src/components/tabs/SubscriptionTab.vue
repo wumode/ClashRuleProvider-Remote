@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SubscriptionInfo } from "@/components/types";
+import {SubscriptionInfo} from "@/components/types";
 import SubscriptionCard from "@/components/cards/SubscriptionCard.vue";
 import {ref} from "vue";
 

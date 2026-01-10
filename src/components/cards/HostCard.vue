@@ -9,8 +9,8 @@ defineProps({
     required: true,
   },
   bestCloudflareIPs: {
-      type: Array as PropType<string[]>,
-      required: true
+    type: Array as PropType<string[]>,
+    required: true
   }
 })
 
@@ -32,8 +32,9 @@ const emit = defineEmits<{
       <v-row no-gutters class="mb-2 align-center">
         <v-col cols="3" class="text-caption text-medium-emphasis">类型</v-col>
         <v-col cols="9">
-           <v-chip :color="getBoolColor(hostData.using_cloudflare)" size="x-small" label variant="tonal" class="font-weight-medium">
-                {{ hostData.using_cloudflare ? 'Cloudflare' : 'hosts' }}
+          <v-chip :color="getBoolColor(hostData.using_cloudflare)" size="x-small" label variant="tonal"
+                  class="font-weight-medium">
+            {{ hostData.using_cloudflare ? 'Cloudflare' : 'hosts' }}
           </v-chip>
         </v-col>
       </v-row>
@@ -42,7 +43,7 @@ const emit = defineEmits<{
         <v-col cols="3" class="text-caption text-medium-emphasis">IP</v-col>
         <v-col cols="9">
           <div class="d-flex flex-wrap gap-1">
-             <v-chip
+            <v-chip
                 v-for="ip in (hostData.using_cloudflare ? bestCloudflareIPs : hostData.value)"
                 :key="ip"
                 size="x-small"
@@ -97,6 +98,6 @@ const emit = defineEmits<{
 
 <style scoped>
 .host-card:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
 }
 </style>

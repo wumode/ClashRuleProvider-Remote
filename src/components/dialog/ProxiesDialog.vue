@@ -4,7 +4,7 @@ import {Proxy, ProxyData} from "@/components/types";
 
 const props = defineProps({
   proxyData: {
-    type: Object as PropType<ProxyData>, 
+    type: Object as PropType<ProxyData>,
     required: true
   },
   api: {
@@ -38,22 +38,22 @@ const proxyTypes = ['ss', 'ssr', 'vmess', 'vless', 'trojan', 'http', 'snell', 't
 // Initialize optional nested objects if they don't exist
 const initNestedObjects = () => {
   if (!proxy.value.smux) {
-    proxy.value.smux = { enabled: false, protocol: 'h2mux' };
+    proxy.value.smux = {enabled: false, protocol: 'h2mux'};
   }
   if (!proxy.value.smux['brutal-opts']) {
-    proxy.value.smux['brutal-opts'] = { enabled: false };
+    proxy.value.smux['brutal-opts'] = {enabled: false};
   }
   if (!proxy.value['ws-opts']) {
-    proxy.value['ws-opts'] = { path: '/', 'v2ray-http-upgrade': false, 'v2ray-http-upgrade-fast-open': false };
+    proxy.value['ws-opts'] = {path: '/', 'v2ray-http-upgrade': false, 'v2ray-http-upgrade-fast-open': false};
   }
   if (!proxy.value['http-opts']) {
-    proxy.value['http-opts'] = { path: ['/'], method: 'GET' };
+    proxy.value['http-opts'] = {path: ['/'], method: 'GET'};
   }
   if (!proxy.value['h2-opts']) {
-    proxy.value['h2-opts'] = { path: '/', host: [] };
+    proxy.value['h2-opts'] = {path: '/', host: []};
   }
   if (!proxy.value['grpc-opts']) {
-    proxy.value['grpc-opts'] = { 'grpc-service-name': '' };
+    proxy.value['grpc-opts'] = {'grpc-service-name': ''};
   }
 
   if (!proxy.value.alpn) {
@@ -171,7 +171,7 @@ const saveProxy = async (proxy: Proxy) => {
     emit('close');
   } catch (err: unknown) {
     if (err instanceof Error)
-      emit('show-error','保存 Proxy 失败: ' + (err.message || '未知错误'));
+      emit('show-error', '保存 Proxy 失败: ' + (err.message || '未知错误'));
     emit('show-snackbar', {
       show: true,
       message: '保存代理失败',
@@ -458,7 +458,8 @@ const saveProxy = async (proxy: Proxy) => {
             type="info"
             variant="tonal"
         >
-          参考<a href="https://wiki.metacubex.one/config/proxies/" target="_blank" style="text-decoration: underline;">Docs</a>, 覆写某些选项可能导致代理不可用。
+          参考<a href="https://wiki.metacubex.one/config/proxies/" target="_blank" style="text-decoration: underline;">Docs</a>,
+          覆写某些选项可能导致代理不可用。
         </v-alert>
       </v-card-text>
       <v-card-actions>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { VAceEditor } from "vue3-ace-editor";
+import {VAceEditor} from "vue3-ace-editor";
 import 'ace-builds/src-noconflict/ace';
 import 'ace-builds/src-noconflict/mode-yaml';
 import 'ace-builds/src-noconflict/theme-monokai';

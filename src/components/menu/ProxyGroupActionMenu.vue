@@ -75,7 +75,7 @@ const emit = defineEmits<{
         </template>
         <v-list-item-title>删除补丁</v-list-item-title>
       </v-list-item>
-      
+
       <v-list-item
           @click="emit('delete')"
           v-if="isManual(proxyGroup.meta.source)"

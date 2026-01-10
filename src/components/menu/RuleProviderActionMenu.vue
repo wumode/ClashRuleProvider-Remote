@@ -55,7 +55,7 @@ const emit = defineEmits<{
         </template>
         <v-list-item-title>查看</v-list-item-title>
       </v-list-item>
-      
+
       <v-list-item v-if="isManual(ruleProvider.meta.source)" @click="emit('editVisibility')">
         <template v-slot:prepend>
           <v-icon size="small" color="warning">mdi-eye-off-outline</v-icon>

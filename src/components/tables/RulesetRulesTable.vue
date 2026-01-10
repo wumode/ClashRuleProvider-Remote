@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref, PropType } from 'vue'
+import {ref, PropType} from 'vue'
 import {RuleData, RuleSetType} from "@/components/types";
 import {getActionColor, getRuleTypeColor, timestampToDate} from "@/components/utils";
 import {itemsPerPageOptions} from "@/components/constants";

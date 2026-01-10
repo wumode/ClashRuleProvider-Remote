@@ -64,8 +64,7 @@ async function saveRuleProvider() {
     emit('refresh')
     emit('close')
   } catch (err: unknown) {
-    if (err instanceof Error)
-    {
+    if (err instanceof Error) {
       emit('show-error', '保存规则集合失败: ' + (err.message || '未知错误'));
       emit('show-snackbar', {
         show: true,

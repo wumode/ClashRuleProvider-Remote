@@ -4,9 +4,9 @@ import TopRulesTable from '../tables/TopRulesTable.vue';
 import RuleCard from '../cards/RuleCard.vue';
 import RuleDialog from '../dialog/RuleDialog.vue';
 import ImportRuleDialog from '../dialog/ImportRuleDialog.vue';
-import { itemsPerPageOptions, defaultRule } from '@/components/constants';
-import { pageTitle } from '@/components/utils';
-import { RuleData, RuleSetType, GeoRules, Metadata } from '@/components/types';
+import {itemsPerPageOptions, defaultRule} from '@/components/constants';
+import {pageTitle} from '@/components/utils';
+import {RuleData, RuleSetType, GeoRules, Metadata} from '@/components/types';
 
 const props = defineProps<{
   rules: RuleData[];
@@ -39,9 +39,9 @@ const filteredRules = computed(() => {
   if (!searchTopRule.value) return props.rules;
   const keyword = searchTopRule.value.toLowerCase();
   return props.rules.filter(item =>
-    Object.values(item).some(val =>
-      String(val).toLowerCase().includes(keyword)
-    )
+      Object.values(item).some(val =>
+          String(val).toLowerCase().includes(keyword)
+      )
   );
 });
 
@@ -103,7 +103,7 @@ async function deleteRule(priority: number) {
 async function deleteRules(priorities: number[]) {
   loading.value = true;
   try {
-    await props.api.delete('/plugin/ClashRuleProvider/rules/top', { data: { rules_priority: priorities } });
+    await props.api.delete('/plugin/ClashRuleProvider/rules/top', {data: {rules_priority: priorities}});
     emit('refresh', ["top", "ruleset"]);
   } catch (err: unknown) {
     if (err instanceof Error) {
@@ -132,7 +132,7 @@ async function handleStatusChange(priority: number, disabled: boolean) {
   loading.value = true;
   try {
     await props.api.post(`/plugin/ClashRuleProvider/rules/top/metadata/disabled`, {
-        [priority]: disabled
+      [priority]: disabled
     });
     emit('refresh', ["top", "ruleset"]);
   } catch (err: unknown) {
@@ -147,7 +147,7 @@ async function handleStatusChange(priority: number, disabled: boolean) {
 async function handleBatchStatusChange(priorities: number[], disabled: boolean) {
   loading.value = true;
   try {
-    const payload = priorities.reduce((acc, p) => ({ ...acc, [p]: disabled }), {});
+    const payload = priorities.reduce((acc, p) => ({...acc, [p]: disabled}), {});
     await props.api.post(`/plugin/ClashRuleProvider/rules/top/metadata/disabled`, payload);
     emit('refresh', ["top", "ruleset"]);
   } catch (err: unknown) {
@@ -180,18 +180,18 @@ function editVisibility(priority: number, type: RuleSetType) {
         <v-col cols="8" sm="6" class="d-flex justify-start">
           <!-- 搜索框 -->
           <v-text-field
-            v-model="searchTopRule"
-            label="搜索规则"
-            clearable
-            density="compact"
-            variant="solo-filled"
-            hide-details
-            class="search-field"
-            prepend-inner-icon="mdi-magnify"
-            flat
-            rounded="pill"
-            single-line
-            :disabled="loading"
+              v-model="searchTopRule"
+              label="搜索规则"
+              clearable
+              density="compact"
+              variant="solo-filled"
+              hide-details
+              class="search-field"
+              prepend-inner-icon="mdi-magnify"
+              flat
+              rounded="pill"
+              single-line
+              :disabled="loading"
           ></v-text-field>
         </v-col>
         <v-col cols="4" sm="6" class="d-flex justify-end">
@@ -213,33 +213,33 @@ function editVisibility(priority: number, type: RuleSetType) {
     </div>
     <div class="d-none d-sm-flex clash-data-table">
       <TopRulesTable
-        :sorted-rules="rules"
-        :page="page"
-        :items-per-page="itemsPerPage"
-        :search-rule="searchTopRule"
-        @edit="editRule"
-        @delete="deleteRule"
-        @delete-batch="deleteRules"
-        @reorder="handleReorderRule"
-        @change-status="handleStatusChange"
-        @change-status-batch="handleBatchStatusChange"
-        @edit-visibility="editVisibility"
+          :sorted-rules="rules"
+          :page="page"
+          :items-per-page="itemsPerPage"
+          :search-rule="searchTopRule"
+          @edit="editRule"
+          @delete="deleteRule"
+          @delete-batch="deleteRules"
+          @reorder="handleReorderRule"
+          @change-status="handleStatusChange"
+          @change-status-batch="handleBatchStatusChange"
+          @edit-visibility="editVisibility"
       ></TopRulesTable>
     </div>
     <!-- 移动端卡片 -->
     <div class="d-sm-none">
       <v-row>
         <v-col
-          v-for="item in paginatedTopRules"
-          :key="item.priority"
-          cols="12"
+            v-for="item in paginatedTopRules"
+            :key="item.priority"
+            cols="12"
         >
           <RuleCard
-            ruleset="top"
-            :rule="item"
-            @delete="deleteRule"
-            @edit="editRule"
-            @change-status="handleStatusChange"
+              ruleset="top"
+              :rule="item"
+              @delete="deleteRule"
+              @edit="editRule"
+              @change-status="handleStatusChange"
           >
           </RuleCard>
         </v-col>
@@ -252,20 +252,20 @@ function editVisibility(priority: number, type: RuleSetType) {
         </v-col>
         <v-col cols="8" md="8" class="d-flex justify-center">
           <v-pagination
-            v-model="page"
-            :length="pageCount"
-            total-visible="5"
-            rounded="circle"
-            class="d-none d-sm-flex my-0"
-            :disabled="loading"
+              v-model="page"
+              :length="pageCount"
+              total-visible="5"
+              rounded="circle"
+              class="d-none d-sm-flex my-0"
+              :disabled="loading"
           />
           <v-pagination
-            v-model="page"
-            :length="pageCount"
-            total-visible="0"
-            rounded="circle"
-            class="d-sm-none my-0"
-            :disabled="loading"
+              v-model="page"
+              :length="pageCount"
+              total-visible="0"
+              rounded="circle"
+              class="d-sm-none my-0"
+              :disabled="loading"
           />
         </v-col>
         <v-col cols="2" md="2" class="d-flex justify-end">
@@ -278,10 +278,10 @@ function editVisibility(priority: number, type: RuleSetType) {
 
             <v-list>
               <v-list-item
-                v-for="(item, index) in itemsPerPageOptions"
-                :key="index"
-                :value="item.value"
-                @click="itemsPerPage = item.value"
+                  v-for="(item, index) in itemsPerPageOptions"
+                  :key="index"
+                  :value="item.value"
+                  @click="itemsPerPage = item.value"
               >
                 <v-list-item-title>{{ item.title }}</v-list-item-title>
               </v-list-item>

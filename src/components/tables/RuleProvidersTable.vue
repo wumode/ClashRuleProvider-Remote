@@ -69,7 +69,8 @@ const headersRuleProviders = ref([
     </template>
 
     <template #item.behavior="{ item }">
-      <v-chip v-if="item.data?.behavior" :color="getBehaviorColor(item.data.behavior)" size="small" label variant="tonal">
+      <v-chip v-if="item.data?.behavior" :color="getBehaviorColor(item.data.behavior)" size="small" label
+              variant="tonal">
         {{ item.data.behavior }}
       </v-chip>
     </template>
@@ -98,7 +99,8 @@ const headersRuleProviders = ref([
         >
           {{ item.meta.disabled ? 'mdi-close-circle-outline' : 'mdi-check-circle-outline' }}
         </v-icon>
-        <v-tooltip v-if="item.meta.invisible_to && item.meta.invisible_to.length > 0" text="已配置可见性限制" location="top">
+        <v-tooltip v-if="item.meta.invisible_to && item.meta.invisible_to.length > 0" text="已配置可见性限制"
+                   location="top">
           <template v-slot:activator="{ props }">
             <v-icon
                 v-bind="props"

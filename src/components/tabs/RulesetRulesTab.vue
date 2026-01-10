@@ -94,7 +94,7 @@ async function deleteRule(priority: number) {
 async function deleteRules(priorities: number[]) {
   loading.value = true;
   try {
-    await props.api.delete('/plugin/ClashRuleProvider/rules/ruleset', { data: { rules_priority: priorities } });
+    await props.api.delete('/plugin/ClashRuleProvider/rules/ruleset', {data: {rules_priority: priorities}});
     emit('refresh', ["top", "ruleset"]);
   } catch (err: unknown) {
     if (err instanceof Error) {
@@ -123,7 +123,7 @@ async function handleStatusChange(priority: number, disabled: boolean) {
   loading.value = true;
   try {
     await props.api.post(`/plugin/ClashRuleProvider/rules/ruleset/metadata/disabled`, {
-        [priority]: disabled
+      [priority]: disabled
     });
     emit('refresh', ["top", "ruleset"]);
   } catch (err: unknown) {
@@ -138,7 +138,7 @@ async function handleStatusChange(priority: number, disabled: boolean) {
 async function handleBatchStatusChange(priorities: number[], disabled: boolean) {
   loading.value = true;
   try {
-    const payload = priorities.reduce((acc, p) => ({ ...acc, [p]: disabled }), {});
+    const payload = priorities.reduce((acc, p) => ({...acc, [p]: disabled}), {});
     await props.api.post(`/plugin/ClashRuleProvider/rules/ruleset/metadata/disabled`, payload);
     emit('refresh', ["top", "ruleset"]);
   } catch (err: unknown) {

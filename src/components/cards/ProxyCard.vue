@@ -35,7 +35,8 @@ const emit = defineEmits<{
       <v-row no-gutters class="mb-2 align-center">
         <v-col cols="3" class="text-caption text-medium-emphasis">类型</v-col>
         <v-col cols="9">
-          <v-chip :color="getProxyColor(proxyData.data.type)" size="x-small" label variant="tonal" class="font-weight-medium">
+          <v-chip :color="getProxyColor(proxyData.data.type)" size="x-small" label variant="tonal"
+                  class="font-weight-medium">
             {{ proxyData.data.type }}
           </v-chip>
         </v-col>
@@ -71,6 +72,6 @@ const emit = defineEmits<{
 
 <style scoped>
 .proxy-card:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
 }
 </style>

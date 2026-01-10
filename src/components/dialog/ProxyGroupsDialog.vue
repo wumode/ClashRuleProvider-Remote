@@ -74,10 +74,13 @@ async function saveProxyGroup() {
       }
     });
 
-    const requestData = props.isAdding ? cleanedProxyGroup : {"source": props.initialValue?.meta.source, "proxy_group": cleanedProxyGroup}
+    const requestData = props.isAdding ? cleanedProxyGroup : {
+      "source": props.initialValue?.meta.source,
+      "proxy_group": cleanedProxyGroup
+    }
     const result = await props.api[method](`/plugin/ClashRuleProvider/proxy-groups${path}`, requestData);
     if (!result.success) {
-      emit('show-error',action + '失败: ' + (result.message || '未知错误'));
+      emit('show-error', action + '失败: ' + (result.message || '未知错误'));
       emit('show-snackbar', {
         show: true,
         message: action + '失败',
@@ -93,8 +96,7 @@ async function saveProxyGroup() {
     emit('refresh')
     emit('close')
   } catch (err: unknown) {
-    if (err instanceof Error)
-    {
+    if (err instanceof Error) {
       emit('show-error', action + '失败: ' + (err.message || '未知错误'));
       emit('show-snackbar', {
         show: true,

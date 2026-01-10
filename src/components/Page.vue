@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import {ref, onMounted, computed} from 'vue'
 import yaml from 'js-yaml';
 import ShowYamlDialog from "./dialog/ShowYamlDialog.vue";
 import DataVisibilityDialog from "./dialog/DataVisibilityDialog.vue";

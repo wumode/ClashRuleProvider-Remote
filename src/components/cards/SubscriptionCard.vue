@@ -7,7 +7,7 @@ import {
   getUsedPercentageFloor,
   getUsageColor
 } from '@/components/utils'
-import { SubscriptionInfo } from "@/components/types";
+import {SubscriptionInfo} from "@/components/types";
 import {ref} from "vue";
 
 const props = defineProps<{

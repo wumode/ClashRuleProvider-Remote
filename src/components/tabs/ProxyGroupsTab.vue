@@ -112,7 +112,7 @@ async function handleStatusChange(name: string, disabled: boolean) {
     }
     const n = encodeURIComponent(name);
     // Send full metadata with updated disabled status
-    const newMeta = { ...group.meta, disabled: disabled };
+    const newMeta = {...group.meta, disabled: disabled};
     await props.api.patch(`/plugin/ClashRuleProvider/proxy-groups/${n}/meta`, newMeta);
     emit('refresh', ["proxy-groups", "clash-outbounds"]);
   } catch (err: unknown) {
