@@ -181,9 +181,11 @@ function closeRuleDialog() {
           />
         </v-col>
         <v-col cols="2" sm="6" class="d-flex justify-end">
-          <v-btn-group variant="outlined" rounded divided>
+          <v-btn-group class="d-sm-none" variant="outlined" rounded divided>
+            <v-btn icon="mdi-plus" :disabled="loading" @click="openAddRuleDialog"></v-btn>
+          </v-btn-group>
+          <v-btn-group class="d-none d-sm-flex" variant="outlined" rounded divided>
             <v-btn
-              class="d-none d-sm-flex"
               :icon="group ? 'mdi-format-list-bulleted' : 'mdi-format-list-group'"
               :disabled="loading"
               @click="group = !group"
