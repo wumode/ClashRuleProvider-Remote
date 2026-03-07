@@ -144,7 +144,7 @@ function closeProxyDialog() {
 async function deleteProxy(name: string) {
   loading.value = true
   try {
-    await props.api.delete(`/plugin/ClashRuleProvider/proxies/${name}`)
+    await props.api.delete(`/plugin/ClashRuleProvider/proxies/${encodeURIComponent(name)}`)
     emit('refresh', ['proxies', 'clash-outbounds'])
   } catch (err: unknown) {
     if (err instanceof Error) {
