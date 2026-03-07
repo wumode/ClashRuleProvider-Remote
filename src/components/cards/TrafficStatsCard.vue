@@ -232,7 +232,8 @@ onMounted(() => {
   })
   if (props.allowRefresh && componentConfig.clash_available) {
     evtSource = new EventSource(
-      'api/v1/plugin/ClashRuleProvider/clash/ws/traffic?secret=' + componentConfig.secret
+      'api/v1/plugin/ClashRuleProvider/clash/ws/traffic?secret=' +
+        encodeURIComponent(componentConfig.secret)
     )
     evtSource.addEventListener('traffic', (event) => {
       const data = JSON.parse(event.data)
@@ -247,7 +248,8 @@ onMounted(() => {
     })
 
     connectionsEvtSource = new EventSource(
-      'api/v1/plugin/ClashRuleProvider/clash/ws/connections?secret=' + componentConfig.secret
+      'api/v1/plugin/ClashRuleProvider/clash/ws/connections?secret=' +
+        encodeURIComponent(componentConfig.secret)
     )
     connectionsEvtSource.addEventListener('connections', (event) => {
       const data = JSON.parse(event.data)
