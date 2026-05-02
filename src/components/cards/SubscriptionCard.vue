@@ -32,15 +32,24 @@ async function updateSubscription() {
   loading.value = true
   emit('start-loading')
   try {
-    await props.api.put('plugin/ClashRuleProvider/refresh', {
+    const result = await props.api.put('plugin/ClashRuleProvider/refresh', {
       url: props.url
     })
-    // 显示成功提示
-    emit('show-snackbar', {
-      show: true,
-      message: '订阅更新成功',
-      color: 'success'
-    })
+    if (result.success) {
+      // 显示成功提示
+      emit('show-snackbar', {
+        show: true,
+        message: '订阅更新成功',
+        color: 'success'
+      })
+    }
+    else {
+      emit('show-snackbar', {
+        show: true,
+        message: '订阅更新失败',
+        color: 'error'
+      })
+    }
     emit('refresh', [
       'status',
       'clash-outbounds',
@@ -57,7 +66,8 @@ async function updateSubscription() {
   }
 }
 
-async function toggleSubscription(val: boolean) {
+async function toggleSubscription(val: boolean | null) {
+  if (val === null) return
   emit('start-loading')
   try {
     await props.api.post('plugin/ClashRuleProvider/subscription-info', {
