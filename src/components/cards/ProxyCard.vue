@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import {PropType} from 'vue'
-import {ProxyData} from '@/components/types'
-import {getProxyColor, getSourceColor} from '@/components/utils'
+import { PropType } from 'vue'
+import { ProxyData } from '@/components/types'
+import { getProxyColor, getSourceColor } from '@/components/utils'
 import ProxyActionMenu from '@/components/menu/ProxyActionMenu.vue'
 
 defineProps({
@@ -26,13 +26,13 @@ const emit = defineEmits<{
   <v-card rounded="lg" elevation="2" class="proxy-card h-100 transition-swing" variant="tonal">
     <div class="d-flex justify-space-between align-center px-4 pt-3">
       <span class="font-weight-bold text-truncate" :title="proxyData.data.name">{{
-          proxyData.data.name
-        }}</span>
+        proxyData.data.name
+      }}</span>
       <div class="d-flex align-center">
         <v-tooltip
-            v-if="proxyData.meta.invisible_to && proxyData.meta.invisible_to.length > 0"
-            text="已配置可见性限制"
-            location="top"
+          v-if="proxyData.meta.invisible_to && proxyData.meta.invisible_to.length > 0"
+          text="已配置可见性限制"
+          location="top"
         >
           <template #activator="{ props }">
             <v-icon v-bind="props" size="small" color="warning" class="mr-2">
@@ -51,11 +51,11 @@ const emit = defineEmits<{
         <v-col cols="3" class="text-caption text-medium-emphasis">类型</v-col>
         <v-col cols="9">
           <v-chip
-              :color="getProxyColor(proxyData.data.type)"
-              size="x-small"
-              label
-              variant="tonal"
-              class="font-weight-medium"
+            :color="getProxyColor(proxyData.data.type)"
+            size="x-small"
+            label
+            variant="tonal"
+            class="font-weight-medium"
           >
             {{ proxyData.data.type }}
           </v-chip>
@@ -69,14 +69,14 @@ const emit = defineEmits<{
       </v-icon>
       <v-spacer></v-spacer>
       <ProxyActionMenu
-          :proxy="proxyData"
-          @change-status="(disabled) => emit('changeStatus', proxyData.data.name, disabled)"
-          @show-yaml="emit('showYaml', proxyData.data)"
-          @edit="emit('editProxy', proxyData)"
-          @delete="emit('deleteProxy', proxyData.data.name)"
-          @delete-patch="emit('deletePatch', proxyData.data.name)"
-          @copy-to-clipboard="(text) => emit('copyToClipboard', text)"
-          @edit-visibility="emit('editVisibility', proxyData.data.name)"
+        :proxy="proxyData"
+        @change-status="(disabled) => emit('changeStatus', proxyData.data.name, disabled)"
+        @show-yaml="emit('showYaml', proxyData.data)"
+        @edit="emit('editProxy', proxyData)"
+        @delete="emit('deleteProxy', proxyData.data.name)"
+        @delete-patch="emit('deletePatch', proxyData.data.name)"
+        @copy-to-clipboard="(text) => emit('copyToClipboard', text)"
+        @edit-visibility="emit('editVisibility', proxyData.data.name)"
       />
     </v-card-actions>
   </v-card>

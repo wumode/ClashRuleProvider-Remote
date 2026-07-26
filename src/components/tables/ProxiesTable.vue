@@ -77,13 +77,15 @@ const headers = ref([
     </template>
 
     <template #item.server="{ item }">
-      <small>{{ item.data.server }}</small>
+      <small v-if="item.data.server">{{ item.data.server }}</small>
+      <span v-else class="text-disabled">—</span>
     </template>
 
     <template #item.port="{ item }">
-      <v-chip size="x-small" label variant="tonal" color="primary">
+      <v-chip v-if="item.data.port != null" size="x-small" label variant="tonal" color="primary">
         {{ item.data.port }}
       </v-chip>
+      <span v-else class="text-disabled">—</span>
     </template>
 
     <template #item.source="{ item }">

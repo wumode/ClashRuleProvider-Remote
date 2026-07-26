@@ -17,6 +17,12 @@ export type ProxyType =
   | 'wireguard'
   | 'ssh'
   | 'socks5'
+  | 'sudoku'
+  | 'shadowquic'
+  | 'masque'
+  | 'trusttunnel'
+  | 'openvpn'
+  | 'tailscale'
 
 export interface Metadata {
   source: string
@@ -281,8 +287,8 @@ export interface GrpcOpts {
 export interface Proxy {
   name: string
   type: ProxyType
-  server: string
-  port: number
+  server?: string
+  port?: number
   uuid?: string
   password?: string
   cipher?: string

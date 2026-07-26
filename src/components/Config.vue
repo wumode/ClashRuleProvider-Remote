@@ -6,6 +6,7 @@ import 'ace-builds/src-noconflict/mode-yaml'
 import 'ace-builds/src-noconflict/theme-monokai'
 import { validateIPs, isValidUrl } from '@/components/utils'
 import { PluginConfig } from '@/components/types'
+
 // Props
 const props = defineProps({
   initialConfig: {
@@ -47,6 +48,14 @@ const saving = ref(false)
 const testing = ref(false)
 const dashboardComponents = ['Clash Info', 'Traffic Stats']
 const showSecrets = ref<Record<number, boolean>>({ 0: false })
+
+// Cron Presets
+const cronPresets = [
+  { label: '每 6 小时', value: '0 */6 * * *' },
+  { label: '每 12 小时', value: '0 */12 * * *' },
+  { label: '每日 04:00', value: '0 4 * * *' },
+  { label: '每日零点', value: '0 0 * * *' }
+]
 
 // Test result state
 const testResult = reactive({
@@ -106,8 +115,26 @@ const sub_links = computed(() => {
   return config.subscriptions_config.map((item) => item.url)
 })
 
+const activeOptionsCount = (item: any) => {
+  let count = 0
+  if (item.rules) count++
+  if (item['rule-providers']) count++
+  if (item['proxy-groups']) count++
+  if (item['proxy-providers']) count++
+  return count
+}
+
+const getUrlHostname = (urlStr: string) => {
+  if (!urlStr) return '未配置订阅 URL'
+  try {
+    const parsed = new URL(urlStr)
+    return parsed.hostname
+  } catch {
+    return urlStr.length > 30 ? urlStr.substring(0, 30) + '...' : urlStr
+  }
+}
+
 const generateApiKey = () => {
-  // 简单生成随机字符串，可替换为更安全的算法
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
   let key = ''
   for (let i = 0; i < 32; i++) {
@@ -130,28 +157,24 @@ async function testConnection() {
   testResult.show = false
 
   try {
-    // 验证必需的参数
     if (sub_links.value.length === 0) {
       showError('连接测试失败', '请先配置至少一个订阅链接')
+      return
     }
 
-    // 准备API请求参数
     const testParams = {
       clash_apis: config.clash_dashboards,
       sub_links: sub_links.value
     }
 
-    // 调用API进行连接测试
     const result = await props.api.post('/plugin/ClashRuleProvider/connectivity', testParams)
 
-    // 根据返回结果显示相应消息
     if (result.success) {
       testResult.success = true
       testResult.title = '连接测试成功！'
-      testResult.message = 'Clash面板和订阅链接连接正常，配置验证通过'
+      testResult.message = 'Clash 面板和订阅链接连接正常，配置验证通过'
       testResult.show = true
 
-      // Auto hide after 5 seconds
       setTimeout(() => {
         testResult.show = false
       }, 5000)
@@ -167,13 +190,10 @@ async function testConnection() {
 
 // 保存配置
 async function saveConfig() {
-  // 手动验证所有订阅链接
   for (let i = 0; i < config.subscriptions_config.length; i++) {
     const sub = config.subscriptions_config[i]
     if (!sub.url || !isValidUrl(sub.url)) {
-      error.value = `订阅配置 ${i + 1} 中的URL无效或为空`
-      // 展开对应的面板以提示用户
-      // 注意：这需要给 v-expansion-panel 设置一个 ref 或者 model 来控制展开状态
+      error.value = `订阅配置 ${i + 1} 中的 URL 无效或为空`
       return
     }
   }
@@ -187,7 +207,7 @@ async function saveConfig() {
   error.value = ''
 
   try {
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 800))
     emit('save', { ...config })
   } catch (err: unknown) {
     if (err instanceof Error) error.value = err.message || '保存配置失败'
@@ -199,6 +219,7 @@ async function saveConfig() {
 const toggleSecret = (index: number) => {
   showSecrets.value[index] = !showSecrets.value[index]
 }
+
 const addClashConfig = () => {
   const newIndex = config.clash_dashboards.length
   config.clash_dashboards.push({ url: '', secret: '' })
@@ -209,7 +230,6 @@ const removeClashConfig = (index: number) => {
   config.clash_dashboards.splice(index, 1)
   delete showSecrets.value[index]
 
-  // 如果删除的是当前激活项，重置激活
   if (config.active_dashboard === index) {
     config.active_dashboard = config.clash_dashboards.length > 0 ? 0 : null
   }
@@ -240,7 +260,6 @@ function saveClashTemplate() {
   clashTemplateDialog.value = false
 }
 
-// 重置表单
 function resetForm() {
   Object.assign(config, JSON.parse(JSON.stringify(defaultConfig)))
 
@@ -249,617 +268,1285 @@ function resetForm() {
   }
 }
 </script>
+
 <template>
-  <div class="plugin-config">
-    <v-alert v-if="error" type="error" class="mb-4">{{ error }}</v-alert>
-    <v-card>
-      <v-card-item>
-        <v-card-title>Clash Rule Provider 插件配置</v-card-title>
-        <template #append>
-          <v-btn icon color="primary" variant="text" @click="emit('close')">
-            <v-icon left>mdi-close</v-icon>
+  <div class="plugin-config-wrapper">
+    <v-card class="modern-config-card border elevation-3 rounded-xl overflow-hidden">
+      <!-- 现代化 Hero Header Section -->
+      <div
+        class="config-hero-header pa-5 pa-md-6 d-flex flex-wrap align-center justify-space-between gap-4"
+      >
+        <div class="d-flex align-center gap-4">
+          <div class="hero-icon-avatar rounded-lg d-flex align-center justify-center">
+            <v-icon size="28" color="white">mdi-tune-variant</v-icon>
+          </div>
+          <div>
+            <div class="d-flex align-center gap-2">
+              <h2 class="text-h6 text-md-h5 font-weight-bold text-gradient">
+                Clash Rule Provider
+              </h2>
+              <v-chip
+                :color="config.enabled ? 'success' : 'grey'"
+                size="small"
+                variant="tonal"
+                class="font-weight-bold ml-2"
+              >
+                <v-icon start size="14">
+                  {{ config.enabled ? 'mdi-check-circle' : 'mdi-pause-circle' }}
+                </v-icon>
+                {{ config.enabled ? '已启用' : '未启用' }}
+              </v-chip>
+            </div>
+            <p class="text-body-2 text-medium-emphasis mt-1 mb-0">
+              随时为 Clash 添加一些额外的规则
+            </p>
+          </div>
+        </div>
+
+        <div class="d-flex align-center gap-2">
+          <v-btn
+            color="primary"
+            variant="tonal"
+            size="small"
+            class="rounded-lg text-none"
+            @click="emit('switch')"
+          >
+            <v-icon start>mdi-view-dashboard-edit</v-icon>
+            切换至规则
           </v-btn>
-        </template>
-      </v-card-item>
-      <v-card-text class="overflow-y-auto">
+          <v-btn
+            icon
+            variant="text"
+            color="grey-darken-1"
+            density="comfortable"
+            @click="emit('close')"
+          >
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </div>
+      </div>
+
+      <v-divider />
+
+      <!-- 主界面区域 -->
+      <v-card-text class="pa-4 pa-md-6">
+        <v-alert
+          v-if="error"
+          type="error"
+          variant="tonal"
+          closable
+          class="mb-6 rounded-lg border-error"
+          @click:close="error = ''"
+        >
+          <template #prepend>
+            <v-icon color="error">mdi-alert-circle</v-icon>
+          </template>
+          <span class="font-weight-medium">{{ error }}</span>
+        </v-alert>
+
         <v-form ref="form" v-model="isFormValid" @submit.prevent="saveConfig">
-          <!-- 标签页 -->
-          <v-row>
-            <v-col cols="6" md="3">
-              <v-switch
-                v-model="config.enabled"
-                label="启用插件"
-                color="primary"
-                inset
-                density="compact"
-                hint="启用插件"
-              />
-            </v-col>
-            <v-col cols="6" md="3">
-              <v-switch
-                v-model="config.proxy"
-                label="启用代理"
-                color="primary"
-                inset
-                density="compact"
-                hint="是否使用系统代理进行网络请求"
-              />
-            </v-col>
-            <v-col cols="6" md="3">
-              <v-switch
-                v-model="config.notify"
-                label="启用通知"
-                color="primary"
-                inset
-                density="compact"
-                hint="执行完成后发送通知消息"
-              />
-            </v-col>
-            <v-col cols="6" md="3">
-              <v-switch
-                v-model="config.auto_update_subscriptions"
-                label="自动更新订阅"
-                color="primary"
-                inset
-                density="compact"
-                hint="定期自动更新 Clash 订阅配置"
-              />
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="12" md="4">
-              <v-text-field
-                v-model="config.movie_pilot_url"
-                label="MoviePilot URL"
-                variant="outlined"
-                placeholder="http://localhost:3001"
-                hint="MoviePilot 服务的访问地址"
-                :rules="[
-                  (v) => !!v || 'MoviePilot URL不能为空',
-                  (v) => isValidUrl(v) || '请输入有效的URL地址'
-                ]"
-              >
-                <template #prepend-inner>
-                  <v-icon color="success">mdi-movie</v-icon>
-                </template>
-              </v-text-field>
-            </v-col>
-            <v-col cols="12" md="4">
-              <v-text-field
-                v-model="config.apikey"
-                label="API Key"
-                variant="outlined"
-                placeholder="留空使用系统 API Key"
-                hint="用于服务认证的 API Key"
-              >
-                <template #prepend-inner>
-                  <v-icon color="warning">mdi-key</v-icon>
-                </template>
-                <template #append-inner>
-                  <v-icon color="primary" class="cursor-pointer" @click="generateApiKey">
-                    mdi-autorenew
-                  </v-icon>
-                </template>
-              </v-text-field>
-            </v-col>
-            <v-col cols="12" md="4">
-              <v-select
-                v-model="config.dashboard_components"
-                :items="dashboardComponents"
-                label="仪表盘组件"
-                hide-details
-                variant="outlined"
-                multiple
-                chips
-                class="mb-4"
-                hint="添加仪表盘组件"
-              >
-                <template #prepend-inner>
-                  <v-icon color="info">mdi-view-dashboard</v-icon>
-                </template>
-              </v-select>
-            </v-col>
-          </v-row>
-          <v-tabs v-model="activeTab" class="mt-4" grow>
-            <v-tab value="subscription">
-              <v-icon start>mdi-link-variant</v-icon>
-              订阅配置
-            </v-tab>
-            <v-tab value="clash">
-              <v-icon start>mdi-application-brackets</v-icon>
-              Clash API 配置
-            </v-tab>
-            <v-tab value="execution">
-              <v-icon start>mdi-play-circle</v-icon>
-              执行设置
-            </v-tab>
-            <v-tab value="settings">
-              <v-icon start>mdi-cog</v-icon>
-              高级选项
-            </v-tab>
-          </v-tabs>
-
-          <v-divider></v-divider>
-
-          <!-- 标签页内容 -->
-          <v-window v-model="activeTab" class="pa-4">
-            <!-- 订阅配置 -->
-            <v-window-item value="subscription">
-              <v-row>
-                <v-col cols="12" md="6">
+          <!-- 1. 核心总开关微卡片 Grid (4 Master Switches Cards) -->
+          <div class="mb-6">
+            <div
+              class="text-subtitle-2 font-weight-bold text-uppercase text-medium-emphasis mb-3 d-flex align-center"
+            >
+              <v-icon size="16" class="mr-2" color="primary">mdi-lightning-bolt</v-icon>
+              核心功能开关
+            </div>
+            <v-row dense>
+              <!-- 开关 1: 启用插件 -->
+              <v-col cols="12" sm="6" md="3">
+                <div
+                  class="switch-card switch-card--primary rounded-lg pa-3 pa-md-4 d-flex align-center justify-space-between transition-all cursor-pointer select-none"
+                  :class="{ 'switch-card--active': config.enabled }"
+                  @click="config.enabled = !config.enabled"
+                >
+                  <div class="d-flex align-center gap-3">
+                    <div class="card-icon-avatar rounded-circle d-flex align-center justify-center">
+                      <v-icon :color="config.enabled ? 'primary' : 'grey-darken-1'">mdi-power</v-icon>
+                    </div>
+                    <div>
+                      <div class="font-weight-bold text-body-2">启用插件</div>
+                      <div class="text-caption text-medium-emphasis">运行插件服务</div>
+                    </div>
+                  </div>
                   <v-switch
-                    v-model="config.group_by_country"
-                    label="按国家分组节点"
+                    v-model="config.enabled"
                     color="primary"
+                    hide-details
                     inset
-                    hint="启用后，根据名称将节点添加到代理组"
+                    density="compact"
+                    @click.stop
                   />
-                </v-col>
-                <v-col cols="12" md="6">
+                </div>
+              </v-col>
+
+              <!-- 开关 2: 系统代理 -->
+              <v-col cols="12" sm="6" md="3">
+                <div
+                  class="switch-card switch-card--info rounded-lg pa-3 pa-md-4 d-flex align-center justify-space-between transition-all cursor-pointer select-none"
+                  :class="{ 'switch-card--active': config.proxy }"
+                  @click="config.proxy = !config.proxy"
+                >
+                  <div class="d-flex align-center gap-3">
+                    <div class="card-icon-avatar rounded-circle d-flex align-center justify-center">
+                      <v-icon :color="config.proxy ? 'info' : 'grey-darken-1'">mdi-lan-connect</v-icon>
+                    </div>
+                    <div>
+                      <div class="font-weight-bold text-body-2">启用代理</div>
+                      <div class="text-caption text-medium-emphasis">网络请求代理</div>
+                    </div>
+                  </div>
                   <v-switch
-                    v-model="config.group_by_region"
-                    label="按大洲分组节点"
-                    color="primary"
+                    v-model="config.proxy"
+                    color="info"
+                    hide-details
                     inset
-                    hint="启用后，根据名称将节点添加到代理组"
+                    density="compact"
+                    @click.stop
                   />
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="12">
-                  <v-combobox
-                    v-model="config.filter_keywords"
-                    label="节点过滤关键词"
-                    variant="outlined"
-                    multiple
-                    chips
-                    closable-chips
-                    clearable
-                    hint="添加用于过滤节点的关键词"
-                  >
-                    <template #prepend-inner>
-                      <v-icon color="info">mdi-filter</v-icon>
-                    </template>
-                    <template #chip="{ props, item }">
-                      <v-chip v-bind="props" closable size="small" color="info">
-                        {{ item.value }}
-                      </v-chip>
-                    </template>
-                  </v-combobox>
-                </v-col>
-                <v-divider></v-divider>
-                <v-col cols="12">
-                  <v-expansion-panels multiple>
-                    <v-expansion-panel
-                      v-for="(item, index) in config.subscriptions_config"
-                      :key="index"
-                    >
-                      <v-expansion-panel-title>
-                        <span class="text-subtitle-1 font-weight-medium">
-                          订阅配置 {{ index + 1 }}
-                        </span>
-                        <v-spacer />
+                </div>
+              </v-col>
+
+              <!-- 开关 3: 运行通知 -->
+              <v-col cols="12" sm="6" md="3">
+                <div
+                  class="switch-card switch-card--warning rounded-lg pa-3 pa-md-4 d-flex align-center justify-space-between transition-all cursor-pointer select-none"
+                  :class="{ 'switch-card--active': config.notify }"
+                  @click="config.notify = !config.notify"
+                >
+                  <div class="d-flex align-center gap-3">
+                    <div class="card-icon-avatar rounded-circle d-flex align-center justify-center">
+                      <v-icon :color="config.notify ? 'warning' : 'grey-darken-1'">mdi-bell-outline</v-icon>
+                    </div>
+                    <div>
+                      <div class="font-weight-bold text-body-2">运行通知</div>
+                      <div class="text-caption text-medium-emphasis">发送消息推送</div>
+                    </div>
+                  </div>
+                  <v-switch
+                    v-model="config.notify"
+                    color="warning"
+                    hide-details
+                    inset
+                    density="compact"
+                    @click.stop
+                  />
+                </div>
+              </v-col>
+
+              <!-- 开关 4: 自动更新订阅 -->
+              <v-col cols="12" sm="6" md="3">
+                <div
+                  class="switch-card switch-card--success rounded-lg pa-3 pa-md-4 d-flex align-center justify-space-between transition-all cursor-pointer select-none"
+                  :class="{ 'switch-card--active': config.auto_update_subscriptions }"
+                  @click="config.auto_update_subscriptions = !config.auto_update_subscriptions"
+                >
+                  <div class="d-flex align-center gap-3">
+                    <div class="card-icon-avatar rounded-circle d-flex align-center justify-center">
+                      <v-icon :color="config.auto_update_subscriptions ? 'success' : 'grey-darken-1'">
+                        mdi-sync
+                      </v-icon>
+                    </div>
+                    <div>
+                      <div class="font-weight-bold text-body-2">自动更新</div>
+                      <div class="text-caption text-medium-emphasis">定时同步订阅</div>
+                    </div>
+                  </div>
+                  <v-switch
+                    v-model="config.auto_update_subscriptions"
+                    color="success"
+                    hide-details
+                    inset
+                    density="compact"
+                    @click.stop
+                  />
+                </div>
+              </v-col>
+            </v-row>
+          </div>
+
+          <!-- 2. 基础服务对接 (MoviePilot & API Service) -->
+          <v-card variant="outlined" class="section-card border rounded-xl pa-4 mb-6 bg-surface">
+            <div
+              class="text-subtitle-2 font-weight-bold text-uppercase text-medium-emphasis mb-3 d-flex align-center"
+            >
+              <v-icon size="16" class="mr-2" color="primary">mdi-server-network</v-icon>
+              基础配置
+            </div>
+            <v-row dense>
+              <v-col cols="12" md="4">
+                <v-text-field
+                  v-model="config.movie_pilot_url"
+                  label="MoviePilot URL"
+                  variant="outlined"
+                  density="comfortable"
+                  placeholder="http://localhost:3001"
+                  hint="MoviePilot 服务访问地址"
+                  persistent-hint
+                  class="custom-input"
+                  :rules="[
+                    (v) => !!v || 'MoviePilot URL 不能为空',
+                    (v) => isValidUrl(v) || '请输入有效的 URL 地址'
+                  ]"
+                >
+                  <template #prepend-inner>
+                    <v-icon color="primary" size="20">mdi-movie-open</v-icon>
+                  </template>
+                </v-text-field>
+              </v-col>
+              <v-col cols="12" md="4">
+                <v-text-field
+                  v-model="config.apikey"
+                  label="API Key"
+                  variant="outlined"
+                  density="comfortable"
+                  placeholder="留空使用系统 API Key"
+                  hint="服务鉴权凭证"
+                  persistent-hint
+                  class="custom-input"
+                >
+                  <template #prepend-inner>
+                    <v-icon color="warning" size="20">mdi-key-variant</v-icon>
+                  </template>
+                  <template #append-inner>
+                    <v-tooltip location="top" text="自动生成随机 Key">
+                      <template #activator="{ props: slotProps }">
                         <v-btn
-                          icon
-                          size="small"
-                          color="error"
+                          v-bind="slotProps"
+                          icon="mdi-autorenew"
+                          size="x-small"
                           variant="text"
-                          @click.stop="removeSubscriptionConfig(index)"
-                        >
-                          <v-icon>mdi-delete</v-icon>
-                        </v-btn>
-                      </v-expansion-panel-title>
+                          color="primary"
+                          class="rotate-on-hover"
+                          @click="generateApiKey"
+                        />
+                      </template>
+                    </v-tooltip>
+                  </template>
+                </v-text-field>
+              </v-col>
+              <v-col cols="12" md="4">
+                <v-select
+                  v-model="config.dashboard_components"
+                  :items="dashboardComponents"
+                  label="仪表盘组件"
+                  variant="outlined"
+                  density="comfortable"
+                  multiple
+                  chips
+                  closable-chips
+                  hint="选中的组件将在仪表盘中展示"
+                  persistent-hint
+                  class="custom-input"
+                >
+                  <template #prepend-inner>
+                    <v-icon color="info" size="20">mdi-view-dashboard-outline</v-icon>
+                  </template>
+                  <template #chip="{ props: slotProps, item }">
+                    <v-chip
+                      v-bind="slotProps"
+                      size="small"
+                      color="info"
+                      variant="tonal"
+                      class="font-weight-medium"
+                    >
+                      {{ item.value }}
+                    </v-chip>
+                  </template>
+                </v-select>
+              </v-col>
+            </v-row>
+          </v-card>
 
-                      <v-expansion-panel-text>
-                        <v-row dense>
-                          <v-col cols="12">
-                            <v-text-field
-                              v-model="item.url"
-                              label="订阅链接"
-                              variant="underlined"
-                              placeholder="https://xxx.com/clash/config.yaml"
-                              density="compact"
-                              :rules="[
-                                (v) => !!v || '订阅链接不能为空',
-                                (v) => isValidUrl(v) || '请输入有效的 URL 地址'
-                              ]"
-                            >
-                              <template #prepend-inner>
-                                <v-icon color="primary">mdi-link</v-icon>
-                              </template>
-                            </v-text-field>
-                          </v-col>
+          <!-- 3. 现代化胶囊分段 Tabs 导航 -->
+          <div class="tabs-container mb-4">
+            <v-tabs
+              v-model="activeTab"
+              color="primary"
+              align-tabs="start"
+              class="custom-modern-tabs"
+            >
+              <v-tab value="subscription" class="rounded-lg text-none px-4 py-2 font-weight-bold">
+                <v-icon start size="18">mdi-link-variant</v-icon>
+                订阅配置
+                <v-badge
+                  v-if="config.subscriptions_config?.length"
+                  :content="config.subscriptions_config.length"
+                  color="primary"
+                  inline
+                  class="ml-2"
+                />
+              </v-tab>
+              <v-tab value="clash" class="rounded-lg text-none px-4 py-2 font-weight-bold">
+                <v-icon start size="18">mdi-application-brackets-outline</v-icon>
+                Clash API 配置
+                <v-badge
+                  v-if="config.clash_dashboards?.length"
+                  :content="config.clash_dashboards.length"
+                  color="info"
+                  inline
+                  class="ml-2"
+                />
+              </v-tab>
+              <v-tab value="execution" class="rounded-lg text-none px-4 py-2 font-weight-bold">
+                <v-icon start size="18">mdi-clock-time-four-outline</v-icon>
+                执行与定时
+              </v-tab>
+              <v-tab value="settings" class="rounded-lg text-none px-4 py-2 font-weight-bold">
+                <v-icon start size="18">mdi-tune</v-icon>
+                高级与规则集
+              </v-tab>
+            </v-tabs>
+          </div>
 
-                          <v-col cols="12" md="3">
-                            <v-switch
-                              v-model="item.rules"
-                              label="保留规则"
-                              color="primary"
-                              density="compact"
-                            />
-                          </v-col>
-                          <v-col cols="12" md="3">
-                            <v-switch
-                              v-model="item['rule-providers']"
-                              label="保留规则集合"
-                              color="primary"
-                              density="compact"
-                            />
-                          </v-col>
-                          <v-col cols="12" md="3">
-                            <v-switch
-                              v-model="item['proxy-groups']"
-                              label="保留代理组"
-                              color="primary"
-                              density="compact"
-                            />
-                          </v-col>
-                          <v-col cols="12" md="3">
-                            <v-switch
-                              v-model="item['proxy-providers']"
-                              label="保留代理集合"
-                              color="primary"
-                              density="compact"
-                            />
-                          </v-col>
-                        </v-row>
-                      </v-expansion-panel-text>
-                    </v-expansion-panel>
-                  </v-expansion-panels>
+          <!-- 4. 标签页切换 Window 内容 -->
+          <v-window v-model="activeTab" class="tab-window-content">
+            <!-- ===== Tab 1: 订阅配置 ===== -->
+            <v-window-item value="subscription">
+              <v-card variant="flat" class="pa-4 border rounded-xl bg-surface">
+                <!-- 全局节点分组设置 -->
+                <div class="mb-4">
+                  <div class="text-subtitle-2 font-weight-bold mb-2">节点分组与过滤设置</div>
+                  <v-row dense>
+                    <v-col cols="12" md="6">
+                      <div
+                        class="feature-toggle-item d-flex align-center justify-space-between border rounded-lg pa-3 cursor-pointer select-none transition-all"
+                        @click="config.group_by_country = !config.group_by_country"
+                      >
+                        <div class="d-flex align-center gap-2">
+                          <v-icon color="primary" size="20">mdi-flag-outline</v-icon>
+                          <div>
+                            <div class="text-body-2 font-weight-medium">按国家/地区分组节点</div>
+                            <div class="text-caption text-medium-emphasis">
+                              根据节点名称自动归类国家代理组
+                            </div>
+                          </div>
+                        </div>
+                        <v-switch
+                          v-model="config.group_by_country"
+                          color="primary"
+                          hide-details
+                          inset
+                          density="compact"
+                          @click.stop
+                        />
+                      </div>
+                    </v-col>
+                    <v-col cols="12" md="6">
+                      <div
+                        class="feature-toggle-item d-flex align-center justify-space-between border rounded-lg pa-3 cursor-pointer select-none transition-all"
+                        @click="config.group_by_region = !config.group_by_region"
+                      >
+                        <div class="d-flex align-center gap-2">
+                          <v-icon color="primary" size="20">mdi-earth</v-icon>
+                          <div>
+                            <div class="text-body-2 font-weight-medium">按大洲/区域分组节点</div>
+                            <div class="text-caption text-medium-emphasis">
+                              根据节点名称自动归类大洲代理组
+                            </div>
+                          </div>
+                        </div>
+                        <v-switch
+                          v-model="config.group_by_region"
+                          color="primary"
+                          hide-details
+                          inset
+                          density="compact"
+                          @click.stop
+                        />
+                      </div>
+                    </v-col>
+                  </v-row>
+                </div>
 
-                  <v-row dense justify="space-between">
+                <v-combobox
+                  v-model="config.filter_keywords"
+                  label="节点过滤关键词"
+                  variant="outlined"
+                  density="comfortable"
+                  multiple
+                  chips
+                  closable-chips
+                  clearable
+                  hint="按 Enter 添加无需导入的节点过滤关键字"
+                  persistent-hint
+                  class="mb-6"
+                >
+                  <template #prepend-inner>
+                    <v-icon color="info" size="20">mdi-filter-variant</v-icon>
+                  </template>
+                  <template #chip="{ props: slotProps, item }">
+                    <v-chip
+                      v-bind="slotProps"
+                      closable
+                      size="small"
+                      color="info"
+                      variant="tonal"
+                      class="font-weight-medium"
+                    >
+                      {{ item.value }}
+                    </v-chip>
+                  </template>
+                </v-combobox>
+
+                <v-divider class="my-4" />
+
+                <!-- 订阅链接列表 Header -->
+                <div class="d-flex align-center justify-space-between mb-4">
+                  <div class="text-subtitle-1 font-weight-bold d-flex align-center">
+                    <v-icon color="primary" class="mr-2">mdi-link-box-variant-outline</v-icon>
+                    订阅链接配置列表
+                  </div>
+                  <div class="d-flex align-center gap-2">
                     <v-btn
                       size="small"
                       color="primary"
                       variant="tonal"
-                      class="mt-2"
+                      class="rounded-lg"
                       @click="addSubscriptionConfig"
                     >
                       <v-icon start>mdi-plus</v-icon>
-                      添加
+                      添加订阅
                     </v-btn>
                     <v-btn
                       size="small"
-                      color="primary"
-                      variant="tonal"
-                      class="mt-2"
+                      color="secondary"
+                      variant="outlined"
+                      class="rounded-lg"
                       @click="openClashTemplateDialog"
                     >
-                      <v-icon left>mdi-import</v-icon>
+                      <v-icon start>mdi-file-code-outline</v-icon>
                       配置模板
                     </v-btn>
-                  </v-row>
-                </v-col>
-              </v-row>
+                  </div>
+                </div>
+
+                <!-- 空订阅提示 -->
+                <div
+                  v-if="!config.subscriptions_config || config.subscriptions_config.length === 0"
+                  class="empty-box rounded-xl pa-8 text-center border-dashed"
+                >
+                  <v-icon size="48" color="grey-lighten-1" class="mb-2">mdi-link-off</v-icon>
+                  <div class="text-body-1 font-weight-medium text-medium-emphasis">
+                    暂未配置任何订阅链接
+                  </div>
+                  <div class="text-caption text-disabled mb-4">
+                    点击上方“添加订阅”按钮以配置 Clash 规则订阅
+                  </div>
+                  <v-btn size="small" color="primary" variant="flat" @click="addSubscriptionConfig">
+                    <v-icon start>mdi-plus</v-icon>
+                    立即添加
+                  </v-btn>
+                </div>
+
+                <!-- 订阅折叠卡片列表 -->
+                <v-expansion-panels v-else multiple class="sub-panels">
+                  <v-expansion-panel
+                    v-for="(item, index) in config.subscriptions_config"
+                    :key="index"
+                    class="border rounded-xl mb-3 overflow-hidden"
+                    elevation="0"
+                  >
+                    <v-expansion-panel-title class="py-3 px-4">
+                      <div class="d-flex align-center gap-3 w-100">
+                        <v-chip color="primary" size="small" variant="flat" class="font-weight-bold">
+                          #{{ index + 1 }}
+                        </v-chip>
+                        <div
+                          class="text-subtitle-2 font-weight-bold text-truncate"
+                          style="max-width: 320px"
+                        >
+                          {{ getUrlHostname(item.url) }}
+                        </div>
+                        <v-chip
+                          v-if="activeOptionsCount(item) > 0"
+                          size="x-small"
+                          color="success"
+                          variant="tonal"
+                          class="ml-2"
+                        >
+                          已勾选 {{ activeOptionsCount(item) }} 项保留
+                        </v-chip>
+                        <v-spacer />
+                        <v-btn
+                          icon="mdi-delete-outline"
+                          size="small"
+                          color="error"
+                          variant="text"
+                          class="mr-2"
+                          @click.stop="removeSubscriptionConfig(index)"
+                        />
+                      </div>
+                    </v-expansion-panel-title>
+
+                    <v-expansion-panel-text class="pa-4">
+                      <v-text-field
+                        v-model="item.url"
+                        label="订阅 URL 链接"
+                        variant="outlined"
+                        density="comfortable"
+                        placeholder="https://example.com/clash/config.yaml"
+                        class="mb-4"
+                        :rules="[
+                          (v) => !!v || '订阅链接不能为空',
+                          (v) => isValidUrl(v) || '请输入有效的 URL 地址'
+                        ]"
+                      >
+                        <template #prepend-inner>
+                          <v-icon color="primary" size="20">mdi-link</v-icon>
+                        </template>
+                      </v-text-field>
+
+                      <div class="text-caption text-medium-emphasis font-weight-bold mb-2">
+                        保留选项设置
+                      </div>
+                      <v-row dense>
+                        <v-col cols="12" sm="6" md="3">
+                          <div
+                            class="option-toggle-box rounded-lg pa-2 border d-flex align-center justify-space-between cursor-pointer select-none"
+                            @click="item.rules = !item.rules"
+                          >
+                            <span class="text-caption font-weight-medium">保留规则</span>
+                            <v-switch
+                              v-model="item.rules"
+                              color="primary"
+                              hide-details
+                              density="compact"
+                              @click.stop
+                            />
+                          </div>
+                        </v-col>
+                        <v-col cols="12" sm="6" md="3">
+                          <div
+                            class="option-toggle-box rounded-lg pa-2 border d-flex align-center justify-space-between cursor-pointer select-none"
+                            @click="item['rule-providers'] = !item['rule-providers']"
+                          >
+                            <span class="text-caption font-weight-medium">保留规则集合</span>
+                            <v-switch
+                              v-model="item['rule-providers']"
+                              color="primary"
+                              hide-details
+                              density="compact"
+                              @click.stop
+                            />
+                          </div>
+                        </v-col>
+                        <v-col cols="12" sm="6" md="3">
+                          <div
+                            class="option-toggle-box rounded-lg pa-2 border d-flex align-center justify-space-between cursor-pointer select-none"
+                            @click="item['proxy-groups'] = !item['proxy-groups']"
+                          >
+                            <span class="text-caption font-weight-medium">保留代理组</span>
+                            <v-switch
+                              v-model="item['proxy-groups']"
+                              color="primary"
+                              hide-details
+                              density="compact"
+                              @click.stop
+                            />
+                          </div>
+                        </v-col>
+                        <v-col cols="12" sm="6" md="3">
+                          <div
+                            class="option-toggle-box rounded-lg pa-2 border d-flex align-center justify-space-between cursor-pointer select-none"
+                            @click="item['proxy-providers'] = !item['proxy-providers']"
+                          >
+                            <span class="text-caption font-weight-medium">保留代理集合</span>
+                            <v-switch
+                              v-model="item['proxy-providers']"
+                              color="primary"
+                              hide-details
+                              density="compact"
+                              @click.stop
+                            />
+                          </div>
+                        </v-col>
+                      </v-row>
+                    </v-expansion-panel-text>
+                  </v-expansion-panel>
+                </v-expansion-panels>
+              </v-card>
             </v-window-item>
 
-            <!-- Clash API 配置 -->
+            <!-- ===== Tab 2: Clash API 配置 ===== -->
             <v-window-item value="clash">
-              <v-alert
-                border-color="info"
-                variant="tonal"
-                border="start"
-                text="Clash 访问地址用于通知 Clash 更新规则集; 选中的面板用于小组件显示"
-                class="mb-3"
-              ></v-alert>
-              <v-row>
-                <v-col cols="12">
-                  <!-- 使用 v-radio-group 来管理单选按钮组 -->
-                  <v-radio-group v-model="config.active_dashboard">
-                    <v-row v-for="(item, index) in config.clash_dashboards" :key="index">
-                      <!-- 选择激活 -->
-                      <v-col cols="2" md="1" class="d-flex align-center">
-                        <v-radio :value="index" color="primary" label="" />
+              <v-card variant="flat" class="pa-4 border rounded-lg bg-surface">
+                <v-alert
+                  type="info"
+                  variant="tonal"
+                  density="comfortable"
+                  class="mb-4 rounded-lg"
+                  icon="mdi-information-outline"
+                >
+                  <div class="text-caption font-weight-medium">
+                    Clash API 用于通知 Clash 更新规则集；选中的活动面板将作为小组件展示。
+                  </div>
+                </v-alert>
+
+                <v-radio-group v-model="config.active_dashboard" hide-details class="w-100">
+                  <div
+                    v-for="(item, index) in config.clash_dashboards"
+                    :key="index"
+                    class="api-endpoint-card border rounded-lg pa-3 pa-md-4 mb-3 transition-all"
+                    :class="{ 'api-endpoint-card--active': config.active_dashboard === index }"
+                  >
+                    <v-row dense align="center">
+                      <v-col
+                        cols="12"
+                        sm="1"
+                        class="d-flex align-center justify-start justify-sm-center"
+                      >
+                        <v-radio :value="index" color="primary" hide-details />
+                        <span class="text-caption font-weight-bold ml-1 d-sm-none"
+                          >设为活动面板</span
+                        >
                       </v-col>
-                      <v-col cols="10" md="5">
+                      <v-col cols="12" sm="5">
                         <v-text-field
                           v-model="item.url"
-                          label="API URL"
+                          label="API 访问 URL"
                           variant="outlined"
+                          density="comfortable"
                           placeholder="http://localhost:9090"
-                          density="compact"
-                          :rules="[(v) => !v || isValidUrl(v) || '请输入有效的URL地址']"
+                          hide-details="auto"
+                          :rules="[(v) => !v || isValidUrl(v) || '请输入有效的 URL']"
                         >
                           <template #prepend-inner>
-                            <v-icon color="primary">mdi-web</v-icon>
+                            <v-icon color="primary" size="20">mdi-web</v-icon>
                           </template>
                         </v-text-field>
                       </v-col>
-
-                      <v-col cols="10" md="5">
+                      <v-col cols="12" sm="5">
                         <v-text-field
                           v-model="item.secret"
-                          label="API 密钥"
+                          label="API 密钥 (Secret)"
                           variant="outlined"
+                          density="comfortable"
                           placeholder="your-clash-secret"
-                          density="compact"
-                          :append-inner-icon="showSecrets[index] ? 'mdi-eye-off' : 'mdi-eye'"
+                          hide-details="auto"
                           :type="showSecrets[index] ? 'text' : 'password'"
+                          :append-inner-icon="
+                            showSecrets[index] ? 'mdi-eye-off-outline' : 'mdi-eye-outline'
+                          "
                           @click:append-inner="toggleSecret(index)"
                         >
                           <template #prepend-inner>
-                            <v-icon color="warning">mdi-key</v-icon>
+                            <v-icon color="warning" size="20">mdi-shield-key-outline</v-icon>
                           </template>
                         </v-text-field>
                       </v-col>
-
-                      <v-col cols="2" md="1" class="d-flex align-center">
-                        <v-btn icon color="error" variant="text" @click="removeClashConfig(index)">
-                          <v-icon>mdi-delete</v-icon>
-                        </v-btn>
+                      <v-col cols="12" sm="1" class="d-flex align-center justify-end">
+                        <v-btn
+                          icon="mdi-delete-outline"
+                          color="error"
+                          variant="text"
+                          size="small"
+                          @click="removeClashConfig(index)"
+                        />
                       </v-col>
                     </v-row>
-                  </v-radio-group>
-                  <v-btn
-                    size="small"
-                    color="primary"
-                    variant="tonal"
-                    class="mt-2"
-                    @click="addClashConfig"
-                  >
-                    <v-icon start>mdi-plus</v-icon>
-                    添加
-                  </v-btn>
-                </v-col>
-              </v-row>
+                  </div>
+                </v-radio-group>
+
+                <v-btn
+                  size="small"
+                  color="primary"
+                  variant="tonal"
+                  class="rounded-lg mt-2"
+                  @click="addClashConfig"
+                >
+                  <v-icon start>mdi-plus</v-icon>
+                  添加 Clash API 地址
+                </v-btn>
+              </v-card>
             </v-window-item>
 
-            <!-- 执行设置 -->
+            <!-- ===== Tab 3: 执行与定时 ===== -->
             <v-window-item value="execution">
-              <v-row>
-                <v-col cols="12" md="6">
-                  <v-cron-field
-                    v-model="config.cron_string"
-                    label="执行周期"
-                    placeholder="0 4 * * *"
-                    hint="使用标准Cron表达式格式 (分 时 日 月 周)"
-                  >
-                    <template #prepend-inner>
-                      <v-icon color="info">mdi-clock-time-four-outline</v-icon>
-                    </template>
-                  </v-cron-field>
-                </v-col>
-                <v-col cols="12" md="6">
-                  <v-text-field
-                    v-model.number="config.timeout"
-                    label="超时时间"
-                    variant="outlined"
-                    type="number"
-                    min="1"
-                    max="300"
-                    suffix="秒"
-                    hint="请求的超时时间"
-                    :rules="[(v) => v > 0 || '超时时间必须大于0']"
-                  />
-                </v-col>
-                <v-col cols="12" md="6">
-                  <v-text-field
-                    v-model.number="config.retry_times"
-                    label="重试次数"
-                    variant="outlined"
-                    type="number"
-                    min="0"
-                    max="10"
-                    hint="失败时的重试次数"
-                    :rules="[(v) => v >= 0 || '重试次数不能为负数']"
-                  >
-                    <template #prepend-inner>
-                      <v-icon color="info">mdi-refresh</v-icon>
-                    </template>
-                  </v-text-field>
-                </v-col>
-                <v-col cols="12" md="6">
-                  <v-text-field
-                    v-model.number="config.refresh_delay"
-                    label="刷新延迟"
-                    variant="outlined"
-                    type="number"
-                    min="1"
-                    max="30"
-                    suffix="秒"
-                    hint="通知Clash刷新规则集的延迟时间"
-                    :rules="[(v) => v >= 0 || '刷新延迟不能为负数']"
-                  >
-                    <template #prepend-inner>
-                      <v-icon color="info">mdi-clock-outline</v-icon>
-                    </template>
-                  </v-text-field>
-                </v-col>
-              </v-row>
+              <v-card variant="flat" class="pa-4 border rounded-xl bg-surface">
+                <v-row dense>
+                  <v-col cols="12" md="6">
+                    <v-text-field
+                      v-model="config.cron_string"
+                      label="执行周期 (Cron 表达式)"
+                      variant="outlined"
+                      density="comfortable"
+                      placeholder="0 */6 * * *"
+                      hint="标准 Cron 表达式格式 (分 时 日 月 周)"
+                      persistent-hint
+                      class="mb-3"
+                    >
+                      <template #prepend-inner>
+                        <v-icon color="info" size="20">mdi-clock-outline</v-icon>
+                      </template>
+                    </v-text-field>
+
+                    <!-- Cron 预设快捷方式 -->
+                    <div class="d-flex align-center gap-1 flex-wrap mb-4">
+                      <span class="text-caption text-medium-emphasis mr-1">快捷预设:</span>
+                      <v-chip
+                        v-for="preset in cronPresets"
+                        :key="preset.value"
+                        size="x-small"
+                        color="info"
+                        variant="tonal"
+                        class="cursor-pointer font-weight-medium"
+                        @click="config.cron_string = preset.value"
+                      >
+                        {{ preset.label }}
+                      </v-chip>
+                    </div>
+                  </v-col>
+
+                  <v-col cols="12" md="6">
+                    <v-text-field
+                      v-model.number="config.timeout"
+                      label="请求超时时间"
+                      variant="outlined"
+                      density="comfortable"
+                      type="number"
+                      min="1"
+                      max="300"
+                      suffix="秒"
+                      hint="网络请求及订阅下载的超时时长"
+                      persistent-hint
+                      class="mb-4"
+                      :rules="[(v) => v > 0 || '超时时间必须大于 0']"
+                    >
+                      <template #prepend-inner>
+                        <v-icon color="warning" size="20">mdi-timer-sand</v-icon>
+                      </template>
+                    </v-text-field>
+                  </v-col>
+
+                  <v-col cols="12" md="6">
+                    <v-text-field
+                      v-model.number="config.retry_times"
+                      label="失败重试次数"
+                      variant="outlined"
+                      density="comfortable"
+                      type="number"
+                      min="0"
+                      max="10"
+                      hint="请求失败时的自动重试次数"
+                      persistent-hint
+                      :rules="[(v) => v >= 0 || '重试次数不能为负数']"
+                    >
+                      <template #prepend-inner>
+                        <v-icon color="info" size="20">mdi-refresh</v-icon>
+                      </template>
+                    </v-text-field>
+                  </v-col>
+
+                  <v-col cols="12" md="6">
+                    <v-text-field
+                      v-model.number="config.refresh_delay"
+                      label="刷新延迟"
+                      variant="outlined"
+                      density="comfortable"
+                      type="number"
+                      min="1"
+                      max="30"
+                      suffix="秒"
+                      hint="通知 Clash 刷新规则集的延迟秒数"
+                      persistent-hint
+                      :rules="[(v) => v >= 0 || '刷新延迟不能为负数']"
+                    >
+                      <template #prepend-inner>
+                        <v-icon color="primary" size="20">mdi-clock-fast</v-icon>
+                      </template>
+                    </v-text-field>
+                  </v-col>
+                </v-row>
+              </v-card>
             </v-window-item>
-            <!-- 高级选项 -->
+
+            <!-- ===== Tab 4: 高级与规则集 ===== -->
             <v-window-item value="settings">
-              <v-row>
-                <v-col cols="12" md="6">
-                  <v-switch
-                    v-model="config.hint_geo_dat"
-                    label="Geo规则补全"
-                    color="primary"
-                    inset
-                    hint="获取官方Geo数据库, 并在输入时补全"
-                  ></v-switch>
-                </v-col>
-                <v-col cols="12" md="6">
-                  <v-switch
-                    v-model="config.enable_acl4ssr"
-                    label="ACL4SSR规则集"
-                    color="primary"
-                    inset
-                    hint="启用ACL4SSR规则集"
-                  ></v-switch>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="12" md="4">
-                  <v-text-field
-                    v-model="config.ruleset_prefix"
-                    label="规则集前缀"
-                    variant="outlined"
-                    placeholder="📂<="
-                    hint="为生成的规则集添加前缀"
-                  >
-                    <template #prepend-inner>
-                      <v-icon color="info">mdi-palette</v-icon>
-                    </template>
-                  </v-text-field>
-                </v-col>
-                <v-col cols="12" md="4">
-                  <v-text-field
-                    v-model="config.acl4ssr_prefix"
-                    label="ACL4SSR 规则集前缀"
-                    variant="outlined"
-                    placeholder="🗂️=>"
-                    hint="ACL4SSR 规则集前缀"
-                  >
-                    <template #prepend-inner>
-                      <v-icon color="primary">mdi-palette</v-icon>
-                    </template>
-                  </v-text-field>
-                </v-col>
-                <v-col cols="12" md="4">
-                  <v-text-field
-                    v-model="config.cache_ttl"
-                    label="缓存 TTL"
-                    variant="outlined"
-                    placeholder="3600"
-                    type="number"
-                    min="600"
-                    suffix="秒"
-                  >
-                    <template #prepend-inner>
-                      <v-icon color="warning">mdi-alarm</v-icon>
-                    </template>
-                  </v-text-field>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="12" md="12">
-                  <v-combobox
-                    v-model="config.best_cf_ip"
-                    label="Cloudflare CDN 优选 IPs"
-                    variant="outlined"
-                    multiple
-                    chips
-                    closable-chips
-                    clearable
-                    hint="用于设置 Hosts 中的 Cloudflare 域名"
-                    :rules="[validateIPs]"
-                  >
-                    <template #chip="{ props, item }">
-                      <v-chip v-bind="props" closable size="small">
-                        {{ item.value }}
-                      </v-chip>
-                    </template>
-                  </v-combobox>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="12" md="12">
-                  <v-combobox
-                    v-model="config.identifiers"
-                    label="预设设备标识"
-                    variant="outlined"
-                    multiple
-                    chips
-                    closable-chips
-                    clearable
-                    hint="获取配置时的额外查询参数 「identifier」"
-                  >
-                    <template #chip="{ props, item }">
-                      <v-chip v-bind="props" closable size="small">
-                        {{ item.value }}
-                      </v-chip>
-                    </template>
-                  </v-combobox>
-                </v-col>
-              </v-row>
+              <v-card variant="flat" class="pa-4 border rounded-xl bg-surface">
+                <v-row dense class="mb-4">
+                  <v-col cols="12" md="6">
+                    <div
+                      class="feature-toggle-item d-flex align-center justify-space-between border rounded-lg pa-3 cursor-pointer select-none transition-all"
+                      @click="config.hint_geo_dat = !config.hint_geo_dat"
+                    >
+                      <div class="d-flex align-center gap-2">
+                        <v-icon color="primary" size="20">mdi-database-search-outline</v-icon>
+                        <div>
+                          <div class="text-body-2 font-weight-medium">Geo 规则补全</div>
+                          <div class="text-caption text-medium-emphasis">
+                            自动获取 GeoIP / GeoSite 官方库补全
+                          </div>
+                        </div>
+                      </div>
+                      <v-switch
+                        v-model="config.hint_geo_dat"
+                        color="primary"
+                        hide-details
+                        inset
+                        density="compact"
+                        @click.stop
+                      />
+                    </div>
+                  </v-col>
+
+                  <v-col cols="12" md="6">
+                    <div
+                      class="feature-toggle-item d-flex align-center justify-space-between border rounded-lg pa-3 cursor-pointer select-none transition-all"
+                      @click="config.enable_acl4ssr = !config.enable_acl4ssr"
+                    >
+                      <div class="d-flex align-center gap-2">
+                        <v-icon color="primary" size="20">mdi-shield-crown-outline</v-icon>
+                        <div>
+                          <div class="text-body-2 font-weight-medium">ACL4SSR 规则集</div>
+                          <div class="text-caption text-medium-emphasis">
+                            启用 ACL4SSR 规则集扩展支持
+                          </div>
+                        </div>
+                      </div>
+                      <v-switch
+                        v-model="config.enable_acl4ssr"
+                        color="primary"
+                        hide-details
+                        inset
+                        density="compact"
+                        @click.stop
+                      />
+                    </div>
+                  </v-col>
+                </v-row>
+
+                <v-row dense class="mb-2">
+                  <v-col cols="12" md="4">
+                    <v-text-field
+                      v-model="config.ruleset_prefix"
+                      label="规则集前缀"
+                      variant="outlined"
+                      density="comfortable"
+                      placeholder="📂<="
+                      hint="生成规则集名称的前缀标识"
+                      persistent-hint
+                    >
+                      <template #prepend-inner>
+                        <v-icon color="info" size="20">mdi-format-title</v-icon>
+                      </template>
+                    </v-text-field>
+                  </v-col>
+
+                  <v-col cols="12" md="4">
+                    <v-text-field
+                      v-model="config.acl4ssr_prefix"
+                      label="ACL4SSR 前缀"
+                      variant="outlined"
+                      density="comfortable"
+                      placeholder="🗂️=>"
+                      hint="ACL4SSR 规则集的前缀标识"
+                      persistent-hint
+                    >
+                      <template #prepend-inner>
+                        <v-icon color="primary" size="20">mdi-tag-outline</v-icon>
+                      </template>
+                    </v-text-field>
+                  </v-col>
+
+                  <v-col cols="12" md="4">
+                    <v-text-field
+                      v-model.number="config.cache_ttl"
+                      label="缓存 TTL"
+                      variant="outlined"
+                      density="comfortable"
+                      type="number"
+                      min="600"
+                      suffix="秒"
+                      hint="缓存超时时长"
+                      persistent-hint
+                    >
+                      <template #prepend-inner>
+                        <v-icon color="warning" size="20">mdi-cached</v-icon>
+                      </template>
+                    </v-text-field>
+                  </v-col>
+                </v-row>
+
+                <v-row dense>
+                  <v-col cols="12" class="mb-3">
+                    <v-combobox
+                      v-model="config.best_cf_ip"
+                      label="Cloudflare CDN 优选 IPs"
+                      variant="outlined"
+                      density="comfortable"
+                      multiple
+                      chips
+                      closable-chips
+                      clearable
+                      hint="用于 Hosts 中关联的 Cloudflare CDN 优化 IP"
+                      persistent-hint
+                      :rules="[validateIPs]"
+                    >
+                      <template #prepend-inner>
+                        <v-icon color="warning" size="20">mdi-cloud-check-outline</v-icon>
+                      </template>
+                      <template #chip="{ props: slotProps, item }">
+                        <v-chip
+                          v-bind="slotProps"
+                          closable
+                          size="small"
+                          color="warning"
+                          variant="tonal"
+                        >
+                          {{ item.value }}
+                        </v-chip>
+                      </template>
+                    </v-combobox>
+                  </v-col>
+
+                  <v-col cols="12">
+                    <v-combobox
+                      v-model="config.identifiers"
+                      label="预设设备标识 (Identifiers)"
+                      variant="outlined"
+                      density="comfortable"
+                      multiple
+                      chips
+                      closable-chips
+                      clearable
+                      hint="获取配置时的额外 identifier 查询参数"
+                      persistent-hint
+                    >
+                      <template #prepend-inner>
+                        <v-icon color="info" size="20">mdi-cellphone-link</v-icon>
+                      </template>
+                      <template #chip="{ props: slotProps, item }">
+                        <v-chip
+                          v-bind="slotProps"
+                          closable
+                          size="small"
+                          color="info"
+                          variant="tonal"
+                        >
+                          {{ item.value }}
+                        </v-chip>
+                      </template>
+                    </v-combobox>
+                  </v-col>
+                </v-row>
+              </v-card>
             </v-window-item>
           </v-window>
         </v-form>
       </v-card-text>
-      <v-alert type="info" variant="tonal">
-        配置说明参考:
-        <a
-          href="https://github.com/wumode/MoviePilot-Plugins/tree/main/plugins.v2/clashruleprovider/README.md"
-          target="_blank"
-          style="text-decoration: underline"
-          >README</a
-        >
-      </v-alert>
-      <v-card-actions>
-        <v-btn color="primary" @click="emit('switch')">
-          <v-icon left>mdi-view-dashboard-edit</v-icon>
-          规则
-        </v-btn>
-        <v-btn color="secondary" @click="resetForm">
-          <v-icon left>mdi-autorenew</v-icon>
-          重置
-        </v-btn>
-        <v-btn color="info" :loading="testing" @click="testConnection">
-          <v-icon left>mdi-connection</v-icon>
-          测试连接
-        </v-btn>
-        <v-spacer></v-spacer>
-        <v-btn color="primary" :disabled="!isFormValid" :loading="saving" @click="saveConfig">
-          <v-icon left>mdi-content-save</v-icon>
-          保存配置
-        </v-btn>
-      </v-card-actions>
 
-      <!-- Simple Test Result Alert -->
-      <v-alert
-        v-if="testResult.show"
-        :type="testResult.success ? 'success' : 'error'"
-        variant="tonal"
-        closable
-        class="ma-4 mt-0"
-        @click:close="testResult.show = false"
+      <v-divider />
+
+      <!-- 底部辅助说明 & 操作 Toolbar -->
+      <div class="pa-4 bg-surface d-flex flex-wrap align-center justify-space-between gap-3">
+        <div class="d-flex align-center text-caption text-medium-emphasis">
+          <v-icon color="info" size="18" class="mr-1">mdi-help-circle-outline</v-icon>
+          配置文档参考:
+          <a
+            href="https://github.com/wumode/MoviePilot-Plugins/tree/main/plugins.v2/clashruleprovider/README.md"
+            target="_blank"
+            class="text-primary font-weight-bold text-decoration-none ml-1"
+          >
+            GitHub README
+            <v-icon size="12">mdi-open-in-new</v-icon>
+          </a>
+        </div>
+
+        <div class="d-flex align-center gap-2">
+          <v-btn
+            color="grey-darken-1"
+            variant="outlined"
+            size="small"
+            class="rounded-lg text-none"
+            @click="resetForm"
+          >
+            <v-icon start>mdi-refresh</v-icon>
+            重置
+          </v-btn>
+          <v-btn
+            color="info"
+            variant="tonal"
+            size="small"
+            class="rounded-lg text-none"
+            :loading="testing"
+            @click="testConnection"
+          >
+            <v-icon start>mdi-lan-check</v-icon>
+            测试连接
+          </v-btn>
+          <v-btn
+            color="primary"
+            variant="elevated"
+            size="small"
+            class="rounded-lg text-none font-weight-bold px-4"
+            :disabled="!isFormValid"
+            :loading="saving"
+            @click="saveConfig"
+          >
+            <v-icon start>mdi-content-save-outline</v-icon>
+            保存配置
+          </v-btn>
+        </div>
+      </div>
+
+      <!-- 测试结果 Toast 通知浮层 -->
+      <v-snackbar
+        v-model="testResult.show"
+        :color="testResult.success ? 'success' : 'error'"
+        location="top"
+        timeout="5000"
+        class="test-result-snackbar"
       >
-        <div class="d-flex align-center">
-          <v-icon class="mr-2">
-            {{ testResult.success ? 'mdi-check-circle' : 'mdi-alert-circle' }}
+        <div class="d-flex align-center gap-3">
+          <v-icon size="24" color="white">
+            {{ testResult.success ? 'mdi-check-circle-outline' : 'mdi-alert-circle-outline' }}
           </v-icon>
           <div>
-            <div class="font-weight-medium">{{ testResult.title }}</div>
-            <div class="text-body-2">{{ testResult.message }}</div>
+            <div class="font-weight-bold text-subtitle-2">{{ testResult.title }}</div>
+            <div class="text-caption">{{ testResult.message }}</div>
           </div>
         </div>
-      </v-alert>
+        <template #actions>
+          <v-btn
+            variant="text"
+            icon="mdi-close"
+            color="white"
+            size="small"
+            @click="testResult.show = false"
+          />
+        </template>
+      </v-snackbar>
     </v-card>
+
+    <!-- Clash 配置模板 Dialog 弹窗 -->
+    <v-dialog v-model="clashTemplateDialog" max-width="680">
+      <v-card class="rounded-xl overflow-hidden">
+        <v-card-title class="pa-4 bg-surface d-flex align-center justify-space-between">
+          <div class="d-flex align-center gap-2">
+            <v-icon color="primary">mdi-file-code-outline</v-icon>
+            <span class="font-weight-bold text-h6">Clash 配置模板编辑</span>
+          </div>
+          <v-btn
+            icon="mdi-close"
+            variant="text"
+            size="small"
+            @click="clashTemplateDialog = false"
+          />
+        </v-card-title>
+        <v-divider />
+        <v-card-text class="pa-4">
+          <v-select
+            v-model="clashTemplateType"
+            :items="['YAML']"
+            label="配置格式"
+            variant="outlined"
+            density="comfortable"
+            class="mb-3"
+          />
+          <div class="ace-editor-wrapper border rounded-lg overflow-hidden mb-3">
+            <VAceEditor
+              v-model:value="clashTemplateContent"
+              lang="yaml"
+              theme="monokai"
+              :options="editorOptions"
+              :placeholder="configPlaceholder"
+              style="height: 24rem; width: 100%"
+            />
+          </div>
+          <v-alert type="info" variant="tonal" density="compact" class="rounded-lg mb-0">
+            <template #prepend>
+              <v-icon size="18">mdi-information-outline</v-icon>
+            </template>
+            <span class="text-caption">规则与出站代理会自动附加在配置模板之上</span>
+          </v-alert>
+        </v-card-text>
+        <v-divider />
+        <v-card-actions class="pa-4 bg-surface">
+          <v-spacer />
+          <v-btn
+            color="grey-darken-1"
+            variant="text"
+            class="rounded-lg"
+            @click="clashTemplateDialog = false"
+          >
+            取消
+          </v-btn>
+          <v-btn
+            color="primary"
+            variant="flat"
+            class="rounded-lg font-weight-bold"
+            @click="saveClashTemplate"
+          >
+            保存模板
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
-  <v-dialog v-model="clashTemplateDialog" max-width="600">
-    <v-card>
-      <v-card-title>Clash 配置模板</v-card-title>
-      <v-card-text style="max-height: 900px; overflow-y: auto">
-        <v-select
-          v-model="clashTemplateType"
-          :items="['YAML']"
-          label="配置类型"
-          class="mb-4"
-        ></v-select>
-        <VAceEditor
-          v-model:value="clashTemplateContent"
-          lang="yaml"
-          theme="monokai"
-          hint=""
-          :options="editorOptions"
-          :placeholder="configPlaceholder"
-          style="height: 30rem; width: 100%; margin-bottom: 16px"
-        />
-        <v-alert type="info" dense class="mb-4" variant="tonal"
-          >规则和出站代理会被添加在配置模板上
-        </v-alert>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn @click="clashTemplateDialog = false">取消</v-btn>
-        <v-btn color="primary" @click="saveClashTemplate">确定</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
 </template>
+
 <style scoped>
-.plugin-config {
+.plugin-config-wrapper {
   margin: 0 auto;
+  max-width: 1200px;
+}
+
+/* 渐变 Header */
+.config-hero-header {
+  background: linear-gradient(
+    135deg,
+    rgba(var(--v-theme-primary), 0.08) 0%,
+    rgba(var(--v-theme-surface), 1) 100%
+  );
+}
+
+.hero-icon-avatar {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, rgb(var(--v-theme-primary)) 0%, #4f46e5 100%);
+  box-shadow: 0 4px 12px rgba(var(--v-theme-primary), 0.3);
+}
+
+.text-gradient {
+  background: linear-gradient(
+    135deg,
+    rgb(var(--v-theme-on-surface)) 30%,
+    rgb(var(--v-theme-primary)) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 开关微卡片 精致现代造型 */
+.switch-card {
+  background: rgba(var(--v-theme-on-surface), 0.03);
+  border: 1px solid rgba(var(--v-border-color), 0.12);
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.switch-card:hover {
+  border-color: rgba(var(--v-theme-primary), 0.35);
+  background: rgba(var(--v-theme-on-surface), 0.06);
+  transform: translateY(-2px);
+}
+
+/* 各类型开关激活态色调 */
+.switch-card--active {
+  border-color: rgba(var(--v-theme-primary), 0.4) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--v-theme-primary), 0.12) 0%,
+    rgba(var(--v-theme-surface), 0.4) 100%
+  ) !important;
+  box-shadow: 0 4px 16px rgba(var(--v-theme-primary), 0.1) !important;
+}
+
+.switch-card--info.switch-card--active {
+  border-color: rgba(var(--v-theme-info), 0.4) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--v-theme-info), 0.12) 0%,
+    rgba(var(--v-theme-surface), 0.4) 100%
+  ) !important;
+  box-shadow: 0 4px 16px rgba(var(--v-theme-info), 0.1) !important;
+}
+
+.switch-card--warning.switch-card--active {
+  border-color: rgba(var(--v-theme-warning), 0.4) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--v-theme-warning), 0.12) 0%,
+    rgba(var(--v-theme-surface), 0.4) 100%
+  ) !important;
+  box-shadow: 0 4px 16px rgba(var(--v-theme-warning), 0.1) !important;
+}
+
+.switch-card--success.switch-card--active {
+  border-color: rgba(var(--v-theme-success), 0.4) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--v-theme-success), 0.12) 0%,
+    rgba(var(--v-theme-surface), 0.4) 100%
+  ) !important;
+  box-shadow: 0 4px 16px rgba(var(--v-theme-success), 0.1) !important;
+}
+
+.card-icon-avatar {
+  width: 36px;
+  height: 36px;
+  background: rgba(var(--v-theme-on-surface), 0.06);
+  transition: all 0.25s ease;
+}
+
+.switch-card--active .card-icon-avatar {
+  background: rgba(var(--v-theme-on-surface), 0.12);
+}
+
+/* 其它可交互条目样式 */
+.feature-toggle-item {
+  background: rgba(var(--v-theme-on-surface), 0.02);
+  border: 1px solid rgba(var(--v-border-color), 0.12);
+}
+
+.feature-toggle-item:hover {
+  border-color: rgba(var(--v-theme-primary), 0.35);
+  background: rgba(var(--v-theme-on-surface), 0.05);
+}
+
+.option-toggle-box {
+  background: rgba(var(--v-theme-on-surface), 0.02);
+  border: 1px solid rgba(var(--v-border-color), 0.12);
+  transition: all 0.2s ease;
+}
+
+.option-toggle-box:hover {
+  border-color: rgba(var(--v-theme-primary), 0.35);
+  background: rgba(var(--v-theme-on-surface), 0.05);
+}
+
+/* API Dashboard 卡片 */
+.api-endpoint-card {
+  background: rgba(var(--v-theme-on-surface), 0.02);
+  border: 1px solid rgba(var(--v-border-color), 0.12);
+  border-radius: 8px;
+}
+
+.api-endpoint-card:hover {
+  border-color: rgba(var(--v-theme-primary), 0.35);
+}
+
+.api-endpoint-card--active {
+  border-color: rgba(var(--v-theme-primary), 0.4) !important;
+  background: rgba(var(--v-theme-primary), 0.06) !important;
+}
+
+/* Tabs 胶囊风格 */
+.custom-modern-tabs {
+  border-bottom: 1px solid rgba(var(--v-border-color), 0.12);
+}
+
+.rotate-on-hover:hover {
+  transform: rotate(180deg);
+  transition: transform 0.4s ease;
+}
+
+.transition-all {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.border-dashed {
+  border: 2px dashed rgba(var(--v-border-color), 0.25);
+}
+
+.sub-panels :deep(.v-expansion-panel-title__overlay) {
+  opacity: 0.02;
+}
+
+.ace-editor-wrapper {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 </style>

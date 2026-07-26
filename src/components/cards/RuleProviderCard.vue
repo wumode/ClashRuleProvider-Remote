@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import {PropType} from 'vue'
-import {RuleProviderData} from '@/components/types'
-import {getBehaviorColor, getSourceColor} from '@/components/utils'
+import { PropType } from 'vue'
+import { RuleProviderData } from '@/components/types'
+import { getBehaviorColor, getSourceColor } from '@/components/utils'
 import RuleProviderActionMenu from '@/components/menu/RuleProviderActionMenu.vue'
 
 defineProps({
@@ -21,22 +21,20 @@ const emit = defineEmits<{
 
 <template>
   <v-card
-      rounded="lg"
-      elevation="2"
-      class="rule-provider-card h-100 transition-swing"
-      variant="tonal"
+    rounded="lg"
+    elevation="2"
+    class="rule-provider-card h-100 transition-swing"
+    variant="tonal"
   >
     <div class="d-flex justify-space-between align-center px-4 pt-3">
       <span class="font-weight-bold text-truncate" :title="ruleProviderData.name">{{
-          ruleProviderData.name
-        }}</span>
+        ruleProviderData.name
+      }}</span>
       <div class="d-flex align-center">
         <v-tooltip
-            v-if="
-            ruleProviderData.meta.invisible_to && ruleProviderData.meta.invisible_to.length > 0
-          "
-            text="已配置可见性限制"
-            location="top"
+          v-if="ruleProviderData.meta.invisible_to && ruleProviderData.meta.invisible_to.length > 0"
+          text="已配置可见性限制"
+          location="top"
         >
           <template #activator="{ props }">
             <v-icon v-bind="props" size="small" color="warning" class="mr-2">
@@ -45,9 +43,9 @@ const emit = defineEmits<{
           </template>
         </v-tooltip>
         <v-chip
-            size="small"
-            :color="getSourceColor(ruleProviderData.meta.source)"
-            variant="outlined"
+          size="small"
+          :color="getSourceColor(ruleProviderData.meta.source)"
+          variant="outlined"
         >
           {{ ruleProviderData.meta.source }}
         </v-chip>
@@ -71,12 +69,12 @@ const emit = defineEmits<{
       </v-icon>
       <v-spacer></v-spacer>
       <RuleProviderActionMenu
-          :rule-provider="ruleProviderData"
-          @change-status="(disabled) => emit('changeStatus', ruleProviderData.name, disabled)"
-          @edit="emit('editRuleProvider', ruleProviderData.name)"
-          @show-yaml="emit('showYaml', ruleProviderData.data)"
-          @delete="emit('deleteRuleProvider', ruleProviderData.name)"
-          @edit-visibility="emit('editVisibility', ruleProviderData.name)"
+        :rule-provider="ruleProviderData"
+        @change-status="(disabled) => emit('changeStatus', ruleProviderData.name, disabled)"
+        @edit="emit('editRuleProvider', ruleProviderData.name)"
+        @show-yaml="emit('showYaml', ruleProviderData.data)"
+        @delete="emit('deleteRuleProvider', ruleProviderData.name)"
+        @edit-visibility="emit('editVisibility', ruleProviderData.name)"
       />
     </v-card-actions>
   </v-card>

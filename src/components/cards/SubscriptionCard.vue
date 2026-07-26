@@ -42,8 +42,7 @@ async function updateSubscription() {
         message: '订阅更新成功',
         color: 'success'
       })
-    }
-    else {
+    } else {
       emit('show-snackbar', {
         show: true,
         message: '订阅更新失败',
