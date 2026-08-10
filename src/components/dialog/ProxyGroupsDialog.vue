@@ -2,7 +2,7 @@
 import { ref, computed, PropType, toRaw } from 'vue'
 import { ProxyGroup, ProxyGroupData, ProxyProviderData } from '@/components/types'
 import { isValidUrl } from '@/components/utils'
-import { defaultProxyGroup } from '@/components/constants'
+import { defaultProxyGroup, healthCheckUrls } from '@/components/constants'
 
 const props = defineProps({
   initialValue: {
@@ -168,14 +168,15 @@ async function saveProxyGroup() {
             hint="引入代理集合"
             class="mb-4"
           ></v-select>
-          <v-text-field
+          <v-combobox
             v-model="proxyGroup.url"
             label="url"
+            :items="healthCheckUrls"
             hint="健康检查测试地址"
             :rules="urlRules"
             clearable
             class="mb-4"
-          ></v-text-field>
+          ></v-combobox>
           <v-text-field
             v-if="proxyGroup.type === 'url-test'"
             v-model.number="proxyGroup.tolerance"

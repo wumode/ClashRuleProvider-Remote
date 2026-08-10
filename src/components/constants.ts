@@ -1,5 +1,20 @@
 import { Proxy, ProxyGroup, RuleData, HostData, RuleProvider, Metadata } from '@/components/types'
 
+export const healthCheckUrls = [
+  'https://www.gstatic.com/generate_204',
+  'https://connectivitycheck.gstatic.com/generate_204',
+  'https://accounts.google.com/generate_204',
+  'https://www.googleapis.com/generate_204',
+  'https://play.googleapis.com/generate_204',
+  'https://clients3.google.com/generate_204',
+  'https://safebrowsing.google.com/generate_204',
+  'https://www.v2ex.com/generate_204',
+  'https://cp.cloudflare.com/generate_204',
+  'https://connect.rom.miui.com/generate_204',
+  'https://connectivitycheck.platform.hicloud.com/generate_204',
+  'https://wifi.vivo.com.cn/generate_204'
+]
+
 export const itemsPerPageOptions = [
   { title: '5', value: 5 },
   { title: '10', value: 10 },
