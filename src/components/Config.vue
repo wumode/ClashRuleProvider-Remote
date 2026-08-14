@@ -242,7 +242,8 @@ const addSubscriptionConfig = () => {
     proxies: true,
     'proxy-groups': false,
     'rule-providers': false,
-    'proxy-providers': false
+    'proxy-providers': false,
+    user_agent: null
   })
 }
 
@@ -282,9 +283,7 @@ function resetForm() {
           </div>
           <div>
             <div class="d-flex align-center gap-2">
-              <h2 class="text-h6 text-md-h5 font-weight-bold text-gradient">
-                Clash Rule Provider
-              </h2>
+              <h2 class="text-h6 text-md-h5 font-weight-bold text-gradient">Clash Rule Provider</h2>
               <v-chip
                 :color="config.enabled ? 'success' : 'grey'"
                 size="small"
@@ -363,7 +362,9 @@ function resetForm() {
                 >
                   <div class="d-flex align-center gap-3">
                     <div class="card-icon-avatar rounded-circle d-flex align-center justify-center">
-                      <v-icon :color="config.enabled ? 'primary' : 'grey-darken-1'">mdi-power</v-icon>
+                      <v-icon :color="config.enabled ? 'primary' : 'grey-darken-1'"
+                        >mdi-power</v-icon
+                      >
                     </div>
                     <div>
                       <div class="font-weight-bold text-body-2">启用插件</div>
@@ -390,7 +391,9 @@ function resetForm() {
                 >
                   <div class="d-flex align-center gap-3">
                     <div class="card-icon-avatar rounded-circle d-flex align-center justify-center">
-                      <v-icon :color="config.proxy ? 'info' : 'grey-darken-1'">mdi-lan-connect</v-icon>
+                      <v-icon :color="config.proxy ? 'info' : 'grey-darken-1'"
+                        >mdi-lan-connect</v-icon
+                      >
                     </div>
                     <div>
                       <div class="font-weight-bold text-body-2">启用代理</div>
@@ -417,7 +420,9 @@ function resetForm() {
                 >
                   <div class="d-flex align-center gap-3">
                     <div class="card-icon-avatar rounded-circle d-flex align-center justify-center">
-                      <v-icon :color="config.notify ? 'warning' : 'grey-darken-1'">mdi-bell-outline</v-icon>
+                      <v-icon :color="config.notify ? 'warning' : 'grey-darken-1'"
+                        >mdi-bell-outline</v-icon
+                      >
                     </div>
                     <div>
                       <div class="font-weight-bold text-body-2">运行通知</div>
@@ -444,7 +449,9 @@ function resetForm() {
                 >
                   <div class="d-flex align-center gap-3">
                     <div class="card-icon-avatar rounded-circle d-flex align-center justify-center">
-                      <v-icon :color="config.auto_update_subscriptions ? 'success' : 'grey-darken-1'">
+                      <v-icon
+                        :color="config.auto_update_subscriptions ? 'success' : 'grey-darken-1'"
+                      >
                         mdi-sync
                       </v-icon>
                     </div>
@@ -750,7 +757,12 @@ function resetForm() {
                   >
                     <v-expansion-panel-title class="py-3 px-4">
                       <div class="d-flex align-center gap-3 w-100">
-                        <v-chip color="primary" size="small" variant="flat" class="font-weight-bold">
+                        <v-chip
+                          color="primary"
+                          size="small"
+                          variant="flat"
+                          class="font-weight-bold"
+                        >
                           #{{ index + 1 }}
                         </v-chip>
                         <div
@@ -759,6 +771,15 @@ function resetForm() {
                         >
                           {{ getUrlHostname(item.url) }}
                         </div>
+                        <v-chip
+                          v-if="item.user_agent"
+                          size="x-small"
+                          color="info"
+                          variant="tonal"
+                          class="ml-2"
+                        >
+                          UA: {{ item.user_agent }}
+                        </v-chip>
                         <v-chip
                           v-if="activeOptionsCount(item) > 0"
                           size="x-small"
@@ -795,6 +816,22 @@ function resetForm() {
                       >
                         <template #prepend-inner>
                           <v-icon color="primary" size="20">mdi-link</v-icon>
+                        </template>
+                      </v-text-field>
+
+                      <v-text-field
+                        v-model="item.user_agent"
+                        label="User-Agent (可选)"
+                        variant="outlined"
+                        density="comfortable"
+                        placeholder="例如: ClashMeta / ClashforWindows / Mozilla/5.0..."
+                        hint="自定义请求订阅链接时使用的 User-Agent"
+                        persistent-hint
+                        clearable
+                        class="mb-4"
+                      >
+                        <template #prepend-inner>
+                          <v-icon color="primary" size="20">mdi-incognito</v-icon>
                         </template>
                       </v-text-field>
 

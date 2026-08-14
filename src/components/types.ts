@@ -367,6 +367,7 @@ export interface SubscriptionConfig {
   proxies?: boolean
   'proxy-groups'?: boolean
   'proxy-providers'?: boolean
+  user_agent?: string | null
 }
 
 export interface PluginConfig {
