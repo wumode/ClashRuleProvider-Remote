@@ -255,23 +255,23 @@ function resetForm() {
 
 <template>
   <div class="plugin-config-wrapper">
-    <v-card class="modern-config-card border elevation-3 rounded-xl overflow-hidden">
-      <!-- 现代化 Hero Header Section -->
+    <v-card class="modern-config-card border rounded-lg overflow-hidden" elevation="0">
+      <!-- 现代化 Header Section (扁平无光效) -->
       <div
-        class="config-hero-header pa-5 pa-md-6 d-flex flex-wrap align-center justify-space-between gap-4"
+        class="config-hero-header pa-4 pa-md-5 d-flex flex-wrap align-center justify-space-between gap-4"
       >
-        <div class="d-flex align-center gap-4">
+        <div class="d-flex align-center gap-3">
           <div class="hero-icon-avatar rounded-lg d-flex align-center justify-center">
-            <v-icon size="28" color="white">mdi-tune-variant</v-icon>
+            <v-icon size="24" color="primary">mdi-tune-variant</v-icon>
           </div>
           <div>
             <div class="d-flex align-center gap-2">
-              <h2 class="text-h6 text-md-h5 font-weight-bold text-gradient">Clash Rule Provider</h2>
+              <h2 class="text-h6 font-weight-bold text-high-emphasis">Clash Rule Provider</h2>
               <v-chip
                 :color="config.enabled ? 'success' : 'grey'"
                 size="small"
                 variant="tonal"
-                class="font-weight-bold ml-2"
+                class="font-weight-medium ml-2"
               >
                 <v-icon start size="14">
                   {{ config.enabled ? 'mdi-check-circle' : 'mdi-pause-circle' }}
@@ -457,7 +457,7 @@ function resetForm() {
           </div>
 
           <!-- 2. 基础服务对接 (MoviePilot & API Service) -->
-          <v-card variant="outlined" class="section-card border rounded-xl pa-4 mb-6 bg-surface">
+          <v-card variant="flat" class="section-card border rounded-lg pa-4 mb-6 bg-surface">
             <div
               class="text-subtitle-2 font-weight-bold text-uppercase text-medium-emphasis mb-3 d-flex align-center"
             >
@@ -594,7 +594,7 @@ function resetForm() {
           <v-window v-model="activeTab" class="tab-window-content">
             <!-- ===== Tab 1: 订阅配置 ===== -->
             <v-window-item value="subscription">
-              <v-card variant="flat" class="pa-4 border rounded-xl bg-surface">
+              <v-card variant="flat" class="pa-4 border rounded-lg bg-surface">
                 <!-- 全局节点分组设置 -->
                 <div class="mb-4">
                   <div class="text-subtitle-2 font-weight-bold mb-2">节点分组与过滤设置</div>
@@ -715,7 +715,7 @@ function resetForm() {
                 <!-- 空订阅提示 -->
                 <div
                   v-if="!config.subscriptions_config || config.subscriptions_config.length === 0"
-                  class="empty-box rounded-xl pa-8 text-center border-dashed"
+                  class="empty-box rounded-lg pa-8 text-center border-dashed"
                 >
                   <v-icon size="48" color="grey-lighten-1" class="mb-2">mdi-link-off</v-icon>
                   <div class="text-body-1 font-weight-medium text-medium-emphasis">
@@ -735,7 +735,7 @@ function resetForm() {
                   <v-expansion-panel
                     v-for="(item, index) in config.subscriptions_config"
                     :key="index"
-                    class="border rounded-xl mb-3 overflow-hidden"
+                    class="border rounded-lg mb-3 overflow-hidden"
                     elevation="0"
                   >
                     <v-expansion-panel-title class="py-3 px-4">
@@ -743,7 +743,7 @@ function resetForm() {
                         <v-chip
                           color="primary"
                           size="small"
-                          variant="flat"
+                          variant="tonal"
                           class="font-weight-bold"
                         >
                           #{{ index + 1 }}
@@ -984,7 +984,7 @@ function resetForm() {
 
             <!-- ===== Tab 3: 执行与定时 ===== -->
             <v-window-item value="execution">
-              <v-card variant="flat" class="pa-4 border rounded-xl bg-surface">
+              <v-card variant="flat" class="pa-4 border rounded-lg bg-surface">
                 <v-row dense>
                   <v-col cols="12" md="6">
                     <v-text-field
@@ -1084,7 +1084,7 @@ function resetForm() {
 
             <!-- ===== Tab 4: 高级与规则集 ===== -->
             <v-window-item value="settings">
-              <v-card variant="flat" class="pa-4 border rounded-xl bg-surface">
+              <v-card variant="flat" class="pa-4 border rounded-lg bg-surface">
                 <v-row dense class="mb-4">
                   <v-col cols="12" md="6">
                     <div
@@ -1298,7 +1298,7 @@ function resetForm() {
           </v-btn>
           <v-btn
             color="primary"
-            variant="elevated"
+            variant="flat"
             size="small"
             class="rounded-lg text-none font-weight-bold px-4"
             :disabled="!isFormValid"
@@ -1314,7 +1314,7 @@ function resetForm() {
 
     <!-- Clash 配置模板 Dialog 弹窗 -->
     <v-dialog v-model="clashTemplateDialog" max-width="680">
-      <v-card class="rounded-xl overflow-hidden">
+      <v-card class="rounded-lg border overflow-hidden" elevation="0">
         <v-card-title class="pa-4 bg-surface d-flex align-center justify-space-between">
           <div class="d-flex align-center gap-2">
             <v-icon color="primary">mdi-file-code-outline</v-icon>
@@ -1385,140 +1385,113 @@ function resetForm() {
   max-width: 1200px;
 }
 
-/* 渐变 Header */
+/* 扁平化 Header */
 .config-hero-header {
-  background: linear-gradient(
-    135deg,
-    rgba(var(--v-theme-primary), 0.08) 0%,
-    rgba(var(--v-theme-surface), 1) 100%
-  );
+  background: rgba(var(--v-theme-on-surface), 0.02);
 }
 
 .hero-icon-avatar {
-  width: 44px;
-  height: 44px;
-  background: linear-gradient(135deg, rgb(var(--v-theme-primary)) 0%, #4f46e5 100%);
-  box-shadow: 0 4px 12px rgba(var(--v-theme-primary), 0.3);
-}
-
-.text-gradient {
-  background: linear-gradient(
-    135deg,
-    rgb(var(--v-theme-on-surface)) 30%,
-    rgb(var(--v-theme-primary)) 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* 开关微卡片 精致现代造型 */
-.switch-card {
-  background: rgba(var(--v-theme-on-surface), 0.03);
-  border: 1px solid rgba(var(--v-border-color), 0.12);
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  background: rgba(var(--v-theme-primary), 0.12);
+  border: 1px solid rgba(var(--v-theme-primary), 0.2);
   box-shadow: none;
 }
 
-.switch-card:hover {
-  border-color: rgba(var(--v-theme-primary), 0.35);
-  background: rgba(var(--v-theme-on-surface), 0.06);
-  transform: translateY(-2px);
+/* 扁平化开关卡片 */
+.switch-card {
+  background: rgba(var(--v-theme-on-surface), 0.02);
+  border: 1px solid rgba(var(--v-border-color), 0.1);
+  border-radius: 8px;
+  box-shadow: none !important;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-/* 各类型开关激活态色调 */
+.switch-card:hover {
+  border-color: rgba(var(--v-border-color), 0.25);
+  background: rgba(var(--v-theme-on-surface), 0.04);
+  transform: none;
+}
+
+/* 各类型开关激活态色调：纯净扁平无渐变、无发光阴影 */
 .switch-card--active {
-  border-color: rgba(var(--v-theme-primary), 0.4) !important;
-  background: linear-gradient(
-    135deg,
-    rgba(var(--v-theme-primary), 0.12) 0%,
-    rgba(var(--v-theme-surface), 0.4) 100%
-  ) !important;
-  box-shadow: 0 4px 16px rgba(var(--v-theme-primary), 0.1) !important;
+  border-color: rgba(var(--v-theme-primary), 0.35) !important;
+  background: rgba(var(--v-theme-primary), 0.08) !important;
+  box-shadow: none !important;
 }
 
 .switch-card--info.switch-card--active {
-  border-color: rgba(var(--v-theme-info), 0.4) !important;
-  background: linear-gradient(
-    135deg,
-    rgba(var(--v-theme-info), 0.12) 0%,
-    rgba(var(--v-theme-surface), 0.4) 100%
-  ) !important;
-  box-shadow: 0 4px 16px rgba(var(--v-theme-info), 0.1) !important;
+  border-color: rgba(var(--v-theme-info), 0.35) !important;
+  background: rgba(var(--v-theme-info), 0.08) !important;
+  box-shadow: none !important;
 }
 
 .switch-card--warning.switch-card--active {
-  border-color: rgba(var(--v-theme-warning), 0.4) !important;
-  background: linear-gradient(
-    135deg,
-    rgba(var(--v-theme-warning), 0.12) 0%,
-    rgba(var(--v-theme-surface), 0.4) 100%
-  ) !important;
-  box-shadow: 0 4px 16px rgba(var(--v-theme-warning), 0.1) !important;
+  border-color: rgba(var(--v-theme-warning), 0.35) !important;
+  background: rgba(var(--v-theme-warning), 0.08) !important;
+  box-shadow: none !important;
 }
 
 .switch-card--success.switch-card--active {
-  border-color: rgba(var(--v-theme-success), 0.4) !important;
-  background: linear-gradient(
-    135deg,
-    rgba(var(--v-theme-success), 0.12) 0%,
-    rgba(var(--v-theme-surface), 0.4) 100%
-  ) !important;
-  box-shadow: 0 4px 16px rgba(var(--v-theme-success), 0.1) !important;
+  border-color: rgba(var(--v-theme-success), 0.35) !important;
+  background: rgba(var(--v-theme-success), 0.08) !important;
+  box-shadow: none !important;
 }
 
 .card-icon-avatar {
-  width: 36px;
-  height: 36px;
-  background: rgba(var(--v-theme-on-surface), 0.06);
-  transition: all 0.25s ease;
+  width: 34px;
+  height: 34px;
+  background: rgba(var(--v-theme-on-surface), 0.05);
+  transition: background-color 0.2s ease;
 }
 
 .switch-card--active .card-icon-avatar {
-  background: rgba(var(--v-theme-on-surface), 0.12);
+  background: rgba(var(--v-theme-on-surface), 0.08);
 }
 
-/* 其它可交互条目样式 */
+/* 其它可交互条目扁平样式 */
 .feature-toggle-item {
   background: rgba(var(--v-theme-on-surface), 0.02);
-  border: 1px solid rgba(var(--v-border-color), 0.12);
+  border: 1px solid rgba(var(--v-border-color), 0.1);
+  border-radius: 8px;
 }
 
 .feature-toggle-item:hover {
-  border-color: rgba(var(--v-theme-primary), 0.35);
-  background: rgba(var(--v-theme-on-surface), 0.05);
+  border-color: rgba(var(--v-border-color), 0.25);
+  background: rgba(var(--v-theme-on-surface), 0.04);
 }
 
 .option-toggle-box {
   background: rgba(var(--v-theme-on-surface), 0.02);
-  border: 1px solid rgba(var(--v-border-color), 0.12);
-  transition: all 0.2s ease;
+  border: 1px solid rgba(var(--v-border-color), 0.1);
+  border-radius: 8px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .option-toggle-box:hover {
-  border-color: rgba(var(--v-theme-primary), 0.35);
-  background: rgba(var(--v-theme-on-surface), 0.05);
+  border-color: rgba(var(--v-border-color), 0.25);
+  background: rgba(var(--v-theme-on-surface), 0.04);
 }
 
 /* API Dashboard 卡片 */
 .api-endpoint-card {
   background: rgba(var(--v-theme-on-surface), 0.02);
-  border: 1px solid rgba(var(--v-border-color), 0.12);
+  border: 1px solid rgba(var(--v-border-color), 0.1);
   border-radius: 8px;
 }
 
 .api-endpoint-card:hover {
-  border-color: rgba(var(--v-theme-primary), 0.35);
+  border-color: rgba(var(--v-border-color), 0.25);
 }
 
 .api-endpoint-card--active {
-  border-color: rgba(var(--v-theme-primary), 0.4) !important;
+  border-color: rgba(var(--v-theme-primary), 0.35) !important;
   background: rgba(var(--v-theme-primary), 0.06) !important;
 }
 
-/* Tabs 胶囊风格 */
+/* Tabs 扁平风格 */
 .custom-modern-tabs {
-  border-bottom: 1px solid rgba(var(--v-border-color), 0.12);
+  border-bottom: 1px solid rgba(var(--v-border-color), 0.1);
 }
 
 .rotate-on-hover:hover {
@@ -1527,11 +1500,11 @@ function resetForm() {
 }
 
 .transition-all {
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
 }
 
 .border-dashed {
-  border: 2px dashed rgba(var(--v-border-color), 0.25);
+  border: 1px dashed rgba(var(--v-border-color), 0.2);
 }
 
 .sub-panels :deep(.v-expansion-panel-title__overlay) {
@@ -1539,6 +1512,6 @@ function resetForm() {
 }
 
 .ace-editor-wrapper {
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: none;
 }
 </style>
