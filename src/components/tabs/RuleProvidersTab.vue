@@ -14,7 +14,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'refresh', regions: string[]): void
-  (e: 'show-snackbar', value: any): void
   (e: 'show-error', msg: string): void
   (e: 'show-yaml', obj: any): void
   (e: 'edit-visibility', meta: Metadata, endpoint: string, region: string): void
@@ -235,7 +234,6 @@ function closeRuleProviderDialog() {
       :api="api"
       @close="closeRuleProviderDialog"
       @refresh="emit('refresh', ['rule-providers'])"
-      @show-snackbar="(val) => emit('show-snackbar', val)"
       @show-error="(msg) => emit('show-error', msg)"
     ></RuleProviderDialog>
   </div>

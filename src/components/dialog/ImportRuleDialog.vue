@@ -4,6 +4,7 @@ import { VAceEditor } from 'vue3-ace-editor'
 import 'ace-builds/src-noconflict/ace'
 import 'ace-builds/src-noconflict/mode-yaml'
 import 'ace-builds/src-noconflict/theme-monokai'
+import { useToast } from '@/components/utils'
 
 const props = defineProps<{
   modelValue: boolean
@@ -13,9 +14,10 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void
   (e: 'refresh'): void
-  (e: 'show-snackbar', value: any): void
   (e: 'show-error', msg: string): void
 }>()
+
+const toast = useToast()
 
 const editorOptions = {
   enableBasicAutocompletion: true,
@@ -51,30 +53,17 @@ async function importRule() {
     const result = await props.api.post('/plugin/ClashRuleProvider/import', requestData)
     if (!result.success) {
       emit('show-error', '规则导入失败: ' + (result.message || '未知错误'))
-      emit('show-snackbar', {
-        show: true,
-        message: '规则导入失败',
-        color: 'error'
-      })
+      toast.error('规则导入失败')
       return
     }
     close()
     emit('refresh')
-    // 显示成功提示
-    emit('show-snackbar', {
-      show: true,
-      message: '规则导入成功',
-      color: 'success'
-    })
+    toast.success('规则导入成功')
   } catch (err: unknown) {
     if (err instanceof Error) {
       emit('show-error', '导入规则失败: ' + (err.message || '未知错误'))
     }
-    emit('show-snackbar', {
-      show: true,
-      message: '导入规则失败',
-      color: 'error'
-    })
+    toast.error('导入规则失败')
   } finally {
     importRuleLoading.value = false
   }

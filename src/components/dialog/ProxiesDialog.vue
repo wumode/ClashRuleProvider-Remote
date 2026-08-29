@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, PropType, toRaw } from 'vue'
 import { Proxy, ProxyData } from '@/components/types'
+import { useToast } from '@/components/utils'
 
 const props = defineProps({
   proxyData: {
@@ -13,7 +14,8 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['close', 'refresh', 'show-snackbar', 'show-error'])
+const emit = defineEmits(['close', 'refresh', 'show-error'])
+const toast = useToast()
 
 const proxyForm = ref<any>(null)
 const loading = ref(false)
@@ -169,27 +171,15 @@ const saveProxy = async (proxy: Proxy) => {
     const result = await props.api.patch(`/plugin/ClashRuleProvider/proxies/${name}`, requestData)
     if (!result.success) {
       emit('show-error', '保存出站代理失败: ' + (result.message || '未知错误'))
-      emit('show-snackbar', {
-        show: true,
-        message: '保存出站代理失败',
-        color: 'error'
-      })
+      toast.error('保存出站代理失败')
       return
     }
+    toast.success('出站代理更新成功')
     emit('refresh')
-    emit('show-snackbar', {
-      show: true,
-      message: '出站代理更新成功',
-      color: 'success'
-    })
     emit('close')
   } catch (err: unknown) {
     if (err instanceof Error) emit('show-error', '保存 Proxy 失败: ' + (err.message || '未知错误'))
-    emit('show-snackbar', {
-      show: true,
-      message: '保存代理失败',
-      color: 'error'
-    })
+    toast.error('保存代理失败')
   } finally {
     loading.value = false
   }

@@ -10,7 +10,6 @@ defineProps<{
 
 const emit = defineEmits<{
   (e: 'show-error', msg: string): void
-  (e: 'show-snackbar', value: any): void
   (e: 'refresh', regions: string[]): void
   (e: 'copy-to-clipboard', text: string): void
   (e: 'switch'): void
@@ -49,7 +48,6 @@ const loading = ref(false)
           :url="String(url)"
           :api="api"
           @refresh="(r) => emit('refresh', r)"
-          @show-snackbar="(val) => emit('show-snackbar', val)"
           @show-error="(msg) => emit('show-error', msg)"
           @copy-to-clipboard="(t) => emit('copy-to-clipboard', t)"
           @start-loading="loading = true"

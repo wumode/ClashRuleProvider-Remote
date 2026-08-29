@@ -1,4 +1,5 @@
 import { RuleData, SubscriptionInfo } from '@/components/types'
+export { useToast, type HostToast } from '@/composables/useToast'
 
 export const isValidUrl = (urlString: string) => {
   if (!urlString) return false

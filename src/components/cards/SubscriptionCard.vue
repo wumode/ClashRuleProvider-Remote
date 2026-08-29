@@ -5,7 +5,8 @@ import {
   getExpireColor,
   extractDomain,
   getUsedPercentageFloor,
-  getUsageColor
+  getUsageColor,
+  useToast
 } from '@/components/utils'
 import { SubscriptionInfo } from '@/components/types'
 import { ref } from 'vue'
@@ -18,13 +19,13 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'show-error', msg: string): void
-  (e: 'show-snackbar', value: any): void
   (e: 'refresh', regions: string[]): void
   (e: 'copy-to-clipboard', url: string): void
   (e: 'start-loading'): void
   (e: 'end-loading'): void
 }>()
 
+const toast = useToast()
 const loading = ref<boolean>(false)
 
 // 更新订阅
@@ -36,18 +37,9 @@ async function updateSubscription() {
       url: props.url
     })
     if (result.success) {
-      // 显示成功提示
-      emit('show-snackbar', {
-        show: true,
-        message: '订阅更新成功',
-        color: 'success'
-      })
+      toast.success('订阅更新成功')
     } else {
-      emit('show-snackbar', {
-        show: true,
-        message: '订阅更新失败',
-        color: 'error'
-      })
+      toast.error('订阅更新失败')
     }
     emit('refresh', [
       'status',
@@ -73,12 +65,7 @@ async function toggleSubscription(val: boolean | null) {
       url: props.url,
       enabled: val
     })
-    // 显示成功提示
-    emit('show-snackbar', {
-      show: true,
-      message: '设置成功',
-      color: 'success'
-    })
+    toast.success('设置成功')
     emit('refresh', ['status'])
   } catch (err: unknown) {
     if (err instanceof Error) emit('show-error', '设置自动更新失败: ' + (err.message || '未知错误'))

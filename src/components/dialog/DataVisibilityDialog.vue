@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, PropType, toRaw, onMounted } from 'vue'
 import { Metadata } from '@/components/types'
+import { useToast } from '@/components/utils'
 
 const props = defineProps({
   meta: {
@@ -23,11 +24,11 @@ const props = defineProps({
 })
 const emit = defineEmits<{
   (e: 'refresh', regions: string[]): void
-  (e: 'show-snackbar', value: any): void
   (e: 'show-error', msg: string): void
   (e: 'close'): void
 }>()
 
+const toast = useToast()
 const loading = ref(false)
 const invisibleTo = ref<string[]>(structuredClone(toRaw(props.meta?.invisible_to) || []))
 
@@ -84,23 +85,16 @@ async function updateDataVisibility() {
     const result = await props.api.patch(props.endpoint, meta)
     if (props.region) emit('refresh', [props.region])
     if (result?.success) {
-      emit('show-snackbar', {
-        show: true,
-        message: '可见性配置更新成功',
-        color: 'success'
-      })
+      toast.success('可见性配置更新成功')
       emit('close')
     } else {
       emit('show-error', '更新可见性配置失败: ' + (result.message || '未知错误'))
-      emit('show-snackbar', {
-        show: true,
-        message: '更新可见性配置失败',
-        color: 'error'
-      })
+      toast.error('更新可见性配置失败')
     }
   } catch (err: unknown) {
     if (err instanceof Error) {
       emit('show-error', err.message || '更新可见性配置失败')
+      toast.error('更新可见性配置失败')
     }
   } finally {
     loading.value = false

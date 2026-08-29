@@ -2,7 +2,7 @@
 import { PropType, ref, toRaw } from 'vue'
 import { RuleProviderData } from '@/components/types'
 import { defaultMetadata, defaultRuleProvider } from '@/components/constants'
-import { isValidUrl } from '@/components/utils'
+import { isValidUrl, useToast } from '@/components/utils'
 
 const props = defineProps({
   initialValue: {
@@ -19,7 +19,9 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['close', 'refresh', 'show-snackbar', 'show-error'])
+const emit = defineEmits(['close', 'refresh', 'show-error'])
+
+const toast = useToast()
 
 const ruleProviderTypes = ['http', 'file', 'inline']
 const ruleProviderBehaviorTypes = ['domain', 'ipcidr', 'classical']
@@ -54,28 +56,16 @@ async function saveRuleProvider() {
     )
     if (!result.success) {
       emit('show-error', '保存规则集合失败: ' + (result.message || '未知错误'))
-      emit('show-snackbar', {
-        show: true,
-        message: '保存规则集合失败',
-        color: 'error'
-      })
+      toast.error('保存规则集合失败')
       return
     }
-    emit('show-snackbar', {
-      show: true,
-      message: props.isAdding ? '规则集合添加成功' : '规则集合更新成功',
-      color: 'success'
-    })
+    toast.success(props.isAdding ? '规则集合添加成功' : '规则集合更新成功')
     emit('refresh')
     emit('close')
   } catch (err: unknown) {
     if (err instanceof Error) {
       emit('show-error', '保存规则集合失败: ' + (err.message || '未知错误'))
-      emit('show-snackbar', {
-        show: true,
-        message: '保存规则集合失败',
-        color: 'error'
-      })
+      toast.error('保存规则集合失败')
     }
   } finally {
     saveRuleProviderLoading.value = false

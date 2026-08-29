@@ -18,7 +18,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'refresh', regions: string[]): void
-  (e: 'show-snackbar', value: any): void
   (e: 'show-error', msg: string): void
 }>()
 
@@ -287,7 +286,6 @@ function closeRuleDialog() {
       :custom-outbounds="customOutbounds"
       :api="api"
       @refresh="(v: string[]) => emit('refresh', v)"
-      @show-snackbar="(val) => emit('show-snackbar', val)"
       @show-error="(msg) => emit('show-error', msg)"
       @close="closeRuleDialog"
     ></RuleDialog>

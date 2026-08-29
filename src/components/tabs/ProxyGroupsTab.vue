@@ -16,7 +16,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'refresh', regions: string[]): void
-  (e: 'show-snackbar', value: any): void
   (e: 'show-error', msg: string): void
   (e: 'show-yaml', obj: any): void
   (e: 'copy-to-clipboard', text: string): void
@@ -261,7 +260,6 @@ function closeProxyGroupsDialog() {
       :api="api"
       @close="closeProxyGroupsDialog"
       @refresh="emit('refresh', ['clash-outbounds', 'proxy-groups'])"
-      @show-snackbar="(val) => emit('show-snackbar', val)"
       @show-error="(msg) => emit('show-error', msg)"
     ></ProxyGroupsDialog>
   </div>

@@ -18,7 +18,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'refresh', regions: string[]): void
-  (e: 'show-snackbar', value: any): void
   (e: 'show-error', msg: string): void
   (e: 'edit-visibility', meta: Metadata, endpoint: string, region: string): void
 }>()
@@ -300,7 +299,6 @@ function editVisibility(priority: number, type: RuleSetType) {
       :custom-outbounds="customOutbounds"
       :api="api"
       @refresh="(v: string[]) => emit('refresh', v)"
-      @show-snackbar="(val) => emit('show-snackbar', val)"
       @show-error="(msg) => emit('show-error', msg)"
       @close="closeRuleDialog"
     ></RuleDialog>
@@ -309,7 +307,6 @@ function editVisibility(priority: number, type: RuleSetType) {
       v-model="importRuleDialog"
       :api="api"
       @refresh="emit('refresh', ['top'])"
-      @show-snackbar="(val) => emit('show-snackbar', val)"
       @show-error="(msg) => emit('show-error', msg)"
     />
   </div>

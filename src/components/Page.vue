@@ -25,6 +25,7 @@ import {
   Metadata
 } from '@/components/types'
 import { defaultMetadata } from '@/components/constants'
+import { useToast } from '@/components/utils'
 
 // 接收初始配置
 const props = defineProps({
@@ -42,12 +43,8 @@ const props = defineProps({
 const emit = defineEmits(['action', 'switch', 'close'])
 
 const activeTab = ref(0)
+const toast = useToast()
 
-const snackbar = ref({
-  show: false,
-  message: '',
-  color: 'success'
-})
 // 添加自定义出站状态
 const customOutbounds = ref<string[]>([])
 
@@ -101,18 +98,10 @@ function copyToClipboard(text: string) {
   navigator.clipboard
     .writeText(text)
     .then(() => {
-      snackbar.value = {
-        show: true,
-        message: '已复制到剪贴板',
-        color: 'success'
-      }
+      toast.success('已复制到剪贴板')
     })
     .catch(() => {
-      snackbar.value = {
-        show: true,
-        message: '复制失败',
-        color: 'error'
-      }
+      toast.error('复制失败')
     })
 }
 
@@ -396,7 +385,6 @@ onMounted(() => {
                 :geo-rules="geoRules"
                 :custom-outbounds="customOutbounds"
                 @refresh="refreshAllRegions"
-                @show-snackbar="(val) => (snackbar = val)"
                 @show-error="showError"
               />
             </v-window-item>
@@ -409,7 +397,6 @@ onMounted(() => {
                 :geo-rules="geoRules"
                 :custom-outbounds="customOutbounds"
                 @refresh="refreshAllRegions"
-                @show-snackbar="(val) => (snackbar = val)"
                 @show-error="showError"
                 @edit-visibility="handleEditVisibility"
               />
@@ -422,7 +409,6 @@ onMounted(() => {
                 :custom-outbounds="customOutbounds"
                 :api="api"
                 @refresh="refreshAllRegions"
-                @show-snackbar="(val) => (snackbar = val)"
                 @show-error="showError"
                 @show-yaml="showYaml"
                 @copy-to-clipboard="copyToClipboard"
@@ -435,7 +421,6 @@ onMounted(() => {
                 :proxies="proxies"
                 :api="api"
                 @refresh="refreshAllRegions"
-                @show-snackbar="(val) => (snackbar = val)"
                 @show-error="showError"
                 @show-yaml="showYaml"
                 @copy-to-clipboard="copyToClipboard"
@@ -448,7 +433,6 @@ onMounted(() => {
                 :rule-providers="ruleProviders"
                 :api="api"
                 @refresh="refreshAllRegions"
-                @show-snackbar="(val) => (snackbar = val)"
                 @show-error="showError"
                 @show-yaml="showYaml"
                 @edit-visibility="handleEditVisibility"
@@ -461,7 +445,6 @@ onMounted(() => {
                 :best-cloudflare-i-ps="bestCloudflareIPs"
                 :api="api"
                 @refresh="refreshAllRegions(['hosts'])"
-                @show-snackbar="(val) => (snackbar = val)"
                 @show-error="showError"
               />
             </v-window-item>
@@ -471,7 +454,6 @@ onMounted(() => {
                 :subscriptions-info="subscriptionsInfo"
                 :api="api"
                 @refresh="refreshAllRegions"
-                @show-snackbar="(val) => (snackbar = val)"
                 @show-error="showError"
                 @copy-to-clipboard="copyToClipboard"
                 @switch="notifySwitch"
@@ -540,9 +522,6 @@ onMounted(() => {
           配置
         </v-btn>
       </v-card-actions>
-      <v-snackbar v-model="snackbar.show" :color="snackbar.color" location="bottom" class="mb-2">
-        {{ snackbar.message }}
-      </v-snackbar>
     </v-card>
 
     <ShowYamlDialog
@@ -561,7 +540,6 @@ onMounted(() => {
       :api="api"
       :preset-identifiers="presetIdentifiers"
       @refresh="refreshAllRegions"
-      @show-snackbar="(val) => (snackbar = val)"
       @show-error="showError"
       @close="visibilityDialogVisible = false"
     />

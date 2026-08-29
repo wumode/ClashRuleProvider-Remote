@@ -8,7 +8,7 @@ import ProxiesTable from '@/components/tables/ProxiesTable.vue'
 import ProxyCard from '@/components/cards/ProxyCard.vue'
 import ProxiesDialog from '@/components/dialog/ProxiesDialog.vue'
 import { itemsPerPageOptions, defaultMetadata, defaultProxy } from '@/components/constants'
-import { pageTitle } from '@/components/utils'
+import { pageTitle, useToast } from '@/components/utils'
 import { Metadata, ProxyData } from '@/components/types'
 
 const props = defineProps<{
@@ -18,12 +18,13 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'refresh', regions: string[]): void
-  (e: 'show-snackbar', value: any): void
   (e: 'show-error', msg: string): void
   (e: 'show-yaml', obj: any): void
   (e: 'copy-to-clipboard', text: string): void
   (e: 'edit-visibility', meta: Metadata, endpoint: string, region: string): void
 }>()
+
+const toast = useToast()
 
 const editorOptions = {
   enableBasicAutocompletion: true,
@@ -97,28 +98,15 @@ async function importExtraProxies() {
     const result = await props.api.put('/plugin/ClashRuleProvider/proxies', requestData)
     if (!result.success) {
       emit('show-error', '节点导入失败: ' + (result.message || '未知错误'))
-      emit('show-snackbar', {
-        show: true,
-        message: '节点导入失败',
-        color: 'error'
-      })
+      toast.error('节点导入失败')
       return
     }
     importExtraProxiesDialog.value = false
     emit('refresh', ['proxies', 'clash-outbounds'])
-    // 显示成功提示
-    emit('show-snackbar', {
-      show: true,
-      message: '节点导入成功',
-      color: 'success'
-    })
+    toast.success('节点导入成功')
   } catch (err: unknown) {
     if (err instanceof Error) emit('show-error', '节点导入失败: ' + (err.message || '未知错误'))
-    emit('show-snackbar', {
-      show: true,
-      message: '节点导入失败',
-      color: 'error'
-    })
+    toast.error('节点导入失败')
   } finally {
     importProxiesLoading.value = false
   }
@@ -377,7 +365,6 @@ function editVisibility(name: string) {
       :api="api"
       @refresh="emit('refresh', ['proxies'])"
       @close="closeProxyDialog"
-      @show-snackbar="(val) => emit('show-snackbar', val)"
       @show-error="(msg) => emit('show-error', msg)"
     ></ProxiesDialog>
   </div>

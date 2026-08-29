@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, PropType, toRaw } from 'vue'
 import { ProxyGroup, ProxyGroupData, ProxyProviderData } from '@/components/types'
-import { isValidUrl } from '@/components/utils'
+import { isValidUrl, useToast } from '@/components/utils'
 import { defaultProxyGroup, healthCheckUrls } from '@/components/constants'
 
 const props = defineProps({
@@ -27,7 +27,8 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['close', 'refresh', 'show-snackbar', 'show-error'])
+const emit = defineEmits(['close', 'refresh', 'show-error'])
+const toast = useToast()
 
 const proxyGroup = ref<ProxyGroup>(
   props.initialValue ? structuredClone(toRaw(props.initialValue.data)) : { ...defaultProxyGroup }
@@ -92,28 +93,16 @@ async function saveProxyGroup() {
     )
     if (!result.success) {
       emit('show-error', action + '失败: ' + (result.message || '未知错误'))
-      emit('show-snackbar', {
-        show: true,
-        message: action + '失败',
-        color: 'error'
-      })
+      toast.error(action + '失败')
       return
     }
-    emit('show-snackbar', {
-      show: true,
-      message: action + '成功',
-      color: 'success'
-    })
+    toast.success(action + '成功')
     emit('refresh')
     emit('close')
   } catch (err: unknown) {
     if (err instanceof Error) {
       emit('show-error', action + '失败: ' + (err.message || '未知错误'))
-      emit('show-snackbar', {
-        show: true,
-        message: action + '失败',
-        color: 'error'
-      })
+      toast.error(action + '失败')
     }
   } finally {
     loading.value = false

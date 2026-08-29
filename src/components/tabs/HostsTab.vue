@@ -14,7 +14,7 @@ const props = defineProps<{
   api: any
 }>()
 
-const emit = defineEmits(['refresh', 'show-snackbar', 'show-error'])
+const emit = defineEmits(['refresh', 'show-error'])
 
 // State
 const searchHosts = ref('')
@@ -184,7 +184,6 @@ async function deleteHost(name: string) {
     :best-cloudflare-i-ps="bestCloudflareIPs"
     :api="api"
     @refresh="emit('refresh')"
-    @show-snackbar="(v) => emit('show-snackbar', v)"
     @show-error="(v) => emit('show-error', v)"
     @close="hostDialogVisible = false"
   />

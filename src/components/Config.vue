@@ -4,7 +4,7 @@ import { VAceEditor } from 'vue3-ace-editor'
 import 'ace-builds/src-noconflict/ace'
 import 'ace-builds/src-noconflict/mode-yaml'
 import 'ace-builds/src-noconflict/theme-monokai'
-import { validateIPs, isValidUrl } from '@/components/utils'
+import { validateIPs, isValidUrl, useToast } from '@/components/utils'
 import { PluginConfig } from '@/components/types'
 
 // Props
@@ -22,6 +22,7 @@ const props = defineProps({
 // 自定义事件
 const emit = defineEmits(['save', 'close', 'switch'])
 
+const toast = useToast()
 const activeTab = ref('subscription')
 const editorOptions = {
   enableBasicAutocompletion: true,
@@ -56,14 +57,6 @@ const cronPresets = [
   { label: '每日 04:00', value: '0 4 * * *' },
   { label: '每日零点', value: '0 0 * * *' }
 ]
-
-// Test result state
-const testResult = reactive({
-  show: false,
-  success: false,
-  title: '',
-  message: ''
-})
 
 // 默认配置
 const defaultConfig: PluginConfig = {
@@ -143,22 +136,14 @@ const generateApiKey = () => {
   config.apikey = key
 }
 
-function showError(title: string, msg: string) {
-  testResult.title = title
-  testResult.success = false
-  testResult.message = msg
-  testResult.show = true
-}
-
 // 测试连接
 async function testConnection() {
   testing.value = true
   error.value = ''
-  testResult.show = false
 
   try {
     if (sub_links.value.length === 0) {
-      showError('连接测试失败', '请先配置至少一个订阅链接')
+      toast.error('请先配置至少一个订阅链接')
       return
     }
 
@@ -170,19 +155,12 @@ async function testConnection() {
     const result = await props.api.post('/plugin/ClashRuleProvider/connectivity', testParams)
 
     if (result.success) {
-      testResult.success = true
-      testResult.title = '连接测试成功！'
-      testResult.message = 'Clash 面板和订阅链接连接正常，配置验证通过'
-      testResult.show = true
-
-      setTimeout(() => {
-        testResult.show = false
-      }, 5000)
+      toast.success('连接测试成功！Clash 面板和订阅链接连接正常，配置验证通过')
     } else {
-      showError('连接测试失败', result.message || '连接测试失败，请检查配置')
+      toast.error(result.message || '连接测试失败，请检查配置')
     }
   } catch (err: unknown) {
-    if (err instanceof Error) showError('连接测试失败', err.message)
+    if (err instanceof Error) toast.error(err.message || '连接测试失败')
   } finally {
     testing.value = false
   }
@@ -194,12 +172,14 @@ async function saveConfig() {
     const sub = config.subscriptions_config[i]
     if (!sub.url || !isValidUrl(sub.url)) {
       error.value = `订阅配置 ${i + 1} 中的 URL 无效或为空`
+      toast.error(error.value)
       return
     }
   }
 
   if (!isFormValid.value) {
     error.value = '请修正表单中的错误'
+    toast.error(error.value)
     return
   }
 
@@ -210,7 +190,10 @@ async function saveConfig() {
     await new Promise((resolve) => setTimeout(resolve, 800))
     emit('save', { ...config })
   } catch (err: unknown) {
-    if (err instanceof Error) error.value = err.message || '保存配置失败'
+    if (err instanceof Error) {
+      error.value = err.message || '保存配置失败'
+      toast.error(error.value)
+    }
   } finally {
     saving.value = false
   }
@@ -1327,34 +1310,6 @@ function resetForm() {
           </v-btn>
         </div>
       </div>
-
-      <!-- 测试结果 Toast 通知浮层 -->
-      <v-snackbar
-        v-model="testResult.show"
-        :color="testResult.success ? 'success' : 'error'"
-        location="top"
-        timeout="5000"
-        class="test-result-snackbar"
-      >
-        <div class="d-flex align-center gap-3">
-          <v-icon size="24" color="white">
-            {{ testResult.success ? 'mdi-check-circle-outline' : 'mdi-alert-circle-outline' }}
-          </v-icon>
-          <div>
-            <div class="font-weight-bold text-subtitle-2">{{ testResult.title }}</div>
-            <div class="text-caption">{{ testResult.message }}</div>
-          </div>
-        </div>
-        <template #actions>
-          <v-btn
-            variant="text"
-            icon="mdi-close"
-            color="white"
-            size="small"
-            @click="testResult.show = false"
-          />
-        </template>
-      </v-snackbar>
     </v-card>
 
     <!-- Clash 配置模板 Dialog 弹窗 -->

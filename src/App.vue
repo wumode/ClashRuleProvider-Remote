@@ -66,7 +66,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, provide } from 'vue'
 import PageComponent from './components/Page.vue'
 import ConfigComponent from './components/Config.vue'
 import DashboardComponent from './components/Dashboard.vue'
@@ -111,6 +111,14 @@ function showNotification(text, color = 'success') {
   snackbar.color = color
   snackbar.show = true
 }
+
+// 提供主应用 Toast 模拟实例供独立开发预览
+provide('moviepilot:toast', {
+  success: (text) => showNotification(text, 'success'),
+  error: (text) => showNotification(text, 'error'),
+  info: (text) => showNotification(text, 'info'),
+  warning: (text) => showNotification(text, 'warning')
+})
 
 // 处理详情页面操作
 function handleAction() {

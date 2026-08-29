@@ -2,6 +2,7 @@
 import { ref, computed, PropType, toRaw } from 'vue'
 import debounce from 'lodash.debounce'
 import { GeoRules, RuleData } from '@/components/types'
+import { useToast } from '@/components/utils'
 
 // 1. 定义 Props
 const props = defineProps({
@@ -38,7 +39,8 @@ const props = defineProps({
 
 // 2. 定义 Emits
 // 使用 defineEmits 宏。传入一个字符串数组，列出组件会触发的事件
-const emit = defineEmits(['close', 'refresh', 'show-snackbar', 'show-error'])
+const emit = defineEmits(['close', 'refresh', 'show-error'])
+const toast = useToast()
 
 // 3. 响应式数据
 // 将 props 中的 initialRule 复制到 rule 中，以便在组件内部修改而不影响父组件的 prop
@@ -194,27 +196,15 @@ async function saveRule() {
     )
     if (!result.success) {
       emit('show-error', '保存规则失败: ' + (result.message || '未知错误'))
-      emit('show-snackbar', {
-        show: true,
-        message: '保存规则合失败',
-        color: 'error'
-      })
+      toast.error('保存规则失败')
       return
     }
+    toast.success(props.isAdding ? '规则添加成功' : '规则更新成功')
     emit('close')
     emit('refresh', ['top', 'ruleset'])
-    emit('show-snackbar', {
-      show: true,
-      message: props.isAdding ? '规则添加成功' : '规则更新成功',
-      color: 'success'
-    })
   } catch (err: unknown) {
     if (err instanceof Error) emit('show-error', '保存规则失败: ' + (err.message || '未知错误'))
-    emit('show-snackbar', {
-      show: true,
-      message: '保存规则失败',
-      color: 'error'
-    })
+    toast.error('保存规则失败')
   } finally {
     loading.value = false
   }

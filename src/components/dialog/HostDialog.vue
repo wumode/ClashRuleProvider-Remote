@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, PropType, toRaw } from 'vue'
-import { validateIPs } from '@/components/utils'
+import { validateIPs, useToast } from '@/components/utils'
 import type { HostData } from '@/components/types'
 import { defaultHost } from '@/components/constants'
 
@@ -23,7 +23,8 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['close', 'refresh', 'show-snackbar', 'show-error'])
+const emit = defineEmits(['close', 'refresh', 'show-error'])
+const toast = useToast()
 
 // State
 const hostForm = ref<any>(null)
@@ -46,27 +47,15 @@ async function saveHost() {
 
     if (!result.success) {
       emit('show-error', '保存 Host 失败: ' + (result.message || '未知错误'))
-      emit('show-snackbar', {
-        show: true,
-        message: '保存 Host 失败',
-        color: 'error'
-      })
+      toast.error('保存 Host 失败')
       return
     }
+    toast.success(props.isAdding ? 'Host 添加成功' : 'Host 更新成功')
     emit('close')
     emit('refresh')
-    emit('show-snackbar', {
-      show: true,
-      message: props.isAdding ? 'Host 添加成功' : 'Host 更新成功',
-      color: 'success'
-    })
   } catch (err: any) {
     emit('show-error', '保存 Host 失败: ' + (err.message || '未知错误'))
-    emit('show-snackbar', {
-      show: true,
-      message: '保存 Host 失败',
-      color: 'error'
-    })
+    toast.error('保存 Host 失败')
   } finally {
     saveHostLoading.value = false
   }
