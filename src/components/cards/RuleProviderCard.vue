@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { PropType } from 'vue'
 import { RuleProviderData } from '@/components/types'
-import { getBehaviorColor, getSourceColor } from '@/components/utils'
+import { getSourceColor } from '@/components/utils'
 import RuleProviderActionMenu from '@/components/menu/RuleProviderActionMenu.vue'
 
 defineProps({

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, ref, toRaw } from 'vue'
-import RulesetRulesTable from '../tables/RulesetRulesTable.vue'
-import RuleCard from '../cards/RuleCard.vue'
+import { useDisplay } from 'vuetify'
+import RulesetRulesDesktop from './ruleset/RulesetRulesDesktop.vue'
+import RulesetRulesMobile from './ruleset/RulesetRulesMobile.vue'
 import RuleDialog from '../dialog/RuleDialog.vue'
-import { itemsPerPageOptions, defaultRule } from '@/components/constants'
-import { pageTitle } from '@/components/utils'
+import { defaultRule } from '@/components/constants'
 import { RuleData, RuleSetType, GeoRules } from '@/components/types'
 
 const props = defineProps<{
@@ -21,12 +21,16 @@ const emit = defineEmits<{
   (e: 'show-error', msg: string): void
 }>()
 
+// Vuetify 响应式断点
+const { smAndDown } = useDisplay()
+
 const searchRulesetRule = ref('')
 const pageRuleset = ref(1)
 const itemsPerPageRuleset = ref(10)
 const loading = ref(false)
 // 是否要分组
 const group = ref(false)
+
 // Dialog State
 const ruleDialogVisible = ref(false)
 const editingPriority = ref<number | null>(null)
@@ -160,117 +164,46 @@ function closeRuleDialog() {
       <v-progress-circular indeterminate color="primary"></v-progress-circular>
     </v-overlay>
 
-    <!-- 顶部工具栏 -->
-    <div class="pa-4">
-      <v-row align="center" no-gutters>
-        <v-col cols="10" sm="6" class="d-flex justify-start">
-          <v-text-field
-            v-model="searchRulesetRule"
-            label="搜索规则"
-            clearable
-            density="compact"
-            variant="solo-filled"
-            hide-details
-            class="search-field"
-            prepend-inner-icon="mdi-magnify"
-            flat
-            rounded="pill"
-            single-line
-            :disabled="loading"
-          />
-        </v-col>
-        <v-col cols="2" sm="6" class="d-flex justify-end">
-          <v-btn-group class="d-sm-none" variant="outlined" rounded divided>
-            <v-btn icon="mdi-plus" :disabled="loading" @click="openAddRuleDialog"></v-btn>
-          </v-btn-group>
-          <v-btn-group class="d-none d-sm-flex" variant="outlined" rounded divided>
-            <v-btn
-              :icon="group ? 'mdi-format-list-bulleted' : 'mdi-format-list-group'"
-              :disabled="loading"
-              @click="group = !group"
-            />
-            <v-btn icon="mdi-plus" :disabled="loading" @click="openAddRuleDialog"></v-btn>
-          </v-btn-group>
-        </v-col>
-      </v-row>
-    </div>
-    <!-- 桌面端表格 -->
-    <div class="d-none d-sm-flex clash-data-table">
-      <RulesetRulesTable
-        :group="group"
-        :sorted-rules="rules"
-        :page="pageRuleset"
-        :items-per-page="itemsPerPageRuleset"
-        :ruleset-prefix="rulesetPrefix"
-        :search-rule="searchRulesetRule"
-        @edit="editRule"
-        @delete="deleteRule"
-        @delete-batch="deleteRules"
-        @reorder="handleReorderRule"
-        @change-status="handleStatusChange"
-        @change-status-batch="handleBatchStatusChange"
-      ></RulesetRulesTable>
-    </div>
-    <!-- 移动端卡片 -->
-    <div class="d-sm-none">
-      <v-row>
-        <v-col v-for="item in paginatedRulesetRules" :key="item.priority" cols="12">
-          <RuleCard
-            ruleset="ruleset"
-            :rule="item"
-            @delete="deleteRule"
-            @edit="editRule"
-            @change-status="handleStatusChange"
-          ></RuleCard>
-        </v-col>
-      </v-row>
-    </div>
-    <div class="pa-4" style="min-height: 4rem">
-      <v-row align="center" no-gutters>
-        <v-col cols="2" md="2">
-          <div id="ruleset-rules-table-batch-actions"></div>
-        </v-col>
-        <v-col cols="8" md="8" class="d-flex justify-center">
-          <v-pagination
-            v-model="pageRuleset"
-            :length="pageCountRuleset"
-            total-visible="5"
-            rounded="circle"
-            class="d-none d-sm-flex my-0"
-            :disabled="loading"
-          />
-          <!-- 移动端分页器：只在 sm 以下显示 -->
-          <v-pagination
-            v-model="pageRuleset"
-            :length="pageCountRuleset"
-            total-visible="0"
-            rounded="circle"
-            class="d-sm-none my-0"
-            :disabled="loading"
-          />
-        </v-col>
-        <v-col cols="2" md="2" class="d-flex justify-end">
-          <v-menu>
-            <template #activator="{ props }">
-              <v-btn v-bind="props" icon rounded="circle" variant="tonal" :disabled="loading">
-                {{ pageTitle(itemsPerPageRuleset) }}
-              </v-btn>
-            </template>
+    <!-- 移动端视图 -->
+    <RulesetRulesMobile
+      v-if="smAndDown"
+      :paginated-rules="paginatedRulesetRules"
+      :search="searchRulesetRule"
+      :page="pageRuleset"
+      :page-count="pageCountRuleset"
+      :loading="loading"
+      @update:search="(v) => (searchRulesetRule = v)"
+      @update:page="(v) => (pageRuleset = v)"
+      @open-add-dialog="openAddRuleDialog"
+      @edit="editRule"
+      @delete="deleteRule"
+      @change-status="handleStatusChange"
+    />
 
-            <v-list>
-              <v-list-item
-                v-for="(item, index) in itemsPerPageOptions"
-                :key="index"
-                :value="item.value"
-                @click="itemsPerPageRuleset = item.value"
-              >
-                <v-list-item-title>{{ item.title }}</v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-        </v-col>
-      </v-row>
-    </div>
+    <!-- 桌面端视图 -->
+    <RulesetRulesDesktop
+      v-else
+      :rules="rules"
+      :ruleset-prefix="rulesetPrefix"
+      :search="searchRulesetRule"
+      :group="group"
+      :page="pageRuleset"
+      :items-per-page="itemsPerPageRuleset"
+      :page-count="pageCountRuleset"
+      :loading="loading"
+      @update:search="(v) => (searchRulesetRule = v)"
+      @update:group="(v) => (group = v)"
+      @update:page="(v) => (pageRuleset = v)"
+      @update:items-per-page="(v) => (itemsPerPageRuleset = v)"
+      @open-add-dialog="openAddRuleDialog"
+      @edit="editRule"
+      @delete="deleteRule"
+      @delete-batch="deleteRules"
+      @reorder="handleReorderRule"
+      @change-status="handleStatusChange"
+      @change-status-batch="handleBatchStatusChange"
+    />
+
     <v-divider></v-divider>
     <!-- 说明文字 -->
     <div class="text-caption text-grey mt-2">* 对规则集的修改会在 Clash 中立即生效。</div>

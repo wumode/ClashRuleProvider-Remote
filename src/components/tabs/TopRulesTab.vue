@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, ref, toRaw } from 'vue'
-import TopRulesTable from '../tables/TopRulesTable.vue'
-import RuleCard from '../cards/RuleCard.vue'
+import { useDisplay } from 'vuetify'
+import TopRulesDesktop from './top_rules/TopRulesDesktop.vue'
+import TopRulesMobile from './top_rules/TopRulesMobile.vue'
 import RuleDialog from '../dialog/RuleDialog.vue'
 import ImportRuleDialog from '../dialog/ImportRuleDialog.vue'
-import { itemsPerPageOptions, defaultRule } from '@/components/constants'
-import { pageTitle } from '@/components/utils'
+import { defaultRule } from '@/components/constants'
 import { RuleData, RuleSetType, GeoRules, Metadata } from '@/components/types'
 
 const props = defineProps<{
@@ -21,6 +21,8 @@ const emit = defineEmits<{
   (e: 'show-error', msg: string): void
   (e: 'edit-visibility', meta: Metadata, endpoint: string, region: string): void
 }>()
+
+const { smAndDown } = useDisplay()
 
 const searchTopRule = ref('')
 const page = ref(1)
@@ -179,109 +181,47 @@ function editVisibility(priority: number, type: RuleSetType) {
       <v-progress-circular indeterminate color="primary"></v-progress-circular>
     </v-overlay>
 
-    <div class="pa-4">
-      <v-row align="center" no-gutters>
-        <v-col cols="8" sm="6" class="d-flex justify-start">
-          <!-- 搜索框 -->
-          <v-text-field
-            v-model="searchTopRule"
-            label="搜索规则"
-            clearable
-            density="compact"
-            variant="solo-filled"
-            hide-details
-            class="search-field"
-            prepend-inner-icon="mdi-magnify"
-            flat
-            rounded="pill"
-            single-line
-            :disabled="loading"
-          ></v-text-field>
-        </v-col>
-        <v-col cols="4" sm="6" class="d-flex justify-end">
-          <v-btn-group divided variant="outlined" rounded>
-            <v-btn icon="mdi-import" :disabled="loading" @click="openImportRuleDialog"></v-btn>
-            <v-btn icon="mdi-plus" :disabled="loading" @click="openAddRuleDialog"></v-btn>
-          </v-btn-group>
-        </v-col>
-      </v-row>
-    </div>
-    <div class="d-none d-sm-flex clash-data-table">
-      <TopRulesTable
-        :sorted-rules="rules"
-        :page="page"
-        :items-per-page="itemsPerPage"
-        :search-rule="searchTopRule"
-        @edit="editRule"
-        @delete="deleteRule"
-        @delete-batch="deleteRules"
-        @reorder="handleReorderRule"
-        @change-status="handleStatusChange"
-        @change-status-batch="handleBatchStatusChange"
-        @edit-visibility="editVisibility"
-      ></TopRulesTable>
-    </div>
-    <!-- 移动端卡片 -->
-    <div class="d-sm-none">
-      <v-row>
-        <v-col v-for="item in paginatedTopRules" :key="item.priority" cols="12">
-          <RuleCard
-            ruleset="top"
-            :rule="item"
-            @delete="deleteRule"
-            @edit="editRule"
-            @change-status="handleStatusChange"
-            @edit-visibility="editVisibility"
-          >
-          </RuleCard>
-        </v-col>
-      </v-row>
-    </div>
-    <div class="pa-4" style="min-height: 4rem">
-      <v-row align="center" no-gutters>
-        <v-col cols="2" md="2">
-          <div id="top-rules-table-batch-actions"></div>
-        </v-col>
-        <v-col cols="8" md="8" class="d-flex justify-center">
-          <v-pagination
-            v-model="page"
-            :length="pageCount"
-            total-visible="5"
-            rounded="circle"
-            class="d-none d-sm-flex my-0"
-            :disabled="loading"
-          />
-          <v-pagination
-            v-model="page"
-            :length="pageCount"
-            total-visible="0"
-            rounded="circle"
-            class="d-sm-none my-0"
-            :disabled="loading"
-          />
-        </v-col>
-        <v-col cols="2" md="2" class="d-flex justify-end">
-          <v-menu>
-            <template #activator="{ props }">
-              <v-btn v-bind="props" icon rounded="circle" variant="tonal" :disabled="loading">
-                {{ pageTitle(itemsPerPage) }}
-              </v-btn>
-            </template>
+    <!-- 移动端视图 -->
+    <TopRulesMobile
+      v-if="smAndDown"
+      :paginated-rules="paginatedTopRules"
+      :search="searchTopRule"
+      :page="page"
+      :page-count="pageCount"
+      :loading="loading"
+      @update:search="(v) => (searchTopRule = v)"
+      @update:page="(v) => (page = v)"
+      @open-import-dialog="openImportRuleDialog"
+      @open-add-dialog="openAddRuleDialog"
+      @edit="editRule"
+      @delete="deleteRule"
+      @change-status="handleStatusChange"
+      @edit-visibility="editVisibility"
+    />
 
-            <v-list>
-              <v-list-item
-                v-for="(item, index) in itemsPerPageOptions"
-                :key="index"
-                :value="item.value"
-                @click="itemsPerPage = item.value"
-              >
-                <v-list-item-title>{{ item.title }}</v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-        </v-col>
-      </v-row>
-    </div>
+    <!-- 桌面端视图 -->
+    <TopRulesDesktop
+      v-else
+      :rules="rules"
+      :search="searchTopRule"
+      :page="page"
+      :items-per-page="itemsPerPage"
+      :page-count="pageCount"
+      :loading="loading"
+      @update:search="(v) => (searchTopRule = v)"
+      @update:page="(v) => (page = v)"
+      @update:items-per-page="(v) => (itemsPerPage = v)"
+      @open-import-dialog="openImportRuleDialog"
+      @open-add-dialog="openAddRuleDialog"
+      @edit="editRule"
+      @delete="deleteRule"
+      @delete-batch="deleteRules"
+      @reorder="handleReorderRule"
+      @change-status="handleStatusChange"
+      @change-status-batch="handleBatchStatusChange"
+      @edit-visibility="editVisibility"
+    />
+
     <v-divider></v-divider>
     <div class="text-caption text-grey mt-2">
       *置顶规则用于管理来自规则集的匹配规则，这些规则会动态更新。

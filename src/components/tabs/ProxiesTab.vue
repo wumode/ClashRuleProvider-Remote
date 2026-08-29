@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useDisplay } from 'vuetify'
 import { VAceEditor } from 'vue3-ace-editor'
 import 'ace-builds/src-noconflict/ace'
 import 'ace-builds/src-noconflict/mode-yaml'
 import 'ace-builds/src-noconflict/theme-monokai'
-import ProxiesTable from '@/components/tables/ProxiesTable.vue'
-import ProxyCard from '@/components/cards/ProxyCard.vue'
+import ProxiesDesktop from './proxies/ProxiesDesktop.vue'
+import ProxiesMobile from './proxies/ProxiesMobile.vue'
 import ProxiesDialog from '@/components/dialog/ProxiesDialog.vue'
-import { itemsPerPageOptions, defaultMetadata, defaultProxy } from '@/components/constants'
-import { pageTitle, useToast } from '@/components/utils'
+import { defaultMetadata, defaultProxy } from '@/components/constants'
+import { useToast } from '@/components/utils'
 import { Metadata, ProxyData } from '@/components/types'
 
 const props = defineProps<{
@@ -24,6 +25,7 @@ const emit = defineEmits<{
   (e: 'edit-visibility', meta: Metadata, endpoint: string, region: string): void
 }>()
 
+const { smAndDown } = useDisplay()
 const toast = useToast()
 
 const editorOptions = {
@@ -196,112 +198,49 @@ function editVisibility(name: string) {
     <v-overlay v-model="loading" contained class="align-center justify-center">
       <v-progress-circular indeterminate color="primary"></v-progress-circular>
     </v-overlay>
-    <div class="pa-4">
-      <v-row align="center" no-gutters>
-        <v-col cols="10" sm="6" class="d-flex justify-start">
-          <v-text-field
-            v-model="searchProxies"
-            label="搜索出站代理"
-            clearable
-            density="compact"
-            variant="solo-filled"
-            hide-details
-            class="search-field"
-            prepend-inner-icon="mdi-magnify"
-            flat
-            rounded="pill"
-            single-line
-            :disabled="loading"
-          ></v-text-field>
-        </v-col>
-        <v-col cols="2" sm="6" class="d-flex justify-end">
-          <v-btn-group variant="outlined" rounded>
-            <v-btn icon="mdi-import" :disabled="loading" @click="openImportProxiesDialog"> </v-btn>
-          </v-btn-group>
-        </v-col>
-      </v-row>
-    </div>
 
-    <!-- 桌面端表格 -->
-    <div class="d-none d-sm-flex clash-data-table">
-      <ProxiesTable
-        :items-per-page="itemsPerPageProxies"
-        :page="pageProxies"
-        :proxies="proxies"
-        @copy-to-clipboard="(t) => emit('copy-to-clipboard', t)"
-        @show-yaml="(o) => emit('show-yaml', o)"
-        @edit-proxy="openProxiesDialog"
-        @delete-proxy="deleteProxy"
-        @delete-patch="deletePatch"
-        @change-status="handleStatusChange"
-        @edit-visibility="editVisibility"
-      >
-      </ProxiesTable>
-    </div>
+    <!-- 移动端视图 -->
+    <ProxiesMobile
+      v-if="smAndDown"
+      :paginated-proxies="paginatedExtraProxies"
+      :search="searchProxies"
+      :page="pageProxies"
+      :page-count="pageCountProxies"
+      :loading="loading"
+      @update:search="(v) => (searchProxies = v)"
+      @update:page="(v) => (pageProxies = v)"
+      @open-import-dialog="openImportProxiesDialog"
+      @edit-proxy="openProxiesDialog"
+      @delete-proxy="deleteProxy"
+      @delete-patch="deletePatch"
+      @change-status="handleStatusChange"
+      @edit-visibility="editVisibility"
+      @copy-to-clipboard="(t) => emit('copy-to-clipboard', t)"
+      @show-yaml="(o) => emit('show-yaml', o)"
+    />
 
-    <!-- 移动端卡片 -->
-    <div class="d-sm-none">
-      <v-row>
-        <v-col v-for="item in paginatedExtraProxies" :key="item.data.name" cols="12">
-          <ProxyCard
-            :proxy-data="item"
-            @copy-to-clipboard="(t) => emit('copy-to-clipboard', t)"
-            @show-yaml="(o) => emit('show-yaml', o)"
-            @edit-proxy="openProxiesDialog"
-            @delete-proxy="deleteProxy"
-            @delete-patch="deletePatch"
-            @change-status="handleStatusChange"
-            @edit-visibility="editVisibility"
-          ></ProxyCard>
-        </v-col>
-      </v-row>
-    </div>
+    <!-- 桌面端视图 -->
+    <ProxiesDesktop
+      v-else
+      :proxies="proxies"
+      :search="searchProxies"
+      :page="pageProxies"
+      :items-per-page="itemsPerPageProxies"
+      :page-count="pageCountProxies"
+      :loading="loading"
+      @update:search="(v) => (searchProxies = v)"
+      @update:page="(v) => (pageProxies = v)"
+      @update:items-per-page="(v) => (itemsPerPageProxies = v)"
+      @open-import-dialog="openImportProxiesDialog"
+      @edit-proxy="openProxiesDialog"
+      @delete-proxy="deleteProxy"
+      @delete-patch="deletePatch"
+      @change-status="handleStatusChange"
+      @edit-visibility="editVisibility"
+      @copy-to-clipboard="(t) => emit('copy-to-clipboard', t)"
+      @show-yaml="(o) => emit('show-yaml', o)"
+    />
 
-    <div class="pa-4" style="min-height: 4rem">
-      <v-row align="center" no-gutters>
-        <v-col cols="2" md="1"> </v-col>
-        <v-col cols="8" md="10" class="d-flex justify-center">
-          <!-- 桌面端分页器：只在 sm 及以上显示 -->
-          <v-pagination
-            v-model="pageProxies"
-            :length="pageCountProxies"
-            total-visible="5"
-            class="d-none d-sm-flex my-0"
-            rounded="circle"
-            :disabled="loading"
-          />
-          <!-- 移动端分页器：只在 sm 以下显示 -->
-          <v-pagination
-            v-model="pageProxies"
-            :length="pageCountProxies"
-            total-visible="0"
-            class="d-sm-none my-0"
-            rounded="circle"
-            :disabled="loading"
-          />
-        </v-col>
-        <v-col cols="2" md="1" class="d-flex justify-end">
-          <v-menu>
-            <template #activator="{ props }">
-              <v-btn v-bind="props" icon rounded="circle" variant="tonal" :disabled="loading">
-                {{ pageTitle(itemsPerPageProxies) }}
-              </v-btn>
-            </template>
-
-            <v-list>
-              <v-list-item
-                v-for="(item, index) in itemsPerPageOptions"
-                :key="index"
-                :value="item.value"
-                @click="itemsPerPageProxies = item.value"
-              >
-                <v-list-item-title>{{ item.title }}</v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-        </v-col>
-      </v-row>
-    </div>
     <v-divider></v-divider>
 
     <!-- Import Proxies Dialog -->

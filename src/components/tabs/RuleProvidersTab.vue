@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, toRaw } from 'vue'
+import { useDisplay } from 'vuetify'
 import { Metadata, RuleProviderData } from '@/components/types'
-import RuleProvidersTable from '@/components/tables/RuleProvidersTable.vue'
-import RuleProviderCard from '@/components/cards/RuleProviderCard.vue'
+import RuleProvidersDesktop from './rule_providers/RuleProvidersDesktop.vue'
+import RuleProvidersMobile from './rule_providers/RuleProvidersMobile.vue'
 import RuleProviderDialog from '@/components/dialog/RuleProviderDialog.vue'
-import { itemsPerPageOptions } from '@/components/constants'
-import { pageTitle } from '@/components/utils'
 
 const props = defineProps<{
   ruleProviders: RuleProviderData[]
@@ -19,8 +18,10 @@ const emit = defineEmits<{
   (e: 'edit-visibility', meta: Metadata, endpoint: string, region: string): void
 }>()
 
+const { smAndDown } = useDisplay()
+
 const searchRuleProviders = ref('')
-const pageRulProviders = ref(1)
+const pageRuleProviders = ref(1)
 const itemsPerPageRuleProviders = ref(10)
 
 // Dialog State
@@ -38,7 +39,7 @@ const filteredExtraRuleProviders = computed(() => {
 })
 
 const paginatedExtraRuleProviders = computed(() => {
-  const start = (pageRulProviders.value - 1) * itemsPerPageRuleProviders.value
+  const start = (pageRuleProviders.value - 1) * itemsPerPageRuleProviders.value
   const end = start + itemsPerPageRuleProviders.value
   return filteredExtraRuleProviders.value.slice(start, end)
 })
@@ -127,103 +128,45 @@ function closeRuleProviderDialog() {
     <v-overlay v-model="loading" contained class="align-center justify-center">
       <v-progress-circular indeterminate color="primary"></v-progress-circular>
     </v-overlay>
-    <div class="pa-4">
-      <v-row align="center" no-gutters>
-        <v-col cols="10" sm="6" class="d-flex justify-start">
-          <v-text-field
-            v-model="searchRuleProviders"
-            label="搜索规则集合"
-            clearable
-            density="compact"
-            variant="solo-filled"
-            hide-details
-            class="search-field"
-            prepend-inner-icon="mdi-magnify"
-            flat
-            rounded="pill"
-            single-line
-            :disabled="loading"
-          ></v-text-field>
-        </v-col>
-        <v-col cols="2" sm="6" class="d-flex justify-end">
-          <v-btn-group variant="outlined" rounded>
-            <v-btn icon="mdi-plus" :disabled="loading" @click="openAddRuleProviderDialog"> </v-btn>
-          </v-btn-group>
-        </v-col>
-      </v-row>
-    </div>
-    <!-- 桌面端表格 -->
-    <div class="d-none d-sm-flex clash-data-table">
-      <RuleProvidersTable
-        :items-per-page="itemsPerPageRuleProviders"
-        :page="pageRulProviders"
-        :rule-providers="filteredExtraRuleProviders"
-        @edit-rule-provider="editRuleProvider"
-        @delete-rule-provider="deleteRuleProvider"
-        @show-yaml="(o) => emit('show-yaml', o)"
-        @change-status="handleStatusChange"
-        @edit-visibility="editVisibility"
-      ></RuleProvidersTable>
-    </div>
-    <!-- 移动端卡片 -->
-    <div class="d-sm-none">
-      <v-row>
-        <v-col v-for="item in paginatedExtraRuleProviders" :key="item.name" cols="12">
-          <RuleProviderCard
-            :rule-provider-data="item"
-            @edit-rule-provider="editRuleProvider"
-            @delete-rule-provider="deleteRuleProvider"
-            @show-yaml="(o) => emit('show-yaml', o)"
-            @change-status="handleStatusChange"
-            @edit-visibility="editVisibility"
-          ></RuleProviderCard>
-        </v-col>
-      </v-row>
-    </div>
-    <div class="pa-4" style="min-height: 4rem">
-      <v-row align="center" no-gutters>
-        <v-col cols="2" md="1"> </v-col>
-        <v-col cols="8" md="10" class="d-flex justify-center">
-          <!-- 桌面端分页器：只在 sm 及以上显示 -->
-          <v-pagination
-            v-model="pageRulProviders"
-            :length="pageCountExtraRuleProviders"
-            total-visible="5"
-            rounded="circle"
-            class="d-none d-sm-flex my-0"
-            :disabled="loading"
-          />
-          <!-- 移动端分页器：只在 sm 以下显示 -->
-          <v-pagination
-            v-model="pageRulProviders"
-            :length="pageCountExtraRuleProviders"
-            total-visible="0"
-            rounded="circle"
-            class="d-sm-none my-0"
-            :disabled="loading"
-          />
-        </v-col>
-        <v-col cols="2" md="1" class="d-flex justify-end">
-          <v-menu>
-            <template #activator="{ props }">
-              <v-btn v-bind="props" icon rounded="circle" variant="tonal" :disabled="loading">
-                {{ pageTitle(itemsPerPageRuleProviders) }}
-              </v-btn>
-            </template>
-            <v-list>
-              <v-list-item
-                v-for="(item, index) in itemsPerPageOptions"
-                :key="index"
-                :value="item.value"
-                @click="itemsPerPageRuleProviders = item.value"
-              >
-                <v-list-item-title>{{ item.title }}</v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-        </v-col>
-      </v-row>
-    </div>
+
+    <!-- 移动端视图 -->
+    <RuleProvidersMobile
+      v-if="smAndDown"
+      :paginated-rule-providers="paginatedExtraRuleProviders"
+      :search="searchRuleProviders"
+      :page="pageRuleProviders"
+      :page-count="pageCountExtraRuleProviders"
+      :loading="loading"
+      @update:search="(v) => (searchRuleProviders = v)"
+      @update:page="(v) => (pageRuleProviders = v)"
+      @open-add-dialog="openAddRuleProviderDialog"
+      @edit-rule-provider="editRuleProvider"
+      @delete-rule-provider="deleteRuleProvider"
+      @show-yaml="(o) => emit('show-yaml', o)"
+      @change-status="handleStatusChange"
+      @edit-visibility="editVisibility"
+    />
+
+    <!-- 桌面端视图 -->
+    <RuleProvidersDesktop
+      v-else
+      :rule-providers="filteredExtraRuleProviders"
+      :search="searchRuleProviders"
+      :page="pageRuleProviders"
+      :items-per-page="itemsPerPageRuleProviders"
+      :page-count="pageCountExtraRuleProviders"
+      :loading="loading"
+      @update:search="(v) => (searchRuleProviders = v)"
+      @update:page="(v) => (pageRuleProviders = v)"
+      @update:items-per-page="(v) => (itemsPerPageRuleProviders = v)"
+      @open-add-dialog="openAddRuleProviderDialog"
+      @edit-rule-provider="editRuleProvider"
+      @delete-rule-provider="deleteRuleProvider"
+      @show-yaml="(o) => emit('show-yaml', o)"
+      @change-status="handleStatusChange"
+      @edit-visibility="editVisibility"
+    />
+
     <v-divider></v-divider>
 
     <RuleProviderDialog
@@ -235,7 +178,7 @@ function closeRuleProviderDialog() {
       @close="closeRuleProviderDialog"
       @refresh="emit('refresh', ['rule-providers'])"
       @show-error="(msg) => emit('show-error', msg)"
-    ></RuleProviderDialog>
+    />
   </div>
 </template>
 

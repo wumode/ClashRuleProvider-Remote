@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { ref, computed, toRaw } from 'vue'
-import { itemsPerPageOptions } from '@/components/constants'
-import { pageTitle } from '@/components/utils'
+import { useDisplay } from 'vuetify'
 import type { HostData } from '@/components/types'
 import { defaultHost } from '@/components/constants'
-import HostsTable from '@/components/tables/HostsTable.vue'
+import HostsDesktop from './hosts/HostsDesktop.vue'
+import HostsMobile from './hosts/HostsMobile.vue'
 import HostDialog from '@/components/dialog/HostDialog.vue'
-import HostCard from '@/components/cards/HostCard.vue'
 
 const props = defineProps<{
   hosts: HostData[]
@@ -15,6 +14,8 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(['refresh', 'show-error'])
+
+const { smAndDown } = useDisplay()
 
 // State
 const searchHosts = ref('')
@@ -75,104 +76,46 @@ async function deleteHost(name: string) {
   }
 }
 </script>
+
 <template>
   <div class="mb-2 position-relative">
     <v-overlay v-model="loading" contained class="align-center justify-center">
       <v-progress-circular indeterminate color="primary"></v-progress-circular>
     </v-overlay>
-    <div class="pa-4">
-      <v-row align="center" no-gutters>
-        <v-col cols="10" sm="6" class="d-flex justify-start">
-          <v-text-field
-            v-model="searchHosts"
-            label="搜索Hosts"
-            clearable
-            density="compact"
-            variant="solo-filled"
-            hide-details
-            class="search-field"
-            prepend-inner-icon="mdi-magnify"
-            flat
-            rounded="pill"
-            single-line
-            :disabled="loading"
-          ></v-text-field>
-        </v-col>
-        <v-col cols="2" sm="6" class="d-flex justify-end">
-          <v-btn-group variant="outlined" rounded>
-            <v-btn icon="mdi-plus" :disabled="loading" @click="openAddHostDialog"></v-btn>
-          </v-btn-group>
-        </v-col>
-      </v-row>
-    </div>
-    <!-- 桌面端表格 -->
-    <div class="d-none d-sm-flex clash-data-table">
-      <HostsTable
-        :hosts="hosts"
-        :search="searchHosts"
-        :page="pageHosts"
-        :items-per-page="itemsPerPageHosts"
-        @edit="editHost"
-        @delete="deleteHost"
-      />
-    </div>
-    <!-- 移动端卡片 -->
-    <div class="d-sm-none">
-      <v-row>
-        <v-col v-for="item in paginatedHosts" :key="item.domain" cols="12">
-          <HostCard
-            :host-data="item"
-            :best-cloudflare-i-ps="bestCloudflareIPs"
-            @edit-host="editHost"
-            @delete-host="deleteHost"
-          />
-        </v-col>
-      </v-row>
-    </div>
-    <div class="pa-4" style="min-height: 4rem">
-      <v-row align="center" no-gutters>
-        <v-col cols="2" md="1"> </v-col>
-        <v-col cols="8" md="10" class="d-flex justify-center">
-          <!-- 桌面端分页器：只在 sm 及以上显示 -->
-          <v-pagination
-            v-model="pageHosts"
-            :length="pageCountHosts"
-            total-visible="5"
-            rounded="circle"
-            class="d-none d-sm-flex my-0"
-            :disabled="loading"
-          />
-          <!-- 移动端分页器：只在 sm 以下显示 -->
-          <v-pagination
-            v-model="pageHosts"
-            :length="pageCountHosts"
-            total-visible="0"
-            rounded="circle"
-            class="d-sm-none my-0"
-            :disabled="loading"
-          />
-        </v-col>
-        <v-col cols="2" md="1" class="d-flex justify-end">
-          <v-menu>
-            <template #activator="{ props }">
-              <v-btn v-bind="props" icon rounded="circle" variant="tonal" :disabled="loading">
-                {{ pageTitle(itemsPerPageHosts) }}
-              </v-btn>
-            </template>
-            <v-list>
-              <v-list-item
-                v-for="(item, index) in itemsPerPageOptions"
-                :key="index"
-                :value="item.value"
-                @click="itemsPerPageHosts = item.value"
-              >
-                <v-list-item-title>{{ item.title }}</v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-        </v-col>
-      </v-row>
-    </div>
+
+    <!-- 移动端视图 -->
+    <HostsMobile
+      v-if="smAndDown"
+      :paginated-hosts="paginatedHosts"
+      :best-cloudflare-i-ps="bestCloudflareIPs"
+      :search="searchHosts"
+      :page="pageHosts"
+      :page-count="pageCountHosts"
+      :loading="loading"
+      @update:search="(v) => (searchHosts = v)"
+      @update:page="(v) => (pageHosts = v)"
+      @open-add-dialog="openAddHostDialog"
+      @edit="editHost"
+      @delete="deleteHost"
+    />
+
+    <!-- 桌面端视图 -->
+    <HostsDesktop
+      v-else
+      :hosts="filteredHosts"
+      :search="searchHosts"
+      :page="pageHosts"
+      :items-per-page="itemsPerPageHosts"
+      :page-count="pageCountHosts"
+      :loading="loading"
+      @update:search="(v) => (searchHosts = v)"
+      @update:page="(v) => (pageHosts = v)"
+      @update:items-per-page="(v) => (itemsPerPageHosts = v)"
+      @open-add-dialog="openAddHostDialog"
+      @edit="editHost"
+      @delete="deleteHost"
+    />
+
     <v-divider></v-divider>
   </div>
 

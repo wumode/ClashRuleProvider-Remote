@@ -70,6 +70,7 @@ const groupBy = ref<any>([
 const dragEnabled = ref(false)
 const dragItem = ref<RuleData | null>(null)
 const hoveredPriority = ref<number>(-1)
+const dropPosition = ref<'top' | 'bottom' | null>(null)
 const ruleset = 'ruleset'
 const selected = ref<number[]>([])
 
@@ -91,6 +92,12 @@ function dragOver(event: DragEvent, priority: number) {
     event.dataTransfer.dropEffect = 'move'
   }
   hoveredPriority.value = priority
+  const target = event.currentTarget as HTMLElement
+  if (target) {
+    const rect = target.getBoundingClientRect()
+    const offset = event.clientY - rect.top
+    dropPosition.value = offset < rect.height / 2 ? 'top' : 'bottom'
+  }
 }
 
 function drop(event: DragEvent, targetPriority: number) {
@@ -99,11 +106,13 @@ function drop(event: DragEvent, targetPriority: number) {
   }
   dragItem.value = null
   hoveredPriority.value = -1
+  dropPosition.value = null
 }
 
 function dragEnd() {
   dragItem.value = null
   hoveredPriority.value = -1
+  dropPosition.value = null
 }
 
 function editRule(priority: number) {
@@ -134,9 +143,11 @@ function changeBatchStatus(disabled: boolean) {
 
 const rowProps = (data: any) => {
   const item = data.item as RuleData
+  const isHovered = item.priority === hoveredPriority.value
   return {
     class: {
-      'drop-over': item.priority === hoveredPriority.value,
+      'drop-over-top': isHovered && dropPosition.value === 'top',
+      'drop-over-bottom': isHovered && dropPosition.value === 'bottom',
       'dragging-item': dragItem.value?.priority === item.priority,
       'list-row': true,
       'text-grey': item.meta?.disabled
